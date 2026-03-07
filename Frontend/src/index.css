@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4F46E5;
+  --color-background: #F9FAFB;
+  --color-text: #111827;
+  --radius-xl: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text font-sans antialiased;
+  }
+
+  button,
+  [role="button"],
+  select,
+  input[type="submit"],
+  input[type="button"] {
+    cursor: pointer !important;
+    @apply transition-all duration-200 outline-none;
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    @apply opacity-80 brightness-110;
+  }
+
+  button:active,
+  [role="button"]:active {
+    @apply scale-95;
+  }
+}
+
+* {
+  @apply transition-colors duration-200;
+}

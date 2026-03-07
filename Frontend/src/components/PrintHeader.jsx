@@ -3,7 +3,10 @@ import logo from '../assets/login/logo.png';
 
 const PrintHeader = () => {
     return (
-        <div className="hidden print:flex items-center justify-between w-full border-b-4 border-gray-900 pb-8 mb-10">
+        <div
+            className="hidden print:flex items-center justify-between w-full border-b-4 border-gray-900 pb-8 mb-10"
+            style={{ display: 'flex !important', visibility: 'visible !important' }}
+        >
             <div className="flex items-center gap-6">
                 <img src={logo} alt="Company Logo" className="w-16 h-16 object-contain" />
                 <div>

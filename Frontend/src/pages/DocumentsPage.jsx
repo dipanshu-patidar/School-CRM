@@ -221,7 +221,7 @@ const DocumentsPage = ({ role }) => {
             {/* Delete Confirmation Modal */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm no-print" onClick={() => setDeleteTarget(null)} />
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5">
                             <Trash2 size={30} className="text-red-500" />

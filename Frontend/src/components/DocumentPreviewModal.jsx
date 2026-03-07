@@ -7,7 +7,7 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm no-print" onClick={onClose} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[80vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header Strip */}
@@ -30,11 +30,11 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 flex flex-col overflow-y-auto">
+                <div className="flex-1 flex flex-col overflow-y-auto print:overflow-visible">
                     <div className="p-6 pb-0">
                         <PrintHeader />
                     </div>
-                    <div className="flex-1 flex flex-col md:flex-row bg-gray-50/50">
+                    <div className="flex-1 flex flex-col md:flex-row bg-gray-50/50 print:block">
 
                         {/* Main Preview (Placeholder) */}
                         <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-100 border-b md:border-b-0 md:border-r border-gray-200">

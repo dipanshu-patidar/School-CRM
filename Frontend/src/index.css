@@ -52,105 +52,16 @@
     background: white !important;
   }
 
-  /* Hide navigation components */
-  aside,
-  nav,
-  header,
-  [role="navigation"],
-  .no-print,
-  #sidebar,
-  #navbar {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+  /* Force print colors for logos and headers */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
-  .no-print,
-  .no-print * {
-    display: none !important;
-  }
-
-  /* Hide all buttons unless explicitly marked for print */
-  button:not(.print-only) {
-    display: none !important;
-  }
-
-  /* Reset layout containers */
-  main {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    position: static !important;
-    overflow: visible !important;
-  }
-
-  table {
-    display: table !important;
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
-
-  tr {
-    display: table-row !important;
-    page-break-inside: avoid !important;
-  }
-
-  td,
-  th {
-    display: table-cell !important;
-  }
-
-  /* Ensure the main container takes full width */
-  #main-content {
-    margin-left: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Force clean report background for P.I.E sections */
-  .bg-primary\/5,
-  .bg-amber-50,
-  .bg-primary\/10 {
-    background: transparent !important;
-    border: 1px solid #f3f4f6 !important;
-  }
-
-  /* Document content scrolling reset */
-  .overflow-y-auto {
-    overflow: visible !important;
-  }
-
-  /* Ensure the main container takes full width */
-  main>div {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Modal/Document specific print rules */
-  .relative.bg-white {
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    transform: none !important;
-  }
-
-  /* Fix text colors for printing */
   body {
-    color: black !important;
     background: white !important;
+    color: black !important;
   }
 
   /* Reset transitions and animations */
@@ -161,19 +72,78 @@
     text-shadow: none !important;
   }
 
-  .text-primary,
-  .bg-primary {
-    color: black !important;
-    /* Force black for text in print */
+  /* Ensure modal content is fully visible and not clipped */
+  .fixed,
+  .relative {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Force display of printed content */
-  .print-only {
+  /* Target the modal container specifically to fix clipping */
+  div[class*="max-w-4xl"],
+  div[class*="max-w-3xl"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Content areas inside modals */
+  .overflow-y-auto {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Hide navigation and UI elements */
+  nav,
+  aside,
+  header,
+  #sidebar,
+  #navbar,
+  .no-print,
+  button:not(.print-only) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Grid recovery for print */
+  .grid {
     display: block !important;
   }
 
-  @page {
-    margin: 1cm;
-    size: auto;
+  .print\:grid {
+    display: grid !important;
+  }
+
+  .print\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .print\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* Force headers to show */
+  .hidden.print\:flex {
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  /* Ensure the main container takes full width */
+  main,
+  #main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 }

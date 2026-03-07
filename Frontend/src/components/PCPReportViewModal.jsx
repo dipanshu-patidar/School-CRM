@@ -8,7 +8,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm no-print" onClick={onClose} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header Strip */}
@@ -43,7 +43,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                         <PrintHeader />
 
                         {/* Summary Info Header (Document Style) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:shadow-none print:border print:rounded-none print:p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 print:grid print:grid-cols-3 gap-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:shadow-none print:border print:rounded-none print:p-4">
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Date of Service</span>
                                 <span className="text-sm font-bold text-gray-900">{report.date}</span>

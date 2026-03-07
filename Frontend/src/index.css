@@ -70,6 +70,11 @@
     pointer-events: none !important;
   }
 
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
   /* Hide all buttons unless explicitly marked for print */
   button:not(.print-only) {
     display: none !important;
@@ -143,13 +148,17 @@
   }
 
   /* Fix text colors for printing */
-  * {
+  body {
     color: black !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+    background: white !important;
+  }
+
+  /* Reset transitions and animations */
+  * {
     transition: none !important;
     animation: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
 
   .text-primary,

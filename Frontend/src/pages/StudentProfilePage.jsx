@@ -4,6 +4,7 @@ import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer } from 'lucide-reac
 import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
 import StudentTabs from '../components/StudentTabs';
+import PrintHeader from '../components/PrintHeader';
 
 const ALL_STUDENTS = [
     {
@@ -209,6 +210,7 @@ const StudentProfilePage = () => {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Main Content Isolation - hidden when modals are open */}
             <div className={`space-y-6 ${(showEditModal || showUploadModal) ? 'no-print' : ''}`}>
+                <PrintHeader />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
                     <div>
                         <button

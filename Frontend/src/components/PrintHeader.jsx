@@ -3,8 +3,8 @@ import logo from '../assets/login/logo.png';
 
 const PrintHeader = () => {
     return (
-        <div className="hidden print:flex items-center justify-between w-full border-b-2 border-primary pb-6 mb-8">
-            <div className="flex items-center gap-4">
+        <div className="hidden print:flex items-center justify-between w-full border-b-4 border-gray-900 pb-8 mb-10">
+            <div className="flex items-center gap-6">
                 <img src={logo} alt="Company Logo" className="w-16 h-16 object-contain" />
                 <div>
                     <h2 className="text-2xl font-black text-gray-900 tracking-tight">SHINING LIGHT</h2>

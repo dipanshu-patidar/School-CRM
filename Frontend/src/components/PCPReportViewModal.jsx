@@ -15,7 +15,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                 <div className="h-2 bg-primary w-full shadow-[0_0_15px_rgba(212,175,55,0.3)] no-print" />
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
+                <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 no-print">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                             <FileText size={28} />
@@ -42,79 +42,64 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                     <div className="p-8 space-y-8">
                         <PrintHeader />
 
-                        {/* Summary Info Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                                    <Calendar size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Date of Service</p>
-                                    <p className="text-sm font-bold text-gray-900">{report.date}</p>
-                                </div>
+                        {/* Summary Info Header (Document Style) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:shadow-none print:border print:rounded-none print:p-4">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Date of Service</span>
+                                <span className="text-sm font-bold text-gray-900">{report.date}</span>
                             </div>
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                    <User size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Staff Member</p>
-                                    <p className="text-sm font-bold text-gray-900 italic">{report.staff}</p>
-                                </div>
+                            <div className="flex flex-col border-l border-gray-100 md:pl-6 print:pl-4">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Staff Member</span>
+                                <span className="text-sm font-bold text-gray-900 italic">{report.staff}</span>
                             </div>
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                    <Clock size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Created Date</p>
-                                    <p className="text-sm font-bold text-gray-900">{report.createdDate}</p>
-                                </div>
+                            <div className="flex flex-col border-l border-gray-100 md:pl-6 print:pl-4">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Documentation Created</span>
+                                <span className="text-sm font-bold text-gray-900">{report.createdDate}</span>
                             </div>
                         </div>
 
                         {/* P.I.E Format Sections */}
                         <div className="space-y-6">
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
                                 <div className="absolute top-0 right-0 p-8 text-indigo-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <Zap size={120} />
                                 </div>
                                 <div className="relative z-10">
-                                    <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">P</div>
-                                        <h4 className="text-lg font-bold text-gray-900 tracking-tight">Purpose of Service</h4>
+                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">P</div>
+                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Purpose of Service</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
                                         {report.purpose || 'No purpose notes provided.'}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
                                 <div className="absolute top-0 right-0 p-8 text-violet-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <ClipboardCheck size={120} />
                                 </div>
                                 <div className="relative z-10">
-                                    <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">I</div>
-                                        <h4 className="text-lg font-bold text-gray-900 tracking-tight">Interventions Delivered</h4>
+                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">I</div>
+                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Interventions Delivered</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
                                         {report.intervention || 'No intervention notes provided.'}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
                                 <div className="absolute top-0 right-0 p-8 text-emerald-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <CheckCircle size={120} />
                                 </div>
                                 <div className="relative z-10">
-                                    <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">E</div>
-                                        <h4 className="text-lg font-bold text-gray-900 tracking-tight">Effectiveness of Interventions</h4>
+                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">E</div>
+                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Effectiveness of Interventions</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
                                         {report.effectiveness || 'No effectiveness notes provided.'}
                                     </p>
                                 </div>
@@ -122,20 +107,20 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                         </div>
 
                         {/* Additional Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                                <div className="flex items-center gap-2.5 mb-4 text-gray-400">
-                                    <MessageSquare size={18} />
-                                    <h4 className="text-sm font-bold uppercase tracking-wider">Staff Notes</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:border print:rounded-none print:shadow-none print:p-4">
+                                <div className="flex items-center gap-2.5 mb-4 text-gray-400 print:mb-2 print:text-gray-900">
+                                    <MessageSquare size={18} className="no-print" />
+                                    <h4 className="text-sm font-black uppercase tracking-widest">Staff Notes</h4>
                                 </div>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                    {report.staffNotes || 'No additional staff notes.'}
+                                <p className="text-sm text-gray-600 leading-relaxed print:text-gray-900 font-medium">
+                                    {report.staffNotes || 'No additional staff notes recorded for this session.'}
                                 </p>
                             </div>
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Digital Signature</p>
-                                <div className="px-6 py-3 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <p className="text-2xl font-dance text-primary italic font-medium">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center print:border print:rounded-none print:shadow-none print:p-4">
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 print:mb-2">Digital Signature</p>
+                                <div className="px-6 py-3 bg-gray-50 rounded-2xl border border-dashed border-gray-200 print:border-none print:bg-transparent print:p-0">
+                                    <p className="text-3xl font-dance text-primary italic font-medium print:text-gray-900 print:text-3xl">
                                         {report.staffSignature || report.staff}
                                     </p>
                                 </div>

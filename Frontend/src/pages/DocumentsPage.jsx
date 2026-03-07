@@ -8,6 +8,7 @@ import PCPReportForm from '../components/PCPReportForm';
 import PCPReportsTable from '../components/PCPReportsTable';
 import PCPReportViewModal from '../components/PCPReportViewModal';
 import { Trash2 } from 'lucide-react';
+import PrintHeader from '../components/PrintHeader';
 
 const initialDocs = [
     { id: 1, studentName: 'John Doe', docName: 'Lease.pdf', date: '12 Mar 2026', status: 'Completed', size: '2.4 MB' },
@@ -85,8 +86,8 @@ const DocumentsPage = ({ role }) => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Main Content - hidden when printing a specific document modal */}
             <div className={`space-y-6 ${(previewDoc || isPCPModalOpen || isUploadOpen) ? 'no-print' : ''}`}>
+                <PrintHeader />
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-gray-100 pb-6 no-print">
                     <div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Search, Bell, User, Settings, LogOut } from 'lucide-react';
 
-const Navbar = ({ role }) => {
+const Navbar = ({ role, onLogout }) => {
     const location = useLocation();
 
     const getPageTitle = () => {
@@ -43,7 +43,7 @@ const Navbar = ({ role }) => {
                 {/* User Profile Dropdown Simulation */}
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold text-text">John Doe</p>
+                        <p className="text-sm font-semibold text-text">{role === 'admin' ? 'John Doe' : 'Staff Member'}</p>
                         <p className="text-xs text-gray-500 capitalize">{role}</p>
                     </div>
                     <div className="relative group">
@@ -60,7 +60,7 @@ const Navbar = ({ role }) => {
                                 <hr className="my-1 border-gray-100" />
                                 <button
                                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                                    onClick={() => window.location.href = '/'}
+                                    onClick={onLogout}
                                 >
                                     <LogOut size={16} /> Logout
                                 </button>

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
-const Sidebar = ({ role, collapsed, setCollapsed }) => {
+const Sidebar = ({ role, collapsed, setCollapsed, onLogout }) => {
     const adminMenu = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'students', label: 'Students', icon: Users },
@@ -27,6 +27,7 @@ const Sidebar = ({ role, collapsed, setCollapsed }) => {
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'students', label: 'Students', icon: Users },
         { id: 'attendance', label: 'Attendance', icon: CalendarCheck },
+        { id: 'documents', label: 'Documents', icon: FileText },
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
@@ -94,7 +95,7 @@ const Sidebar = ({ role, collapsed, setCollapsed }) => {
             <div className="p-4 border-t border-gray-100">
                 <button
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-all font-medium cursor-pointer"
-                    onClick={() => window.location.href = '/'}
+                    onClick={onLogout}
                 >
                     <LogOut size={20} />
                     {!collapsed && <span>Logout</span>}

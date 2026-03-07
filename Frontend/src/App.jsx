@@ -13,14 +13,16 @@ import Dashboard from './pages/Dashboard';
 import StaffPage from './pages/StaffPage';
 
 function App() {
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(localStorage.getItem('userRole'));
 
   const handleLogin = (selectedRole) => {
     setRole(selectedRole);
+    localStorage.setItem('userRole', selectedRole);
   };
 
   const handleLogout = () => {
     setRole(null);
+    localStorage.removeItem('userRole');
   };
 
   return (
@@ -43,7 +45,7 @@ function App() {
                   <Route path="staff" element={<StaffPage />} />
                   <Route path="workshops" element={<WorkshopsPage />} />
                   <Route path="attendance" element={<AttendanceCalendarPage />} />
-                  <Route path="documents" element={<DocumentsPage />} />
+                  <Route path="documents" element={<DocumentsPage role={role} />} />
                   <Route path="settings" element={<SettingsPage role={role} />} />
                 </Routes>
               </Layout>

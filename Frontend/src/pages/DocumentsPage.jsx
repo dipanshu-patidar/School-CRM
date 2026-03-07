@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, AlertTriangle, FileUp } from 'lucide-react';
+import { Plus, AlertTriangle, FileUp, FileText, FolderOpen } from 'lucide-react';
 import DocumentsTable from '../components/DocumentsTable';
 import UploadDocumentModal from '../components/UploadDocumentModal';
 import DocumentPreviewModal from '../components/DocumentPreviewModal';
 import CompletionRuleCard from '../components/CompletionRuleCard';
+import PCPReportForm from '../components/PCPReportForm';
+import PCPReportsTable from '../components/PCPReportsTable';
+import PCPReportViewModal from '../components/PCPReportViewModal';
+import { Trash2 } from 'lucide-react';
 
 const initialDocs = [
     { id: 1, studentName: 'John Doe', docName: 'Lease.pdf', date: '12 Mar 2026', status: 'Completed', size: '2.4 MB' },
     { id: 2, studentName: 'Sara Smith', docName: 'Mortgage_Agreement.pdf', date: '10 Mar 2026', status: 'Secondary Completion', size: '4.1 MB' },
 ];
 
-const DocumentsPage = () => {
+const initialPCPReports = [
+    { id: 201, studentName: 'John Doe', type: 'PCP / IGP Report', date: '05 Mar 2026', serviceDateRaw: '2026-03-05', staff: 'Sarah Lee', createdDate: '05 Mar 2026', status: 'Completed', purpose: 'Goal Setting', intervention: 'Direct Support', effectiveness: 'Highly Effective' },
+    { id: 202, studentName: 'Sara Smith', type: 'PCP / IGP Report', date: '01 Mar 2026', serviceDateRaw: '2026-03-01', staff: 'Tom Harris', createdDate: '02 Mar 2026', status: 'Draft', purpose: 'Initial Assessment', intervention: 'Consultation', effectiveness: 'Pending' },
+];
+
+const DocumentsPage = ({ role }) => {
+    // renamed local usage to match the prop
+    const userRole = role;
+
     const [documents, setDocuments] = useState(initialDocs);
+    const [pcpReports, setPcpReports] = useState(initialPCPReports);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [isPCPModalOpen, setIsPCPModalOpen] = useState(false);
     const [editingDoc, setEditingDoc] = useState(null);
+    const [editingPCP, setEditingPCP] = useState(null);
+    const [activeTab, setActiveTab] = useState('pcp'); // 'pcp' or 'standard'
 
     // Modal state for view and delete
     const [previewDoc, setPreviewDoc] = useState(null);
@@ -29,13 +45,32 @@ const DocumentsPage = () => {
         setEditingDoc(null);
     };
 
+    const handleSavePCP = (newReport) => {
+        if (editingPCP) {
+            setPcpReports(prev => prev.map(r => r.id === newReport.id ? newReport : r));
+        } else {
+            setPcpReports(prev => [newReport, ...prev]);
+        }
+        setIsPCPModalOpen(false);
+        setEditingPCP(null);
+    };
+
+    const handleEditPCP = (report) => {
+        setEditingPCP(report);
+        setIsPCPModalOpen(true);
+    };
+
     const handleEdit = (doc) => {
         setEditingDoc(doc);
         setIsUploadOpen(true);
     };
 
     const handleDelete = () => {
-        setDocuments(prev => prev.filter(d => d.id !== deleteTarget.id));
+        if (deleteTarget.type === 'PCP / IGP Report') {
+            setPcpReports(prev => prev.filter(r => r.id !== deleteTarget.id));
+        } else {
+            setDocuments(prev => prev.filter(d => d.id !== deleteTarget.id));
+        }
         setDeleteTarget(null);
     };
 
@@ -47,32 +82,91 @@ const DocumentsPage = () => {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-gray-100 pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Housing Documents</h1>
-                    <p className="text-gray-500 mt-1">Upload and manage housing verification documents.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Module Documents</h1>
+                    <p className="text-gray-500 mt-1">Manage service reports and program documentation.</p>
                 </div>
-                <button
-                    onClick={() => { setEditingDoc(null); setIsUploadOpen(true); }}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 self-start sm:self-auto shrink-0"
-                >
-                    <Plus size={18} />
-                    Upload Document
-                </button>
+
+                <div className="flex items-center gap-3">
+                    {activeTab === 'pcp' ? (
+                        <button
+                            onClick={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 whitespace-nowrap"
+                        >
+                            <Plus size={18} />
+                            New PCP / IGP Report
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => { setEditingDoc(null); setIsUploadOpen(true); }}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 whitespace-nowrap"
+                        >
+                            <FileUp size={18} />
+                            Upload Document
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Rules */}
             <CompletionRuleCard />
 
-            {/* Main Table */}
-            <DocumentsTable
-                documents={documents}
-                onView={setPreviewDoc}
-                onDownload={handleDownload}
-                onDelete={setDeleteTarget}
-                onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
-                onEdit={handleEdit}
-            />
+            {/* Tab Switcher */}
+            {userRole === 'admin' && (
+                <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit">
+                    <button
+                        onClick={() => setActiveTab('pcp')}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${activeTab === 'pcp'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        <FileText size={18} className={activeTab === 'pcp' ? 'text-indigo-600' : 'text-gray-400'} />
+                        PCP / IGP Reports
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('standard')}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${activeTab === 'standard'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        <FolderOpen size={18} className={activeTab === 'standard' ? 'text-indigo-600' : 'text-gray-400'} />
+                        Standard Documents
+                    </button>
+                </div>
+            )}
+
+            {/* Tab Secret Content */}
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {activeTab === 'pcp' || userRole === 'staff' ? (
+                    <PCPReportsTable
+                        reports={pcpReports}
+                        onView={setPreviewDoc}
+                        onEdit={handleEditPCP}
+                        onDownload={handleDownload}
+                        onDelete={setDeleteTarget}
+                        onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
+                        userRole={userRole}
+                    />
+                ) : (
+                    <div className="space-y-6">
+                        <div className="mb-2">
+                            <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
+                            <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
+                        </div>
+                        <DocumentsTable
+                            documents={documents}
+                            onView={setPreviewDoc}
+                            onDownload={handleDownload}
+                            onDelete={setDeleteTarget}
+                            onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
+                            onEdit={handleEdit}
+                        />
+                    </div>
+                )}
+            </div>
 
             {/* Modals */}
             <UploadDocumentModal
@@ -82,11 +176,27 @@ const DocumentsPage = () => {
                 editDoc={editingDoc}
             />
 
-            <DocumentPreviewModal
-                doc={previewDoc}
-                onClose={() => setPreviewDoc(null)}
+            <PCPReportForm
+                isOpen={isPCPModalOpen}
+                onClose={() => { setIsPCPModalOpen(false); setEditingPCP(null); }}
+                onSave={handleSavePCP}
+                editData={editingPCP}
             />
-
+            {/* Correct view modal selection based on doc type */}
+            {previewDoc && (
+                previewDoc.type === 'PCP / IGP Report' ? (
+                    <PCPReportViewModal
+                        report={previewDoc}
+                        onClose={() => setPreviewDoc(null)}
+                        onDownload={handleDownload}
+                    />
+                ) : (
+                    <DocumentPreviewModal
+                        doc={previewDoc}
+                        onClose={() => setPreviewDoc(null)}
+                    />
+                )
+            )}
             {/* Delete Confirmation Modal */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

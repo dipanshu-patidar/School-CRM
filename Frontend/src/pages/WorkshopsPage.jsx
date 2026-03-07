@@ -92,9 +92,14 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                     </div>
 
                     {/* Points Info */}
-                    <div className="flex items-center gap-3 p-3.5 bg-primary/5 border border-primary/10 rounded-lg">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary text-black">+1 Point</span>
-                        <p className="text-xs text-gray-600 font-medium">Each attendance at this workshop grants <strong>+1 point</strong>.</p>
+                    <div className="flex items-center gap-4 p-4 bg-[#FDFCF6] border border-primary/20 rounded-xl shadow-sm">
+                        <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/20 shrink-0">
+                            <span className="text-sm font-black text-black leading-none">+1</span>
+                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">Point</span>
+                        </div>
+                        <p className="text-xs text-gray-600 font-semibold leading-relaxed">
+                            Each attendance at this workshop grants <strong className="text-gray-900">+1 point</strong> toward student completion.
+                        </p>
                     </div>
 
                     {/* Footer actions */}
@@ -144,17 +149,17 @@ const WorkshopViewModal = ({ workshop, onClose }) => {
                 {/* Body */}
                 <div className="px-8 pb-8 space-y-5">
                     {/* Points Badge */}
-                    <div className="flex items-center gap-3 p-3.5 bg-primary/5 border border-primary/10 rounded-xl">
-                        <div className="p-1.5 bg-primary/10 rounded-lg">
-                            <Star size={14} className="text-primary" />
+                    <div className="flex items-center gap-4 p-4 bg-[#FDFCF6] border border-primary/20 rounded-2xl shadow-sm">
+                        <div className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-primary shadow-lg shadow-primary/30 shrink-0">
+                            <span className="text-sm font-black text-black leading-none">+1</span>
+                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">Point</span>
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-primary">Points Reward</p>
-                            <p className="text-xs text-gray-500 mt-0.5">Each attendance grants <strong>+1 point</strong> toward program completion.</p>
+                            <p className="text-xs font-bold text-gray-900">Points Reward</p>
+                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                Each attendance grants <strong className="text-primary font-bold">+1 point</strong> toward program completion.
+                            </p>
                         </div>
-                        <span className="ml-auto px-3 py-1 rounded-full text-sm font-black bg-primary text-black shadow-md shadow-primary/20">
-                            +1
-                        </span>
                     </div>
 
                     {/* Description */}

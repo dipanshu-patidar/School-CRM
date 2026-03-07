@@ -72,8 +72,8 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-xl">
-                            <Upload size={20} className="text-indigo-600" />
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            <Upload size={20} className="text-primary" />
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Document' : 'Upload Document'}</h3>
@@ -94,7 +94,7 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                             required
                             value={studentId}
                             onChange={(e) => setStudentId(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition-all"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all"
                         >
                             <option value="">Choose a student...</option>
                             {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -109,7 +109,7 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                             required
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition-all"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all"
                         >
                             <option value="Pending">Pending</option>
                             <option value="Secondary Completion">Secondary Completion</option>
@@ -126,9 +126,9 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             onClick={() => inputRef.current.click()}
-                            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${dragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}`}
+                            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${dragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}`}
                         >
-                            <FileUp size={36} className="mx-auto mb-3 text-indigo-400" />
+                            <FileUp size={36} className="mx-auto mb-3 text-primary/50" />
                             {file ? (
                                 <div>
                                     <p className="font-bold text-gray-800 break-all">{file.name}</p>
@@ -145,10 +145,10 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer">
+                        <button type="button" onClick={onClose} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all cursor-pointer">
                             Cancel
                         </button>
-                        <button type="submit" disabled={!studentId || !file} className="flex-1 py-3 bg-indigo-600 disabled:bg-indigo-300 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
+                        <button type="submit" disabled={!studentId || !file} className="flex-1 py-3 bg-primary disabled:bg-gray-200 disabled:text-gray-400 hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
                             {isEditing ? 'Save Changes' : 'Upload Document'}
                         </button>
                     </div>

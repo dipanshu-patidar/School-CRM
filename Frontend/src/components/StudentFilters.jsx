@@ -13,7 +13,7 @@ const StudentFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilt
                         placeholder="Search students..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                     />
                 </div>
 
@@ -23,7 +23,7 @@ const StudentFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilt
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none cursor-pointer transition-all shadow-sm text-sm font-medium"
+                        className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none cursor-pointer transition-all shadow-sm text-sm font-medium"
                     >
                         <option value="All">All Status</option>
                         <option value="Active">Active</option>
@@ -33,7 +33,7 @@ const StudentFilters = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilt
             </div>
 
             {/* Total Students Counter */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-lg text-indigo-700 font-bold text-sm whitespace-nowrap">
+            <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg text-primary font-bold text-sm whitespace-nowrap">
                 <Users size={16} />
                 {totalStudents} Students
             </div>

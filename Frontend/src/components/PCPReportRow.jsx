@@ -6,10 +6,10 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
     return (
         <>
             {/* Desktop Row */}
-            <tr className="hidden md:table-row hover:bg-gray-50/50 transition-colors group">
+            <tr className="hidden md:table-row hover:bg-[#FFF9E6] transition-colors group">
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
                             {report.studentName.charAt(0)}
                         </div>
                         <span className="text-sm font-semibold text-gray-900">{report.studentName}</span>
@@ -38,7 +38,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                         <button
                             title="View Report"
                             onClick={() => onView(report)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer"
+                            className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
                         >
                             <Eye size={16} />
                         </button>
@@ -52,7 +52,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                         <button
                             title="Download PDF"
                             onClick={() => onDownload(report)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all cursor-pointer"
+                            className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
                         >
                             <Download size={16} />
                         </button>
@@ -70,10 +70,10 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
             </tr>
 
             {/* Mobile Card */}
-            <div className="md:hidden bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-indigo-200 transition-all relative space-y-4">
+            <div className="md:hidden bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-primary/30 transition-all relative space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
                             {report.studentName.charAt(0)}
                         </div>
                         <div>
@@ -88,7 +88,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                     <div className="space-y-1">
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Service Date</p>
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-                            <Calendar size={12} className="text-indigo-400" />
+                            <Calendar size={12} className="text-primary" />
                             {report.date}
                         </div>
                     </div>
@@ -104,7 +104,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                 <div className="flex items-center justify-between gap-2">
                     <button
                         onClick={() => onView(report)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all"
                     >
                         <Eye size={14} /> View
                     </button>

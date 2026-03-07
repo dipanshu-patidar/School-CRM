@@ -1,8 +1,8 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Search, Bell, User, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
 
-const Navbar = ({ role, onLogout }) => {
+const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     const location = useLocation();
 
     const getPageTitle = () => {
@@ -20,6 +20,12 @@ const Navbar = ({ role, onLogout }) => {
     return (
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
             <div className="flex items-center gap-4">
+                <button
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-primary transition-all cursor-pointer"
+                >
+                    <Menu size={22} />
+                </button>
                 <h2 className="text-xl font-semibold text-text">{getPageTitle()}</h2>
             </div>
 
@@ -36,8 +42,8 @@ const Navbar = ({ role, onLogout }) => {
 
                 {/* Notifications */}
                 <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors group">
-                    <Bell size={20} />
-                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    <Bell size={20} className="group-hover:text-primary transition-colors" />
+                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
                 </button>
 
                 {/* User Profile Dropdown Simulation */}
@@ -47,7 +53,7 @@ const Navbar = ({ role, onLogout }) => {
                         <p className="text-xs text-gray-500 capitalize">{role}</p>
                     </div>
                     <div className="relative group">
-                        <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all">
+                        <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">
                             <User size={24} />
                         </button>
 

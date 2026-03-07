@@ -43,9 +43,9 @@ const StudentProgressChart = () => {
                         <Line
                             type="monotone"
                             dataKey="points"
-                            stroke="#4F46E5"
+                            stroke="#D4AF37"
                             strokeWidth={3}
-                            dot={{ r: 6, fill: '#4F46E5', strokeWidth: 2, stroke: '#FFF' }}
+                            dot={{ r: 6, fill: '#D4AF37', strokeWidth: 2, stroke: '#FFF' }}
                             activeDot={{ r: 8, strokeWidth: 0 }}
                             animationDuration={1500}
                         />

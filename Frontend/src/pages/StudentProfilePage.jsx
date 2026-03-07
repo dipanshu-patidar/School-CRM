@@ -70,7 +70,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                                 name={field.name}
                                 value={form[field.name]}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                             />
                         </div>
                     ))}
@@ -80,7 +80,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                             name="status"
                             value={form.status}
                             onChange={handleChange}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm cursor-pointer"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm cursor-pointer"
                         >
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
@@ -95,7 +95,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                     </button>
                     <button
                         onClick={() => onSave(form)}
-                        className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer flex items-center justify-center gap-2"
+                        className="flex-1 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Save size={16} /> Save Changes
                     </button>
@@ -133,10 +133,10 @@ const UploadDocumentModal = ({ onClose }) => {
                     onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={(e) => { e.preventDefault(); setDragging(false); setFile(e.dataTransfer.files[0]); }}
-                    className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}`}
+                    className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}`}
                     onClick={() => document.getElementById('file-input').click()}
                 >
-                    <FileUp size={36} className="mx-auto mb-3 text-indigo-400" />
+                    <FileUp size={36} className="mx-auto mb-3 text-primary/50" />
                     {file ? (
                         <div>
                             <p className="font-bold text-gray-800">{file.name}</p>
@@ -159,7 +159,7 @@ const UploadDocumentModal = ({ onClose }) => {
                     <button
                         onClick={onClose}
                         disabled={!file}
-                        className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer flex items-center justify-center gap-2"
+                        className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:text-gray-400 text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Upload size={16} /> Upload
                     </button>
@@ -196,7 +196,7 @@ const StudentProfilePage = () => {
                 <p className="text-gray-500 mb-6">The student with ID #{id} does not exist.</p>
                 <button
                     onClick={() => navigate('/dashboard/students')}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all cursor-pointer"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all cursor-pointer shadow-lg shadow-primary/20"
                 >
                     <ArrowLeft size={18} />
                     Back to Students
@@ -212,7 +212,7 @@ const StudentProfilePage = () => {
                 <div>
                     <button
                         onClick={() => navigate('/dashboard/students')}
-                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 font-medium mb-3 transition-colors cursor-pointer group"
+                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary font-bold mb-3 transition-colors cursor-pointer group"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
                         Back to Students
@@ -230,7 +230,7 @@ const StudentProfilePage = () => {
                     </button>
                     <button
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                     >
                         <Upload size={16} />
                         Upload Document

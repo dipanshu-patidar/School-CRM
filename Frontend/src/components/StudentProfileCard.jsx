@@ -5,14 +5,14 @@ const StudentProfileCard = ({ student }) => {
     const getStatusStyles = (status) => {
         return status === 'Active'
             ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-            : 'bg-indigo-50 text-indigo-700 border-indigo-100';
+            : 'bg-primary/10 text-primary border-primary/20';
     };
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 {/* Avatar */}
-                <div className="w-20 h-20 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl font-bold shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold shrink-0">
                     {student.name.charAt(0)}
                 </div>
 

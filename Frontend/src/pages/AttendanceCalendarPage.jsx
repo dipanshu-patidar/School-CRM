@@ -54,7 +54,7 @@ const AttendanceCalendarPage = () => {
                 </div>
                 <button
                     onClick={handleAddClick}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 self-start sm:self-auto"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 self-start sm:self-auto"
                 >
                     <Plus size={18} />
                     Mark Attendance
@@ -62,14 +62,14 @@ const AttendanceCalendarPage = () => {
             </div>
 
             {/* Points Rule Banner */}
-            <div className="flex items-start gap-4 bg-indigo-50 border border-indigo-100 rounded-xl px-5 py-4">
-                <div className="p-2 bg-indigo-100 rounded-lg shrink-0">
-                    <Star size={18} className="text-indigo-600" />
+            <div className="flex items-start gap-4 bg-primary/5 border border-primary/10 rounded-xl px-5 py-4">
+                <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                    <Star size={18} className="text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-sm font-bold text-indigo-800">Points Rule</h3>
-                    <p className="text-sm text-indigo-600 mt-0.5">
-                        Each workshop attendance automatically gives <strong className="text-indigo-800">+1 Point</strong> to the student.
+                    <h3 className="text-sm font-bold text-primary">Points Rule</h3>
+                    <p className="text-sm text-gray-600 font-medium mt-0.5">
+                        Each workshop attendance automatically gives <strong className="text-primary">+1 Point</strong> to the student.
                     </p>
                 </div>
             </div>
@@ -95,7 +95,7 @@ const AttendanceCalendarPage = () => {
                         <div className="p-16 text-center flex flex-col items-center justify-center">
                             <CalendarCheck size={40} className="text-gray-300 mb-4" />
                             <p className="text-lg font-bold text-gray-900">No attendance recorded yet</p>
-                            <button onClick={handleAddClick} className="mt-4 text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Mark First Attendance</button>
+                            <button onClick={handleAddClick} className="mt-4 text-primary font-bold hover:text-primary-hover transition-colors">Mark First Attendance</button>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -114,7 +114,7 @@ const AttendanceCalendarPage = () => {
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900">{new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">{record.studentName}</td>
                                             <td className="px-6 py-4 text-sm text-gray-600">{record.workshop}</td>
-                                            <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">+1 Point</span></td>
+                                            <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">+1 Point</span></td>
                                         </tr>
                                     ))}
                                 </tbody>

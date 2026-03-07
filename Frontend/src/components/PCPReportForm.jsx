@@ -85,8 +85,8 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white z-10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-xl">
-                            <FileText size={24} className="text-indigo-600" />
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            <FileText size={24} className="text-primary" />
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-gray-900">New PCP / IGP Report</h3>
@@ -103,7 +103,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                     {/* SECTION 1 — BASIC INFORMATION */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 mb-2">
-                            <Info size={18} className="text-indigo-500" />
+                            <Info size={18} className="text-primary" />
                             <h4 className="font-bold text-gray-900">Section 1: Basic Information</h4>
                         </div>
 
@@ -119,7 +119,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                         name="studentId"
                                         value={formData.studentId}
                                         onChange={handleChange}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                                     >
                                         <option value="">Select Student...</option>
                                         {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -139,7 +139,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                         name="dateOfService"
                                         value={formData.dateOfService}
                                         onChange={handleChange}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     />
                                 </div>
                             </div>
@@ -153,7 +153,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     value={formData.serviceDescription}
                                     onChange={handleChange}
                                     placeholder="Enter service details..."
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[80px] resize-none"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[80px] resize-none"
                                 />
                             </div>
 
@@ -165,7 +165,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     name="faceToFace"
                                     value={formData.faceToFace}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                                 >
                                     <option value="Face-to-Face">Face-to-Face</option>
                                     <option value="Virtual">Virtual</option>
@@ -177,7 +177,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                     {/* SECTION 2 — P.I.E SERVICE NOTES */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 mb-2">
-                            <Activity size={18} className="text-indigo-500" />
+                            <Activity size={18} className="text-primary" />
                             <h4 className="font-bold text-gray-900">Section 2: P.I.E Service Notes</h4>
                         </div>
 
@@ -194,7 +194,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     value={formData.purpose}
                                     onChange={handleChange}
                                     placeholder="Explain why the service was provided..."
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[100px] resize-none shadow-inner"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[100px] resize-none shadow-inner"
                                 />
                             </div>
 
@@ -210,13 +210,13 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     value={formData.intervention}
                                     onChange={handleChange}
                                     placeholder="Explain what actions the staff performed..."
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[100px] resize-none shadow-inner"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[100px] resize-none shadow-inner"
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Activity size={14} className="text-indigo-500" />
+                                    <Activity size={14} className="text-primary" />
                                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
                                         Effectiveness
                                     </label>
@@ -226,7 +226,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     value={formData.effectiveness}
                                     onChange={handleChange}
                                     placeholder="Explain the outcome or impact of the service..."
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[100px] resize-none shadow-inner"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[100px] resize-none shadow-inner"
                                 />
                             </div>
                         </div>
@@ -236,7 +236,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                         {/* SECTION 3 — STAFF NOTES / SIGNATURE */}
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                             <div className="flex items-center gap-2 mb-2">
-                                <Info size={18} className="text-indigo-500" />
+                                <Info size={18} className="text-primary" />
                                 <h4 className="font-bold text-gray-900">Section 3: Staff Notes</h4>
                             </div>
 
@@ -250,7 +250,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                         value={formData.staffNotes}
                                         onChange={handleChange}
                                         placeholder="Internal notes..."
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all min-h-[120px] resize-none"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[120px] resize-none"
                                     />
                                 </div>
 
@@ -265,7 +265,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                         value={formData.staffSignature}
                                         onChange={handleChange}
                                         placeholder="Type full name for signature"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm font-semibold focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     />
                                 </div>
                             </div>
@@ -274,7 +274,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                         {/* SECTION 4 — ASSESSMENT UPLOAD */}
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                             <div className="flex items-center gap-2 mb-2">
-                                <FileUp size={18} className="text-indigo-500" />
+                                <FileUp size={18} className="text-primary" />
                                 <h4 className="font-bold text-gray-900">Section 4: Uploads</h4>
                             </div>
                             <DocumentUploadField
@@ -297,14 +297,14 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                     <button
                         onClick={(e) => handleSubmit(e, 'Draft')}
                         type="button"
-                        className="px-6 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-xl font-bold hover:bg-indigo-100 transition-all cursor-pointer active:scale-95"
+                        className="px-6 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary/20 transition-all cursor-pointer active:scale-95"
                     >
                         Save as Draft
                     </button>
                     <button
                         onClick={(e) => handleSubmit(e, 'Completed')}
                         type="submit"
-                        className="flex items-center gap-2 px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                        className="flex items-center gap-2 px-8 py-2.5 bg-primary hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                     >
                         <Save size={18} />
                         Save Report

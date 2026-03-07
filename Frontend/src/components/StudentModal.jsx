@@ -56,8 +56,8 @@ const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-xl">
-                            {isEditing ? <Save size={20} className="text-indigo-600" /> : <UserPlus size={20} className="text-indigo-600" />}
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            {isEditing ? <Save size={20} className="text-primary" /> : <UserPlus size={20} className="text-primary" />}
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">
@@ -93,7 +93,7 @@ const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
                         </button>
                         <button
                             type="submit"
-                            className="flex items-center gap-2 px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                            className="flex items-center gap-2 px-8 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                         >
                             {isEditing ? <Save size={16} /> : <UserPlus size={16} />}
                             {isEditing ? 'Save Changes' : 'Add Student'}

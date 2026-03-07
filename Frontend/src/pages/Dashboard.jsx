@@ -11,10 +11,10 @@ import {
 
 const Dashboard = ({ role }) => {
     const stats = [
-        { label: 'Total Students', value: '1,284', change: '+12.5%', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-        { label: 'Active Workshops', value: '42', change: '+3.2%', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { label: 'Attendance Rate', value: '94.8%', change: '+1.4%', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-        { label: 'Completion Rate', value: '89.2%', change: '+5.7%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50' },
+        { label: 'Total Students', value: '1,284', change: '+12.5%', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+        { label: 'Active Workshops', value: '42', change: '+3.2%', icon: GraduationCap, color: 'text-primary', bg: 'bg-primary/10' },
+        { label: 'Attendance Rate', value: '94.8%', change: '+1.4%', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
+        { label: 'Completion Rate', value: '89.2%', change: '+5.7%', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
     ];
 
     return (
@@ -23,13 +23,13 @@ const Dashboard = ({ role }) => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Welcome Back, John</h1>
-                    <p className="text-gray-500 mt-1">Here is what's happening today at RIDSS CRM.</p>
+                    <p className="text-gray-500 mt-1">Shining Light CRM — Dashboard Overview</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                         <Calendar size={16} /> Last 30 Days
                     </button>
-                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100">
+                    <button className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
                         Generate Report
                     </button>
                 </div>
@@ -64,7 +64,7 @@ const Dashboard = ({ role }) => {
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Recent Student Submissions</h3>
-                        <button className="text-indigo-600 text-sm font-semibold hover:underline">View All</button>
+                        <button className="text-primary text-sm font-bold hover:underline">View All</button>
                     </div>
                     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50/50">
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
@@ -96,7 +96,7 @@ const Dashboard = ({ role }) => {
                                 </div>
                             </div>
                         ))}
-                        <button className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 rounded-xl text-sm font-medium text-gray-400 hover:border-indigo-200 hover:text-indigo-400 hover:bg-indigo-50/30 transition-all">
+                        <button className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 rounded-xl text-sm font-bold text-gray-400 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
                             + Add New Task
                         </button>
                     </div>

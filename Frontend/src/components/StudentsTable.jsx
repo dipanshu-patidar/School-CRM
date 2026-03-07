@@ -11,7 +11,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No students found</h3>
                 <p className="text-gray-500 max-w-xs mb-8">Try adjusting your search filters or add a new student.</p>
-                <button onClick={onAddStudent} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95">
+                <button onClick={onAddStudent} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95">
                     <UserPlus size={18} />
                     Add First Student
                 </button>
@@ -66,7 +66,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                     <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer">Previous</button>
                     <div className="flex items-center gap-1">
-                        <button className="w-10 h-10 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md shadow-indigo-100 cursor-pointer">1</button>
+                        <button className="w-10 h-10 bg-primary text-black rounded-lg text-sm font-bold shadow-lg shadow-primary/20 cursor-pointer">1</button>
                         <button className="w-10 h-10 hover:bg-gray-50 text-gray-600 rounded-lg text-sm font-bold transition-colors cursor-pointer">2</button>
                         <button className="w-10 h-10 hover:bg-gray-50 text-gray-600 rounded-lg text-sm font-bold transition-colors cursor-pointer">3</button>
                     </div>

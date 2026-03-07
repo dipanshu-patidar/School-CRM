@@ -8,7 +8,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
     const getStatusStyles = (status) => {
         switch (status) {
             case 'Active': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-            case 'Completed': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+            case 'Completed': return 'bg-primary/10 text-primary border-primary/20';
             default: return 'bg-gray-50 text-gray-600 border-gray-100';
         }
     };
@@ -20,7 +20,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                 <td className="px-6 py-4 text-sm font-medium text-gray-500">{student.id}</td>
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-110">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-110">
                             {student.name.charAt(0)}
                         </div>
                         <span className="text-sm font-semibold text-gray-900">{student.name}</span>
@@ -36,7 +36,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                 </td>
                 <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
-                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer">
+                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                             <Eye size={17} />
                         </button>
                         <button title="Edit Student" onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer">
@@ -50,10 +50,10 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
             </tr>
 
             {/* Mobile Card */}
-            <div className="md:hidden bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3 hover:border-indigo-200 transition-all active:scale-[0.98]">
+            <div className="md:hidden bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3 hover:border-primary/30 transition-all active:scale-[0.98]">
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
                             {student.name.charAt(0)}
                         </div>
                         <div>
@@ -71,7 +71,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         <span className="text-sm font-bold text-gray-900">{student.points}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer"><Eye size={17} /></button>
+                        <button onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
                         <button onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={17} /></button>
                         <button onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={17} /></button>
                     </div>

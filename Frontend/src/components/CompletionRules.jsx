@@ -5,7 +5,7 @@ const CompletionRules = () => {
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex items-center gap-2 mb-8">
-                <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                <div className="w-1 h-6 bg-primary rounded-full"></div>
                 <h2 className="text-xl font-bold text-gray-900">Completion Logic</h2>
             </div>
 
@@ -28,10 +28,10 @@ const CompletionRules = () => {
                 </div>
 
                 {/* Secondary Rule */}
-                <div className="border border-indigo-100 rounded-xl overflow-hidden shadow-sm">
-                    <div className="bg-indigo-50 px-5 py-3 border-b border-indigo-100 flex items-center gap-2">
-                        <ShieldCheck size={18} className="text-indigo-600" />
-                        <h3 className="font-bold text-indigo-900">Secondary Completion</h3>
+                <div className="border border-primary/20 rounded-xl overflow-hidden shadow-sm">
+                    <div className="bg-primary/5 px-5 py-3 border-b border-primary/10 flex items-center gap-2">
+                        <ShieldCheck size={18} className="text-primary" />
+                        <h3 className="font-bold text-gray-900">Secondary Completion</h3>
                     </div>
                     <div className="p-6 bg-white flex flex-col items-center text-center space-y-4">
                         <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-100 w-full font-bold text-gray-700">

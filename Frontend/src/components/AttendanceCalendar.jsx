@@ -5,29 +5,29 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 const AttendanceCalendar = ({ records, onDateClick, onEventClick }) => {
-    // Convert records to FullCalendar events
-    const events = records.map(record => ({
-        id: record.id.toString(),
-        title: `${record.studentName} — ${record.workshop}`,
-        date: record.date,
-        extendedProps: {
-            ...record
-        }
-    }));
+  // Convert records to FullCalendar events
+  const events = records.map(record => ({
+    id: record.id.toString(),
+    title: `${record.studentName} — ${record.workshop}`,
+    date: record.date,
+    extendedProps: {
+      ...record
+    }
+  }));
 
-    const renderEventContent = (eventInfo) => {
-        return (
-            <div className="flex flex-col p-1 w-full overflow-hidden text-xs truncate">
-                <span className="font-semibold">{eventInfo.event.title}</span>
-                <span className="font-bold opacity-90 mt-0.5">+1 Point</span>
-            </div>
-        );
-    };
-
+  const renderEventContent = (eventInfo) => {
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 h-[700px] overflow-hidden calendar-container">
-            {/* Custom styles to match the CRM theme */}
-            <style>{`
+      <div className="flex flex-col p-1 w-full overflow-hidden text-xs truncate">
+        <span className="font-semibold">{eventInfo.event.title}</span>
+        <span className="font-bold opacity-90 mt-0.5">+1 Point</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 h-[700px] overflow-hidden calendar-container">
+      {/* Custom styles to match the CRM theme */}
+      <style>{`
         .calendar-container .fc {
           --fc-border-color: #f3f4f6;
           --fc-button-text-color: #374151;
@@ -37,14 +37,14 @@ const AttendanceCalendar = ({ records, onDateClick, onEventClick }) => {
           --fc-button-hover-border-color: #e5e7eb;
           --fc-button-active-bg-color: #f3f4f6;
           --fc-button-active-border-color: #e5e7eb;
-          --fc-event-bg-color: #4F46E5;
-          --fc-event-border-color: #4F46E5;
-          --fc-event-text-color: #ffffff;
+          --fc-event-bg-color: #D4AF37;
+          --fc-event-border-color: #D4AF37;
+          --fc-event-text-color: #000000;
           --fc-event-selected-overlay-color: rgba(0, 0, 0, 0.25);
           --fc-page-bg-color: #ffffff;
           --fc-neutral-bg-color: rgba(208, 215, 222, 0.2);
           --fc-neutral-text-color: #6B7280;
-          --fc-today-bg-color: rgba(79, 70, 229, 0.05);
+          --fc-today-bg-color: rgba(212, 175, 55, 0.05);
           height: 100%;
           font-family: inherit;
         }
@@ -68,9 +68,9 @@ const AttendanceCalendar = ({ records, onDateClick, onEventClick }) => {
         }
 
         .fc .fc-button-active {
-          background-color: #4F46E5 !important;
-          border-color: #4F46E5 !important;
-          color: white !important;
+          background-color: #D4AF37 !important;
+          border-color: #D4AF37 !important;
+          color: black !important;
         }
 
         .fc-theme-standard th {
@@ -110,28 +110,28 @@ const AttendanceCalendar = ({ records, onDateClick, onEventClick }) => {
         }
         
         .fc-day-today .fc-daygrid-day-number {
-          color: #4F46E5 !important;
+          color: #D4AF37 !important;
           font-weight: 700 !important;
         }
       `}</style>
 
-            <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                }}
-                events={events}
-                dateClick={(info) => onDateClick(info.dateStr)}
-                eventClick={(info) => onEventClick(info.event.extendedProps)}
-                eventContent={renderEventContent}
-                height="100%"
-                dayMaxEvents={3}
-            />
-        </div>
-    );
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        headerToolbar={{
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek'
+        }}
+        events={events}
+        dateClick={(info) => onDateClick(info.dateStr)}
+        eventClick={(info) => onEventClick(info.event.extendedProps)}
+        eventContent={renderEventContent}
+        height="100%"
+        dayMaxEvents={3}
+      />
+    </div>
+  );
 };
 
 export default AttendanceCalendar;

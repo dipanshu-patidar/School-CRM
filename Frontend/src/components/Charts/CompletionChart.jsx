@@ -7,7 +7,7 @@ const data = [
     { name: 'Inactive', value: 5 },
 ];
 
-const COLORS = ['#4F46E5', '#A5B4FC', '#D1D5DB'];
+const COLORS = ['#D4AF37', '#F2D675', '#E5E5E5'];
 
 const CompletionChart = () => {
     return (

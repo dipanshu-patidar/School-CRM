@@ -4,7 +4,7 @@ import { CalendarCheck, Users, Star, TrendingUp } from 'lucide-react';
 const StatCard = ({ icon: Icon, label, value, color }) => (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
         <div className={`p-3 rounded-xl ${color}`}>
-            <Icon size={20} className="text-white" />
+            <Icon size={20} className="text-black" />
         </div>
         <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</p>
@@ -21,9 +21,9 @@ const AttendanceStats = ({ records }) => {
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard icon={CalendarCheck} label="Attendance Today" value={todayRecords.length} color="bg-indigo-500" />
-            <StatCard icon={Users} label="Students Attended" value={uniqueStudentsToday} color="bg-emerald-500" />
-            <StatCard icon={Star} label="Points Awarded Total" value={totalPoints} color="bg-violet-500" />
+            <StatCard icon={CalendarCheck} label="Attendance Today" value={todayRecords.length} color="bg-primary shadow-lg shadow-primary/20" />
+            <StatCard icon={Users} label="Students Attended" value={uniqueStudentsToday} color="bg-primary/20" />
+            <StatCard icon={Star} label="Points Awarded Total" value={totalPoints} color="bg-primary" />
         </div>
     );
 };

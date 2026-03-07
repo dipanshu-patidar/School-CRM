@@ -11,12 +11,12 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header Strip */}
-                <div className="h-2 bg-gradient-to-r from-indigo-500 to-violet-500 w-full" />
+                <div className="h-2 bg-primary w-full shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
+                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                             <FileText size={28} />
                         </div>
                         <div>
@@ -79,10 +79,10 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                                 </div>
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-100">P</div>
+                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">P</div>
                                         <h4 className="text-lg font-bold text-gray-900 tracking-tight">Purpose of Service</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-indigo-50/30 p-4 rounded-2xl border border-indigo-50/50">
+                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
                                         {report.purpose || 'No purpose notes provided.'}
                                     </p>
                                 </div>
@@ -94,10 +94,10 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                                 </div>
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold shadow-md shadow-violet-100">I</div>
+                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">I</div>
                                         <h4 className="text-lg font-bold text-gray-900 tracking-tight">Interventions Delivered</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-violet-50/30 p-4 rounded-2xl border border-violet-50/50">
+                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
                                         {report.intervention || 'No intervention notes provided.'}
                                     </p>
                                 </div>
@@ -109,10 +109,10 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                                 </div>
                                 <div className="relative z-10">
                                     <div className="flex items-center gap-2.5 mb-4">
-                                        <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-100">E</div>
+                                        <div className="w-8 h-8 rounded-lg bg-primary text-black flex items-center justify-center font-bold shadow-md shadow-primary/20">E</div>
                                         <h4 className="text-lg font-bold text-gray-900 tracking-tight">Effectiveness of Interventions</h4>
                                     </div>
-                                    <p className="text-gray-600 leading-relaxed font-medium bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50/50">
+                                    <p className="text-gray-600 leading-relaxed font-medium bg-primary/5 p-4 rounded-2xl border border-primary/10">
                                         {report.effectiveness || 'No effectiveness notes provided.'}
                                     </p>
                                 </div>
@@ -133,7 +133,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Digital Signature</p>
                                 <div className="px-6 py-3 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <p className="text-2xl font-dance text-indigo-600/80 italic font-medium">
+                                    <p className="text-2xl font-dance text-primary italic font-medium">
                                         {report.staffSignature || report.staff}
                                     </p>
                                 </div>
@@ -158,7 +158,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                         </button>
                         <button
                             onClick={() => onDownload(report)}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                         >
                             <FileDown size={18} />
                             Download Report

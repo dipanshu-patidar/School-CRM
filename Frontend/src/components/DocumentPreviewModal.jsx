@@ -10,12 +10,12 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[80vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header Strip */}
-                <div className="h-2 bg-gradient-to-r from-indigo-500 to-violet-500 w-full" />
+                <div className="h-2 bg-primary w-full" />
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
+                        <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
                             <FileText size={24} />
                         </div>
                         <div>
@@ -49,7 +49,7 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                                     <CheckCircle size={14} /> Completed
                                 </div>
                             ) : doc.status === 'Secondary Completion' ? (
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold text-sm border border-indigo-100">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/20">
                                     <CheckCircle size={14} /> Secondary
                                 </div>
                             ) : (
@@ -74,7 +74,7 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                         </div>
 
                         <div className="mt-auto pt-4 border-t border-gray-100">
-                            <button className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold rounded-lg transition-colors cursor-pointer mb-2">
+                            <button className="w-full py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-colors cursor-pointer mb-2">
                                 Download File
                             </button>
                         </div>

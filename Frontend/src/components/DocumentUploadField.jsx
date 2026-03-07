@@ -28,7 +28,7 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
         const ext = fileName.split('.').pop().toLowerCase();
         if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return <ImageIcon size={24} className="text-blue-500" />;
         if (ext === 'pdf') return <FileText size={24} className="text-red-500" />;
-        if (['doc', 'docx'].includes(ext)) return <File size={24} className="text-indigo-500" />;
+        if (['doc', 'docx'].includes(ext)) return <File size={24} className="text-primary" />;
         return <File size={24} className="text-gray-500" />;
     };
 
@@ -43,8 +43,8 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
                 onDrop={handleDrop}
                 onClick={() => inputRef.current.click()}
                 className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer relative group ${dragging
-                        ? 'border-indigo-400 bg-indigo-50'
-                        : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
                     }`}
             >
                 <input
@@ -56,7 +56,7 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
                 />
 
                 {selectedFile ? (
-                    <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-indigo-100 shadow-sm animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-primary/20 shadow-sm animate-in fade-in slide-in-from-top-2">
                         <div className="p-2 bg-gray-50 rounded-lg">
                             {getFileIcon(selectedFile.name)}
                         </div>
@@ -76,8 +76,8 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
                     </div>
                 ) : (
                     <div className="py-2">
-                        <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                            <FileUp size={24} className="text-indigo-600" />
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                            <FileUp size={24} className="text-primary" />
                         </div>
                         <p className="text-sm font-semibold text-gray-700">Click to upload or drag and drop</p>
                         <p className="text-xs text-gray-400 mt-1">PDF, DOC, Images (Max 10MB)</p>

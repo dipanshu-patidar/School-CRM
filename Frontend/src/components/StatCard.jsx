@@ -5,7 +5,7 @@ const StatCard = ({ icon: Icon, label, value, trend, trendType }) => {
     return (
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
             <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors">
                     <Icon size={24} />
                 </div>
                 {trend && (

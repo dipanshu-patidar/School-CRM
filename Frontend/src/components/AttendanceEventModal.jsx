@@ -56,7 +56,7 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-xl"><UserCheck size={20} className="text-indigo-600" /></div>
+                        <div className="p-2 bg-primary/10 rounded-xl"><UserCheck size={20} className="text-primary" /></div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Mark Attendance</h3>
                             <p className="text-xs text-gray-500">Record a workshop attendance (+1 point).</p>
@@ -74,7 +74,7 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                             Select Student <span className="text-red-400">*</span>
                         </label>
                         <select name="studentId" value={form.studentId} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer">
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer">
                             <option value="">Choose a student...</option>
                             {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
@@ -86,7 +86,7 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                             Select Workshop <span className="text-red-400">*</span>
                         </label>
                         <select name="workshop" value={form.workshop} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer">
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer">
                             <option value="">Choose a workshop...</option>
                             {WORKSHOPS.map(w => <option key={w} value={w}>{w}</option>)}
                         </select>
@@ -98,18 +98,18 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                             Date <span className="text-red-400">*</span>
                         </label>
                         <input type="date" name="date" value={form.date} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                     </div>
 
                     {/* Points info */}
-                    <div className="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                        <Star size={16} className="text-indigo-600 shrink-0" />
-                        <p className="text-xs text-indigo-700">Points Awarded: <strong>+1 Point</strong> (auto-assigned)</p>
+                    <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/10 rounded-lg">
+                        <Star size={16} className="text-primary shrink-0" />
+                        <p className="text-xs text-gray-600 font-bold">Points Awarded: <span className="text-primary">+1 Point</span> (auto-assigned)</p>
                     </div>
 
                     <div className="flex gap-3 pt-2">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 cursor-pointer transition-all">Cancel</button>
-                        <button type="submit" className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
+                        <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
                             <UserCheck size={16} /> Save Attendance
                         </button>
                     </div>
@@ -127,7 +127,7 @@ export const AttendanceEventModal = ({ record, onClose, onDelete }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="h-1.5 bg-gradient-to-r from-indigo-500 to-violet-500" />
+                <div className="h-1.5 bg-primary" />
                 <div className="p-7">
                     <div className="flex items-center justify-between mb-5">
                         <h3 className="text-lg font-bold text-gray-900">Attendance Record</h3>
@@ -136,31 +136,31 @@ export const AttendanceEventModal = ({ record, onClose, onDelete }) => {
 
                     <div className="space-y-3 mb-6">
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <UserCheck size={16} className="text-indigo-500 shrink-0" />
+                            <UserCheck size={16} className="text-primary shrink-0" />
                             <div>
                                 <p className="text-xs text-gray-400">Student</p>
                                 <p className="text-sm font-bold text-gray-900">{record.studentName}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <BookOpen size={16} className="text-indigo-500 shrink-0" />
+                            <BookOpen size={16} className="text-primary shrink-0" />
                             <div>
                                 <p className="text-xs text-gray-400">Workshop</p>
                                 <p className="text-sm font-bold text-gray-900">{record.workshop}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <Calendar size={16} className="text-indigo-500 shrink-0" />
+                            <Calendar size={16} className="text-primary shrink-0" />
                             <div>
                                 <p className="text-xs text-gray-400">Date</p>
                                 <p className="text-sm font-bold text-gray-900">{new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
-                            <Star size={16} className="text-indigo-600 shrink-0" />
+                        <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/10 rounded-xl">
+                            <Star size={16} className="text-primary shrink-0" />
                             <div>
-                                <p className="text-xs text-indigo-500">Points Earned</p>
-                                <p className="text-sm font-black text-indigo-700">+{record.points} Point</p>
+                                <p className="text-xs text-primary/70">Points Earned</p>
+                                <p className="text-sm font-black text-primary">+{record.points} Point</p>
                             </div>
                         </div>
                     </div>

@@ -30,13 +30,13 @@ const StaffManagement = () => {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                    <div className="w-1 h-6 bg-primary rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-900">Staff Members</h2>
                 </div>
 
                 <button
                     onClick={() => { setEditingStaff(null); setIsModalOpen(true); }}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                 >
                     <Plus size={18} />
                     Add Staff
@@ -58,7 +58,7 @@ const StaffManagement = () => {
                         {staffList.map((staff) => (
                             <tr key={staff.id} className="hover:bg-gray-50/50 transition-colors">
                                 <td className="px-6 py-4 font-bold text-gray-900">{staff.name}</td>
-                                <td className="px-6 py-4 text-sm text-indigo-600 hover:underline cursor-pointer">
+                                <td className="px-6 py-4 text-sm text-primary hover:underline cursor-pointer">
                                     <a href={`mailto:${staff.email}`}>{staff.email}</a>
                                 </td>
                                 <td className="px-6 py-4">
@@ -70,7 +70,7 @@ const StaffManagement = () => {
                                 <td className="px-6 py-4 text-right">
                                     <button
                                         onClick={() => handleEdit(staff)}
-                                        className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer inline-flex"
+                                        className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer inline-flex"
                                     >
                                         <Pencil size={16} />
                                     </button>

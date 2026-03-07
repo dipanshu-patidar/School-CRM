@@ -75,7 +75,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                                 required
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                                 placeholder="e.g. Sarah Lee"
                             />
                         </div>
@@ -89,7 +89,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                                 required
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                                 placeholder="name@email.com"
                             />
                         </div>
@@ -101,7 +101,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                             <select
                                 value={formData.role}
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium appearance-none"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none"
                             >
                                 <option value="Admin">Admin</option>
                                 <option value="Staff">Staff</option>
@@ -115,7 +115,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                             <select
                                 value={formData.status}
                                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium appearance-none"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none"
                             >
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
@@ -143,7 +143,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                             required={!isEditing}
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
                             placeholder="Enter password"
                         />
                         <p className="text-xs text-gray-500 mt-1">
@@ -162,7 +162,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                            className="flex-1 py-3 bg-primary hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                         >
                             Save Staff
                         </button>

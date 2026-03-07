@@ -22,14 +22,14 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
     if (!reports || reports.length === 0) {
         return (
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm py-16 flex flex-col items-center justify-center text-center px-4 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
-                    <FileText size={36} className="text-indigo-200" />
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <FileText size={36} className="text-primary/40" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No PCP / IGP reports created yet</h3>
                 <p className="text-gray-500 max-w-xs mb-8 font-medium">Start by creating your first service documentation report using the P.I.E format.</p>
                 <button
                     onClick={onCreateNew}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                    className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                 >
                     <Plus size={18} />
                     Create First Report
@@ -48,21 +48,21 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
 
                 <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="relative w-full sm:w-64 group">
-                        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
                         <input
                             type="text"
                             placeholder="Search by student..."
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm"
                         />
                     </div>
                     <div className="relative w-full sm:w-40 group">
-                        <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <Filter size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
                         <select
                             value={statusFilter}
                             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm cursor-pointer appearance-none"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm cursor-pointer appearance-none"
                         >
                             <option value="All">All Reports</option>
                             <option value="Draft">Draft</option>
@@ -114,7 +114,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                 {totalPages > 1 && (
                     <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/20 flex items-center justify-between">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Showing <span className="text-indigo-600">{Math.min(filteredReports.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredReports.length, currentPage * itemsPerPage)}</span> of {filteredReports.length} reports
+                            Showing <span className="text-primary">{Math.min(filteredReports.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredReports.length, currentPage * itemsPerPage)}</span> of {filteredReports.length} reports
                         </p>
                         <div className="flex items-center gap-1">
                             <button
@@ -129,7 +129,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                                     key={i + 1}
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === i + 1
-                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
+                                        ? 'bg-primary text-black shadow-lg shadow-primary/20'
                                         : 'text-gray-500 hover:bg-white hover:shadow-sm'
                                         }`}
                                 >

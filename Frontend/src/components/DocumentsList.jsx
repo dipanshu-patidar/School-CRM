@@ -27,9 +27,9 @@ const UploadModal = ({ onClose, onUpload }) => {
                     onDragLeave={() => setDragging(false)}
                     onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); }}
                     onClick={() => inputRef.current.click()}
-                    className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}`}
+                    className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}`}
                 >
-                    <FileUp size={36} className="mx-auto mb-3 text-indigo-400" />
+                    <FileUp size={36} className="mx-auto mb-3 text-primary/50" />
                     {file ? (
                         <div>
                             <p className="font-bold text-gray-800">{file.name}</p>
@@ -52,7 +52,7 @@ const UploadModal = ({ onClose, onUpload }) => {
                     <button
                         disabled={!file}
                         onClick={() => { onUpload(file); onClose(); }}
-                        className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer flex items-center justify-center gap-2"
+                        className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:text-gray-400 text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Upload size={16} /> Upload
                     </button>
@@ -89,7 +89,7 @@ const DocumentsList = () => {
             <div className="flex justify-end">
                 <button
                     onClick={() => setShowUpload(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer"
                 >
                     <Upload size={16} />
                     Upload Document
@@ -106,7 +106,7 @@ const DocumentsList = () => {
                     {documents.map((doc) => (
                         <div key={doc.id} className="flex items-center justify-between py-4 group hover:bg-gray-50 rounded-lg px-3 transition-all">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-indigo-50 rounded-lg text-indigo-600">
+                                <div className="p-2.5 bg-primary/10 rounded-lg text-primary">
                                     <FileText size={20} />
                                 </div>
                                 <div>
@@ -115,7 +115,7 @@ const DocumentsList = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer">
+                                <button className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                                     <Download size={16} />
                                 </button>
                                 <button onClick={() => handleDelete(doc.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">

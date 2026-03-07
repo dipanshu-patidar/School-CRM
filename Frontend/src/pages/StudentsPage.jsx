@@ -73,7 +73,7 @@ const StudentsPage = () => {
                     </button>
                     <button
                         onClick={handleAddStudent}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                     >
                         <UserPlus size={18} />
                         Add Student
@@ -116,7 +116,7 @@ const StudentsPage = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Student</h3>
                         <p className="text-gray-500 mb-2">Are you sure you want to delete</p>
-                        <p className="text-indigo-600 font-bold text-lg mb-6">"{deleteTarget.name}"?</p>
+                        <p className="text-primary font-bold text-lg mb-6">"{deleteTarget.name}"?</p>
                         <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8 w-full">
                             <AlertTriangle size={16} className="shrink-0" />
                             This action cannot be undone. All data will be permanently removed.

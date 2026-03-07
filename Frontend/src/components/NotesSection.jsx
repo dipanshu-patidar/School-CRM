@@ -28,7 +28,7 @@ const NotesSection = () => {
             <div className="flex justify-end">
                 <button
                     onClick={() => setShowInput(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer"
                 >
                     <Plus size={16} />
                     Add Note
@@ -36,14 +36,14 @@ const NotesSection = () => {
             </div>
 
             {showInput && (
-                <div className="bg-indigo-50 rounded-xl border border-indigo-100 p-4 space-y-3">
+                <div className="bg-primary/5 rounded-xl border border-primary/10 p-4 space-y-3">
                     <textarea
                         autoFocus
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
                         placeholder="Type your note here..."
                         rows={3}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                     />
                     <div className="flex gap-2 justify-end">
                         <button
@@ -54,7 +54,7 @@ const NotesSection = () => {
                         </button>
                         <button
                             onClick={handleAddNote}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all cursor-pointer"
+                            className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer"
                         >
                             Save Note
                         </button>

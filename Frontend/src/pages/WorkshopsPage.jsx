@@ -47,8 +47,8 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-50 rounded-xl">
-                            {isEditing ? <Pencil size={18} className="text-indigo-600" /> : <BookOpen size={18} className="text-indigo-600" />}
+                        <div className="p-2 bg-primary/10 rounded-xl">
+                            {isEditing ? <Pencil size={18} className="text-primary" /> : <BookOpen size={18} className="text-primary" />}
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Workshop' : 'Add Workshop'}</h3>
@@ -72,7 +72,7 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. Financial Literacy"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                             required
                         />
                     </div>
@@ -87,14 +87,14 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Describe the workshop objectives and topics covered..."
                             rows={3}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                         />
                     </div>
 
                     {/* Points Info */}
-                    <div className="flex items-center gap-3 p-3.5 bg-indigo-50 border border-indigo-100 rounded-lg">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">+1 Point</span>
-                        <p className="text-xs text-indigo-600">Each attendance at this workshop grants <strong>+1 point</strong>.</p>
+                    <div className="flex items-center gap-3 p-3.5 bg-primary/5 border border-primary/10 rounded-lg">
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary text-black">+1 Point</span>
+                        <p className="text-xs text-gray-600 font-medium">Each attendance at this workshop grants <strong>+1 point</strong>.</p>
                     </div>
 
                     {/* Footer actions */}
@@ -102,7 +102,7 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer">
                             Cancel
                         </button>
-                        <button type="submit" className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
+                        <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
                             {isEditing ? <><Pencil size={15} /> Save Changes</> : <><Plus size={15} /> Add Workshop</>}
                         </button>
                     </div>
@@ -120,12 +120,12 @@ const WorkshopViewModal = ({ workshop, onClose }) => {
             <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 {/* Coloured top strip */}
-                <div className="h-2 bg-gradient-to-r from-indigo-500 to-violet-500 w-full" />
+                <div className="h-2 bg-primary w-full shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
 
                 {/* Header */}
                 <div className="flex items-start justify-between px-8 pt-6 pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                             W
                         </div>
                         <div>
@@ -144,15 +144,15 @@ const WorkshopViewModal = ({ workshop, onClose }) => {
                 {/* Body */}
                 <div className="px-8 pb-8 space-y-5">
                     {/* Points Badge */}
-                    <div className="flex items-center gap-3 p-3.5 bg-indigo-50 border border-indigo-100 rounded-xl">
-                        <div className="p-1.5 bg-indigo-100 rounded-lg">
-                            <Star size={14} className="text-indigo-600" />
+                    <div className="flex items-center gap-3 p-3.5 bg-primary/5 border border-primary/10 rounded-xl">
+                        <div className="p-1.5 bg-primary/10 rounded-lg">
+                            <Star size={14} className="text-primary" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-indigo-800">Points Reward</p>
-                            <p className="text-xs text-indigo-600 mt-0.5">Each attendance grants <strong>+1 point</strong> toward program completion.</p>
+                            <p className="text-xs font-bold text-primary">Points Reward</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Each attendance grants <strong>+1 point</strong> toward program completion.</p>
                         </div>
-                        <span className="ml-auto px-3 py-1 rounded-full text-sm font-black bg-indigo-600 text-white shadow-sm">
+                        <span className="ml-auto px-3 py-1 rounded-full text-sm font-black bg-primary text-black shadow-md shadow-primary/20">
                             +1
                         </span>
                     </div>
@@ -226,7 +226,7 @@ const WorkshopsPage = () => {
                 </div>
                 <button
                     onClick={handleAdd}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 self-start sm:self-auto"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 self-start sm:self-auto"
                 >
                     <Plus size={18} />
                     Add Workshop
@@ -266,7 +266,7 @@ const WorkshopsPage = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Workshop</h3>
                         <p className="text-gray-500 mb-1">Are you sure you want to delete</p>
-                        <p className="text-indigo-600 font-bold text-lg mb-6">"{deleteTarget.name}"?</p>
+                        <p className="text-primary font-bold text-lg mb-6">"{deleteTarget.name}"?</p>
                         <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8 w-full">
                             <AlertTriangle size={15} className="shrink-0" />
                             Student attendance records linked to this workshop will remain unaffected.

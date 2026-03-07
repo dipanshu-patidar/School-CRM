@@ -13,7 +13,7 @@ const WorkshopTable = ({ workshops, onEdit, onDelete, onAdd, onView }) => {
                 <p className="text-gray-500 max-w-xs mb-8">Start by adding your first workshop to the program.</p>
                 <button
                     onClick={onAdd}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95"
+                    className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                 >
                     <BookOpen size={18} />
                     Create First Workshop

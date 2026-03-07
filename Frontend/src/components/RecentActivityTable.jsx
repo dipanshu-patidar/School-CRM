@@ -25,10 +25,10 @@ const RecentActivityTable = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {activities.map((activity) => (
-                            <tr key={activity.id} className="hover:bg-gray-50 transition-colors group cursor-pointer">
+                            <tr key={activity.id} className="hover:bg-[#FFF9E6] transition-colors group cursor-pointer">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                                             {activity.name.charAt(0)}
                                         </div>
                                         <span className="text-sm font-semibold text-gray-900">{activity.name}</span>

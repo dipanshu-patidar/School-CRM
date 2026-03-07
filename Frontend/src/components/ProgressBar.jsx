@@ -17,13 +17,13 @@ const ProgressBar = ({ current, total }) => {
                     <p className="text-sm text-gray-500 mt-0.5">{current} / {total} Points Earned</p>
                 </div>
                 <div className="text-right">
-                    <span className="text-3xl font-bold text-indigo-600">{percentage}%</span>
+                    <span className="text-3xl font-bold text-primary">{percentage}%</span>
                     <p className="text-xs text-gray-400 mt-0.5">Complete</p>
                 </div>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                 <div
-                    className="h-full bg-indigo-600 rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${width}%` }}
                 />
             </div>

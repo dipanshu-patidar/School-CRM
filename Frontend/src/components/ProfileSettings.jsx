@@ -32,7 +32,7 @@ const ProfileSettings = () => {
             {/* Personal Info Card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-8">
-                    <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                    <div className="w-1 h-6 bg-primary rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-900">Profile Settings</h2>
                 </div>
 
@@ -45,7 +45,7 @@ const ProfileSettings = () => {
                             type="text"
                             value={personalInfo.name}
                             onChange={(e) => setPersonalInfo({ ...personalInfo, name: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                         />
                     </div>
                     <div>
@@ -56,7 +56,7 @@ const ProfileSettings = () => {
                             type="email"
                             value={personalInfo.email}
                             onChange={(e) => setPersonalInfo({ ...personalInfo, email: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                         />
                     </div>
                 </div>
@@ -83,7 +83,7 @@ const ProfileSettings = () => {
                                 onClick={() => fileInputRef.current.click()}
                                 className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold text-sm rounded-lg transition-colors cursor-pointer mb-2 shadow-sm"
                             >
-                                <Upload size={16} className="text-indigo-600" />
+                                <Upload size={16} className="text-primary" />
                                 Choose New Photo
                             </button>
                             <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 2MB.</p>
@@ -92,7 +92,7 @@ const ProfileSettings = () => {
                 </div>
 
                 <div className="flex justify-end">
-                    <button className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95">
+                    <button className="px-8 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95">
                         Update Profile
                     </button>
                 </div>
@@ -101,7 +101,7 @@ const ProfileSettings = () => {
             {/* Change Password Card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-8">
-                    <div className="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                    <div className="w-1 h-6 bg-primary rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
                 </div>
 
@@ -115,7 +115,7 @@ const ProfileSettings = () => {
                             placeholder="Enter Old Password"
                             value={passwords.oldPassword}
                             onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
                         />
                     </div>
                     <div>
@@ -127,7 +127,7 @@ const ProfileSettings = () => {
                             placeholder="Enter Your Password"
                             value={passwords.newPassword}
                             onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
                         />
                     </div>
                 </div>
@@ -141,12 +141,12 @@ const ProfileSettings = () => {
                         placeholder="Confirm New Password"
                         value={passwords.confirmPassword}
                         onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:font-normal placeholder:text-gray-400 font-medium"
                     />
                 </div>
 
                 <div className="flex justify-end pt-6 border-t border-gray-100">
-                    <button className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95">
+                    <button className="px-8 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95">
                         Change Password
                     </button>
                 </div>

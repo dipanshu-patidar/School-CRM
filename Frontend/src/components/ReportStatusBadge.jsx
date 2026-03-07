@@ -5,8 +5,8 @@ const ReportStatusBadge = ({ status }) => {
 
     return (
         <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border whitespace-nowrap uppercase tracking-wider ${isCompleted
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                : 'bg-amber-50 text-amber-700 border-amber-100'
+            ? 'bg-primary-light text-[#5C4300] border-primary/20'
+            : 'bg-white text-gray-500 border-gray-200'
             }`}>
             {status}
         </span>

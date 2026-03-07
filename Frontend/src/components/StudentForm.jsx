@@ -17,7 +17,7 @@ const StudentForm = ({ form, onChange }) => {
                         value={form.name}
                         onChange={onChange}
                         placeholder="e.g. John Doe"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         required
                     />
                 </div>
@@ -31,7 +31,7 @@ const StudentForm = ({ form, onChange }) => {
                         value={form.phone}
                         onChange={onChange}
                         placeholder="e.g. +1 234 567 890"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                 </div>
             </div>
@@ -48,7 +48,7 @@ const StudentForm = ({ form, onChange }) => {
                         value={form.email}
                         onChange={onChange}
                         placeholder="e.g. john@example.com"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         required
                     />
                 </div>
@@ -60,7 +60,7 @@ const StudentForm = ({ form, onChange }) => {
                         name="assignedStaff"
                         value={form.assignedStaff}
                         onChange={onChange}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer appearance-none"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer appearance-none"
                     >
                         <option value="">Select staff member...</option>
                         {staffOptions.map(s => <option key={s} value={s}>{s}</option>)}
@@ -78,7 +78,7 @@ const StudentForm = ({ form, onChange }) => {
                         name="status"
                         value={form.status}
                         onChange={onChange}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer appearance-none"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer appearance-none"
                     >
                         <option value="Active">Active</option>
                         <option value="Completed">Completed</option>
@@ -96,10 +96,10 @@ const StudentForm = ({ form, onChange }) => {
                         min={0}
                         max={250}
                         placeholder="0"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                     <p className="text-xs text-gray-400 mt-1.5">
-                        Students need <span className="font-bold text-indigo-600">250 points</span> for program completion.
+                        Students need <span className="font-bold text-primary">250 points</span> for program completion.
                     </p>
                 </div>
             </div>

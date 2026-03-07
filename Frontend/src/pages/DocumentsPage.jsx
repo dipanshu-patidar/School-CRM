@@ -91,18 +91,18 @@ const DocumentsPage = ({ role }) => {
                 <div className="flex items-center gap-3">
                     {activeTab === 'pcp' ? (
                         <button
-                            onClick={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 whitespace-nowrap"
+                            onClick={() => setIsPCPModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
                         >
-                            <Plus size={18} />
+                            <Plus size={20} />
                             New PCP / IGP Report
                         </button>
                     ) : (
                         <button
-                            onClick={() => { setEditingDoc(null); setIsUploadOpen(true); }}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 cursor-pointer active:scale-95 whitespace-nowrap"
+                            onClick={() => setIsUploadOpen(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
                         >
-                            <FileUp size={18} />
+                            <Plus size={20} />
                             Upload Document
                         </button>
                     )}
@@ -117,23 +117,27 @@ const DocumentsPage = ({ role }) => {
                 <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit">
                     <button
                         onClick={() => setActiveTab('pcp')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${activeTab === 'pcp'
-                            ? 'bg-white text-indigo-600 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer ${activeTab === 'pcp'
+                            ? 'bg-primary text-black shadow-primary/20'
+                            : 'bg-white text-gray-600 hover:text-primary hover:bg-gray-50 border border-gray-200'
                             }`}
                     >
-                        <FileText size={18} className={activeTab === 'pcp' ? 'text-indigo-600' : 'text-gray-400'} />
                         PCP / IGP Reports
+                        {activeTab === 'pcp' && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
+                        )}
                     </button>
                     <button
                         onClick={() => setActiveTab('standard')}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${activeTab === 'standard'
-                            ? 'bg-white text-indigo-600 shadow-sm'
+                        className={`px-6 py-3 text-sm font-bold transition-all relative ${activeTab === 'standard'
+                            ? 'text-primary'
                             : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
-                        <FolderOpen size={18} className={activeTab === 'standard' ? 'text-indigo-600' : 'text-gray-400'} />
                         Standard Documents
+                        {activeTab === 'standard' && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
+                        )}
                     </button>
                 </div>
             )}
@@ -207,7 +211,7 @@ const DocumentsPage = ({ role }) => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Document</h3>
                         <p className="text-gray-500 mb-1">Are you sure you want to delete this document from</p>
-                        <p className="text-indigo-600 font-bold text-lg mb-6">{deleteTarget.studentName}'s profile?</p>
+                        <p className="text-primary font-bold text-lg mb-6">{deleteTarget.studentName}'s profile?</p>
                         <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8 w-full">
                             <AlertTriangle size={15} className="shrink-0" />
                             This document will be permanently removed.

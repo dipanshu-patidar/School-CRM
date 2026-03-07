@@ -24,12 +24,12 @@ const SettingsSidebar = ({ activeTab, setActiveTab, role }) => {
                         className={`
                             flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer
                             ${isActive
-                                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-indigo-600'
+                                ? 'bg-primary text-black shadow-md shadow-primary/20'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
                             }
                         `}
                     >
-                        <Icon size={18} className={isActive ? 'text-white' : 'text-gray-400'} />
+                        <Icon size={18} className={isActive ? 'text-black' : 'text-gray-400'} />
                         {item.label}
                     </button>
                 );

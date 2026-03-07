@@ -17,7 +17,7 @@ const StudentTabs = ({ student }) => {
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Tab Bar */}
-            <div className="flex border-b border-gray-100 px-6">
+            <div className="flex border-b border-gray-100 px-6 no-print">
                 {TABS.map((tab) => (
                     <button
                         key={tab}

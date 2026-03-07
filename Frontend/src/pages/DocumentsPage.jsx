@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, AlertTriangle, FileUp, FileText, FolderOpen } from 'lucide-react';
+import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer } from 'lucide-react';
 import DocumentsTable from '../components/DocumentsTable';
 import UploadDocumentModal from '../components/UploadDocumentModal';
 import DocumentPreviewModal from '../components/DocumentPreviewModal';
@@ -74,6 +74,10 @@ const DocumentsPage = ({ role }) => {
         setDeleteTarget(null);
     };
 
+    const handlePrintAll = () => {
+        window.print();
+    };
+
     const handleDownload = (doc) => {
         // Mock download action
         alert(`Downloading ${doc.docName}...`);
@@ -81,98 +85,110 @@ const DocumentsPage = ({ role }) => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-gray-100 pb-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Module Documents</h1>
-                    <p className="text-gray-500 mt-1">Manage service reports and program documentation.</p>
+            {/* Main Content - hidden when printing a specific document modal */}
+            <div className={`space-y-6 ${(previewDoc || isPCPModalOpen || isUploadOpen) ? 'no-print' : ''}`}>
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-gray-100 pb-6 no-print">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Module Documents</h1>
+                        <p className="text-gray-500 mt-1">Manage service reports and program documentation.</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handlePrintAll}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 cursor-pointer no-print"
+                        >
+                            <Printer size={20} />
+                            Print All
+                        </button>
+                        {activeTab === 'pcp' ? (
+                            <button
+                                onClick={() => setIsPCPModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
+                            >
+                                <Plus size={20} />
+                                New PCP / IGP Report
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setIsUploadOpen(true)}
+                                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
+                            >
+                                <Plus size={20} />
+                                Upload Document
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {activeTab === 'pcp' ? (
+                {/* Rules */}
+                <div className="no-print">
+                    <CompletionRuleCard />
+                </div>
+
+                {/* Tab Switcher */}
+                {userRole === 'admin' && (
+                    <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit no-print">
                         <button
-                            onClick={() => setIsPCPModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
+                            onClick={() => setActiveTab('pcp')}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer ${activeTab === 'pcp'
+                                ? 'bg-primary text-black shadow-primary/20'
+                                : 'bg-white text-gray-600 hover:text-primary hover:bg-gray-50 border border-gray-200'
+                                }`}
                         >
-                            <Plus size={20} />
-                            New PCP / IGP Report
+                            PCP / IGP Reports
+                            {activeTab === 'pcp' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
+                            )}
                         </button>
+                        <button
+                            onClick={() => setActiveTab('standard')}
+                            className={`px-6 py-3 text-sm font-bold transition-all relative ${activeTab === 'standard'
+                                ? 'text-primary'
+                                : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            Standard Documents
+                            {activeTab === 'standard' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* Tab Secret Content */}
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {activeTab === 'pcp' || userRole === 'staff' ? (
+                        <PCPReportsTable
+                            reports={pcpReports}
+                            onView={setPreviewDoc}
+                            onEdit={handleEditPCP}
+                            onDownload={handleDownload}
+                            onDelete={setDeleteTarget}
+                            onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
+                            userRole={userRole}
+                        />
                     ) : (
-                        <button
-                            onClick={() => setIsUploadOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
-                        >
-                            <Plus size={20} />
-                            Upload Document
-                        </button>
+                        <div className="space-y-6">
+                            <div className="mb-2">
+                                <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
+                                <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
+                            </div>
+                            <DocumentsTable
+                                documents={documents}
+                                onView={setPreviewDoc}
+                                onDownload={handleDownload}
+                                onDelete={setDeleteTarget}
+                                onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
+                                onEdit={handleEdit}
+                            />
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Rules */}
-            <CompletionRuleCard />
-
-            {/* Tab Switcher */}
-            {userRole === 'admin' && (
-                <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit">
-                    <button
-                        onClick={() => setActiveTab('pcp')}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer ${activeTab === 'pcp'
-                            ? 'bg-primary text-black shadow-primary/20'
-                            : 'bg-white text-gray-600 hover:text-primary hover:bg-gray-50 border border-gray-200'
-                            }`}
-                    >
-                        PCP / IGP Reports
-                        {activeTab === 'pcp' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
-                        )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('standard')}
-                        className={`px-6 py-3 text-sm font-bold transition-all relative ${activeTab === 'standard'
-                            ? 'text-primary'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        Standard Documents
-                        {activeTab === 'standard' && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
-                        )}
-                    </button>
-                </div>
-            )}
-
-            {/* Tab Secret Content */}
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                {activeTab === 'pcp' || userRole === 'staff' ? (
-                    <PCPReportsTable
-                        reports={pcpReports}
-                        onView={setPreviewDoc}
-                        onEdit={handleEditPCP}
-                        onDownload={handleDownload}
-                        onDelete={setDeleteTarget}
-                        onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
-                        userRole={userRole}
-                    />
-                ) : (
-                    <div className="space-y-6">
-                        <div className="mb-2">
-                            <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
-                            <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
-                        </div>
-                        <DocumentsTable
-                            documents={documents}
-                            onView={setPreviewDoc}
-                            onDownload={handleDownload}
-                            onDelete={setDeleteTarget}
-                            onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
-                            onEdit={handleEdit}
-                        />
-                    </div>
-                )}
-            </div>
-
-            {/* Modals */}
+            {/* Modals - Outside the hidden container */}
             <UploadDocumentModal
                 isOpen={isUploadOpen}
                 onClose={() => { setIsUploadOpen(false); setEditingDoc(null); }}

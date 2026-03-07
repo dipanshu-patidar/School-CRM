@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, FileText, Calendar, CheckCircle, Clock } from 'lucide-react';
+import PrintHeader from './PrintHeader';
 
 const DocumentPreviewModal = ({ doc, onClose }) => {
     if (!doc) return null;
@@ -23,64 +24,68 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                             <p className="text-sm text-gray-500">{doc.studentName}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors cursor-pointer">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors cursor-pointer no-print">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 flex flex-col md:flex-row bg-gray-50/50">
-
-                    {/* Main Preview (Placeholder) */}
-                    <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-100 border-b md:border-b-0 md:border-r border-gray-200">
-                        <FileText size={64} className="text-gray-300 mb-4" />
-                        <p className="text-gray-500 font-medium">Document Preview UI</p>
-                        <p className="text-sm text-gray-400 mt-2 text-center max-w-xs">
-                            In a full implementation, the PDF or image viewer would render here.
-                        </p>
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                    <div className="p-6 pb-0">
+                        <PrintHeader />
                     </div>
+                    <div className="flex-1 flex flex-col md:flex-row bg-gray-50/50">
 
-                    {/* Sidebar Info */}
-                    <div className="w-full md:w-80 bg-white p-6 flex flex-col gap-6">
-                        <div>
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</p>
-                            {doc.status === 'Completed' ? (
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-sm border border-emerald-100">
-                                    <CheckCircle size={14} /> Completed
-                                </div>
-                            ) : doc.status === 'Secondary Completion' ? (
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/20">
-                                    <CheckCircle size={14} /> Secondary
-                                </div>
-                            ) : (
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-bold text-sm border border-gray-200">
-                                    <Clock size={14} /> Pending
-                                </div>
-                            )}
+                        {/* Main Preview (Placeholder) */}
+                        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-100 border-b md:border-b-0 md:border-r border-gray-200">
+                            <FileText size={64} className="text-gray-300 mb-4" />
+                            <p className="text-gray-500 font-medium">Document Preview UI</p>
+                            <p className="text-sm text-gray-400 mt-2 text-center max-w-xs">
+                                In a full implementation, the PDF or image viewer would render here.
+                            </p>
                         </div>
 
-                        <div>
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Upload Info</p>
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm">
-                                    <Calendar size={16} className="text-gray-400" />
-                                    <span className="text-gray-900 font-medium">{doc.date}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm">
-                                    <FileText size={16} className="text-gray-400" />
-                                    <span className="text-gray-900 font-medium">{doc.size || '3.2 MB'}</span>
+                        {/* Sidebar Info */}
+                        <div className="w-full md:w-80 bg-white p-6 flex flex-col gap-6">
+                            <div>
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</p>
+                                {doc.status === 'Completed' ? (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-sm border border-emerald-100">
+                                        <CheckCircle size={14} /> Completed
+                                    </div>
+                                ) : doc.status === 'Secondary Completion' ? (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/20">
+                                        <CheckCircle size={14} /> Secondary
+                                    </div>
+                                ) : (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-bold text-sm border border-gray-200">
+                                        <Clock size={14} /> Pending
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Upload Info</p>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <Calendar size={16} className="text-gray-400" />
+                                        <span className="text-gray-900 font-medium">{doc.date}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <FileText size={16} className="text-gray-400" />
+                                        <span className="text-gray-900 font-medium">{doc.size || '3.2 MB'}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="mt-auto pt-4 border-t border-gray-100">
-                            <button className="w-full py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-colors cursor-pointer mb-2">
-                                Download File
-                            </button>
+                            <div className="mt-auto pt-4 border-t border-gray-100">
+                                <button className="w-full py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-colors cursor-pointer mb-2 no-print">
+                                    Download File
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

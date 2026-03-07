@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Upload, X, Save, FileUp } from 'lucide-react';
+import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer } from 'lucide-react';
 import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
 import StudentTabs from '../components/StudentTabs';
@@ -207,45 +207,56 @@ const StudentProfilePage = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <button
-                        onClick={() => navigate('/dashboard/students')}
-                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary font-bold mb-3 transition-colors cursor-pointer group"
-                    >
-                        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-                        Back to Students
-                    </button>
-                    <h1 className="text-3xl font-bold text-gray-900">Student Profile</h1>
-                    <p className="text-gray-500 mt-1">View student progress and program activity.</p>
+            {/* Main Content Isolation - hidden when modals are open */}
+            <div className={`space-y-6 ${(showEditModal || showUploadModal) ? 'no-print' : ''}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
+                    <div>
+                        <button
+                            onClick={() => navigate('/dashboard/students')}
+                            className="flex items-center gap-2 text-sm text-gray-500 hover:text-primary font-bold mb-3 transition-colors cursor-pointer group"
+                        >
+                            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+                            Back to Students
+                        </button>
+                        <h1 className="text-3xl font-bold text-gray-900">Student Profile</h1>
+                        <p className="text-gray-500 mt-1">View student progress and program activity.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => window.print()}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer no-print focus:ring-2 focus:ring-gray-100"
+                        >
+                            <Printer size={16} />
+                            Print Profile
+                        </button>
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer no-print"
+                        >
+                            <Pencil size={16} />
+                            Edit Student
+                        </button>
+                        <button
+                            onClick={() => setShowUploadModal(true)}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
+                        >
+                            <Upload size={16} />
+                            Upload Document
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setShowEditModal(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
-                    >
-                        <Pencil size={16} />
-                        Edit Student
-                    </button>
-                    <button
-                        onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
-                    >
-                        <Upload size={16} />
-                        Upload Document
-                    </button>
+
+                {/* Profile Summary Card */}
+                <StudentProfileCard student={studentData} />
+
+                {/* Progress Bar */}
+                <div className="no-print">
+                    <ProgressBar current={studentData.points} total={studentData.totalPoints} />
                 </div>
+
+                {/* Tabs */}
+                <StudentTabs student={studentData} />
             </div>
-
-            {/* Profile Summary Card */}
-            <StudentProfileCard student={studentData} />
-
-            {/* Progress Bar */}
-            <ProgressBar current={studentData.points} total={studentData.totalPoints} />
-
-            {/* Tabs */}
-            <StudentTabs student={studentData} />
 
             {/* Modals */}
             {showEditModal && (

@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, FileText, Calendar, User, CheckCircle, Clock, Download, FileDown, MessageSquare, ClipboardCheck, Zap } from 'lucide-react';
+import { X, FileText, Calendar, User, CheckCircle, Clock, Download, FileDown, MessageSquare, ClipboardCheck, Zap, Printer } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
+import PrintHeader from './PrintHeader';
 
 const PCPReportViewModal = ({ report, onClose, onDownload }) => {
     if (!report) return null;
@@ -11,7 +12,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                 {/* Header Strip */}
-                <div className="h-2 bg-primary w-full shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
+                <div className="h-2 bg-primary w-full shadow-[0_0_15px_rgba(212,175,55,0.3)] no-print" />
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
@@ -31,7 +32,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                             </div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-all cursor-pointer hover:rotate-90 duration-200">
+                    <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-all cursor-pointer hover:rotate-90 duration-200 no-print">
                         <X size={24} />
                     </button>
                 </div>
@@ -39,6 +40,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto bg-gray-50/30">
                     <div className="p-8 space-y-8">
+                        <PrintHeader />
 
                         {/* Summary Info Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -73,8 +75,8 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
 
                         {/* P.I.E Format Sections */}
                         <div className="space-y-6">
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-8 text-indigo-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                                <div className="absolute top-0 right-0 p-8 text-indigo-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <Zap size={120} />
                                 </div>
                                 <div className="relative z-10">
@@ -88,8 +90,8 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-8 text-violet-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                                <div className="absolute top-0 right-0 p-8 text-violet-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <ClipboardCheck size={120} />
                                 </div>
                                 <div className="relative z-10">
@@ -103,8 +105,8 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                                 </div>
                             </div>
 
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-8 text-emerald-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none">
+                                <div className="absolute top-0 right-0 p-8 text-emerald-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
                                     <CheckCircle size={120} />
                                 </div>
                                 <div className="relative z-10">
@@ -144,7 +146,7 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between">
+                <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between print:mt-auto">
                     <div className="flex items-center gap-2 text-gray-400 text-sm font-medium italic">
                         <FileText size={16} />
                         Service Documentation Report - {report.id}
@@ -157,11 +159,18 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                             Close
                         </button>
                         <button
+                            onClick={() => window.print()}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer no-print focus:ring-2 focus:ring-gray-100"
+                        >
+                            <Printer size={18} />
+                            Print Report
+                        </button>
+                        <button
                             onClick={() => onDownload(report)}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
                         >
                             <FileDown size={18} />
-                            Download Report
+                            Download PDF
                         </button>
                     </div>
                 </div>

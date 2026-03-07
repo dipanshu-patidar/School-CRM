@@ -35,8 +35,136 @@
   [role="button"]:active {
     @apply scale-95;
   }
+
+  * {
+    @apply transition-colors duration-200;
+  }
 }
 
-* {
-  @apply transition-colors duration-200;
+/* Print Styles - Outside of tailwind layers for absolute priority */
+@media print {
+
+  /* Hide EVERYTHING by default in print */
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  /* Hide navigation components */
+  aside,
+  nav,
+  header,
+  [role="navigation"],
+  .no-print,
+  #sidebar,
+  #navbar {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Hide all buttons unless explicitly marked for print */
+  button:not(.print-only) {
+    display: none !important;
+  }
+
+  /* Reset layout containers */
+  main {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+  }
+
+  td,
+  th {
+    display: table-cell !important;
+  }
+
+  /* Ensure the main container takes full width */
+  #main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Force clean report background for P.I.E sections */
+  .bg-primary\/5,
+  .bg-amber-50,
+  .bg-primary\/10 {
+    background: transparent !important;
+    border: 1px solid #f3f4f6 !important;
+  }
+
+  /* Document content scrolling reset */
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  /* Ensure the main container takes full width */
+  main>div {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Modal/Document specific print rules */
+  .relative.bg-white {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  /* Fix text colors for printing */
+  * {
+    color: black !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .text-primary,
+  .bg-primary {
+    color: black !important;
+    /* Force black for text in print */
+  }
+
+  /* Force display of printed content */
+  .print-only {
+    display: block !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
 }

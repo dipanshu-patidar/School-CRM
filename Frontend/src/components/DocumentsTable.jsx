@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Download, Trash2, FileText, Pencil } from 'lucide-react';
+import { Eye, Download, Trash2, FileText, Pencil, Printer } from 'lucide-react';
 
 const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onEdit }) => {
     if (!documents || documents.length === 0) {
@@ -33,7 +33,7 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-1">
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block print:block overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="bg-gray-50/50 border-b border-gray-100">
@@ -41,7 +41,7 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Document Name</th>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Upload Date</th>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right no-print">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -63,9 +63,10 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500">{doc.date}</td>
                                 <td className="px-6 py-4">{getStatusBadge(doc.status)}</td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 no-print">
                                     <div className="flex items-center justify-end gap-1">
                                         <button title="View Document" onClick={() => onView(doc)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={16} /></button>
+                                        <button title="Print Document" onClick={() => window.print()} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Printer size={16} /></button>
                                         <button title="Download Document" onClick={() => onDownload(doc)} className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all cursor-pointer"><Download size={16} /></button>
                                         <button title="Edit Document" onClick={() => onEdit(doc)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={16} /></button>
                                         <button title="Delete Document" onClick={() => onDelete(doc)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={16} /></button>
@@ -78,7 +79,7 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
             </div>
 
             {/* Mobile View */}
-            <div className="md:hidden p-4 space-y-4 bg-gray-50/30">
+            <div className="md:hidden print:hidden p-4 space-y-4 bg-gray-50/30">
                 {documents.map((doc) => (
                     <div key={doc.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-primary/30 transition-all relative">
                         <div className="flex items-center justify-between mb-3">
@@ -97,8 +98,9 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                             <FileText size={16} className="text-gray-400 shrink-0" />
                             <span className="truncate">{doc.docName}</span>
                         </div>
-                        <div className="flex items-center justify-end gap-1 border-t border-gray-50 pt-3 mt-2">
+                        <div className="flex items-center justify-end gap-1 border-t border-gray-50 pt-3 mt-2 no-print">
                             <button onClick={() => onView(doc)} className="flex items-center justify-center gap-1.5 flex-1 py-1.5 rounded-lg text-sm font-bold text-black bg-primary hover:bg-primary-hover transition-all cursor-pointer"><Eye size={15} /> View</button>
+                            <button onClick={() => window.print()} className="p-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"><Printer size={15} /></button>
                             <button onClick={() => onDownload(doc)} className="flex items-center justify-center gap-1.5 flex-1 py-1.5 rounded-lg text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer"><Download size={15} /> Save</button>
                             <button onClick={() => onEdit(doc)} className="p-2.5 rounded-lg text-amber-500 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={15} /></button>
                             <button onClick={() => onDelete(doc)} className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={15} /></button>
@@ -107,7 +109,7 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                 ))}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/30 text-sm font-medium text-gray-500">
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/30 text-sm font-medium text-gray-500 no-print">
                 {documents.length} document{documents.length !== 1 ? 's' : ''} uploaded.
             </div>
         </div>

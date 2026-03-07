@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { FileText, Download, Trash2, Upload, X, FileUp } from 'lucide-react';
+import { FileText, Download, Trash2, Upload, X, FileUp, Printer } from 'lucide-react';
 
 /* ── Inline Upload Modal ──────────────────────── */
 const UploadModal = ({ onClose, onUpload }) => {
@@ -114,7 +114,14 @@ const DocumentsList = () => {
                                     <p className="text-xs text-gray-400">{doc.size} · {doc.uploadDate}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity no-print">
+                                <button
+                                    title="Print Document"
+                                    onClick={() => window.print()}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+                                >
+                                    <Printer size={16} />
+                                </button>
                                 <button className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                                     <Download size={16} />
                                 </button>

@@ -1,12 +1,12 @@
 import React from 'react';
-import { Eye, Pencil, Download, Trash2, FileText, Calendar, User } from 'lucide-react';
+import { Eye, Pencil, Download, Trash2, FileText, Calendar, User, Printer } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
 
 const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }) => {
     return (
         <>
             {/* Desktop Row */}
-            <tr className="hidden md:table-row hover:bg-[#FFF9E6] transition-colors group">
+            <tr className="hidden md:table-row print:table-row hover:bg-[#FFF9E6] transition-colors group">
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
@@ -33,7 +33,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                 <td className="px-6 py-4">
                     <ReportStatusBadge status={report.status} />
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 no-print">
                     <div className="flex items-center justify-end gap-1">
                         <button
                             title="View Report"
@@ -56,6 +56,13 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                         >
                             <Download size={16} />
                         </button>
+                        <button
+                            title="Print Report"
+                            onClick={() => window.print()}
+                            className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+                        >
+                            <Printer size={16} />
+                        </button>
                         {userRole === 'admin' && (
                             <button
                                 title="Delete Report"
@@ -70,7 +77,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
             </tr>
 
             {/* Mobile Card */}
-            <div className="md:hidden bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-primary/30 transition-all relative space-y-4">
+            <div className="md:hidden print:hidden bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-primary/30 transition-all relative space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
@@ -101,7 +108,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2 no-print">
                     <button
                         onClick={() => onView(report)}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all"
@@ -119,6 +126,12 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                         className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all"
                     >
                         <Download size={14} />
+                    </button>
+                    <button
+                        onClick={() => window.print()}
+                        className="p-2.5 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                    >
+                        <Printer size={14} />
                     </button>
                     {userRole === 'admin' && (
                         <button

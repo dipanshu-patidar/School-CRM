@@ -46,7 +46,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                     <p className="text-sm text-gray-500 font-medium">List of all service documentation reports created using the P.I.E format.</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-center gap-3 no-print">
                     <div className="relative w-full sm:w-64 group">
                         <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
                         <input
@@ -72,8 +72,8 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden flex flex-col">
-                <div className="overflow-x-auto">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden flex flex-col print:border-none print:shadow-none">
+                <div className="overflow-x-auto print:overflow-visible">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100">
@@ -83,7 +83,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                                 <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Staff</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Created Date</th>
                                 <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest no-print text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -112,7 +112,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/20 flex items-center justify-between">
+                    <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/20 flex items-center justify-between no-print">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                             Showing <span className="text-primary">{Math.min(filteredReports.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredReports.length, currentPage * itemsPerPage)}</span> of {filteredReports.length} reports
                         </p>

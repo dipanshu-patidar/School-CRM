@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api/axios';
 import logoImg from '../assets/login/logo.png';
 import illustrationGold from '../assets/login/login_illustration_gold.png';
 import illustrationStudent from '../assets/login/login_illustration_student.png';
@@ -24,10 +25,12 @@ const slides = [
 
 const LoginPage = ({ onLogin }) => {
     const [role, setRole] = useState('admin');
-    const [email, setEmail] = useState('admin@gmail.com');
-    const [password, setPassword] = useState('123');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isBlinking, setIsBlinking] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -48,18 +51,29 @@ const LoginPage = ({ onLogin }) => {
 
     const handleRoleChange = (newRole) => {
         setRole(newRole);
-        if (newRole === 'admin') {
-            setEmail('admin@gmail.com');
-            setPassword('123');
-        } else {
-            setEmail('staff@gmail.com');
-            setPassword('123');
-        }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onLogin(role);
+        setError('');
+        setIsLoading(true);
+
+        try {
+            const response = await api.post('/api/auth/login', { email, password });
+            const { token, user } = response.data;
+
+            // Save token to localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userName', user.name);
+
+            // Pass the verified role to handleLogin in App.jsx
+            onLogin(user.role);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -92,6 +106,12 @@ const LoginPage = ({ onLogin }) => {
                     <div className="w-full max-w-[440px] mx-auto flex flex-col justify-center my-auto py-12">
                         <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">Log in</h1>
                         <p className="text-gray-500 font-medium mb-8">Welcome back! Please enter your details.</p>
+
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg text-sm font-medium">
+                                {error}
+                            </div>
+                        )}
 
                         <form onSubmit={handleSubmit} className="w-full space-y-5">
 
@@ -153,9 +173,10 @@ const LoginPage = ({ onLogin }) => {
                             {/* Login Button */}
                             <button
                                 type="submit"
-                                className="w-full py-3.5 mt-2 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                                disabled={isLoading}
+                                className={`w-full py-3.5 mt-2 ${isLoading ? 'bg-primary/70 cursor-not-allowed' : 'bg-primary hover:bg-primary-hover active:scale-[0.98] cursor-pointer'} text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2`}
                             >
-                                Sign in
+                                {isLoading ? 'Signing in...' : 'Sign in'}
                             </button>
 
                             {/* Signup Link */}

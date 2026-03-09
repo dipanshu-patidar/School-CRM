@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronLeft, ChevronRight, FileText, Plus } from 'lucide-react';
 import PCPReportRow from './PCPReportRow';
 
-const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCreateNew, userRole }) => {
+const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userRole }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
@@ -10,7 +10,8 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
 
     const filteredReports = useMemo(() => {
         return reports.filter(report => {
-            const matchesSearch = report.studentName.toLowerCase().includes(searchTerm.toLowerCase());
+            const studentName = report?.studentName || '';
+            const matchesSearch = studentName.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesStatus = statusFilter === 'All' || report.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
@@ -93,7 +94,6 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDownload, onDelete, onCrea
                                     report={report}
                                     onView={onView}
                                     onEdit={onEdit}
-                                    onDownload={onDownload}
                                     onDelete={onDelete}
                                     userRole={userRole}
                                 />

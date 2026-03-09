@@ -1,30 +1,27 @@
-import React, { useState, useRef } from 'react';
-import { X, Upload, FileUp } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Upload, FileUp, Loader2 } from 'lucide-react';
 
-const STUDENTS = [
-    { id: 101, name: 'John Doe' },
-    { id: 102, name: 'Sara Smith' },
-    { id: 103, name: 'Mike Brown' },
-];
-
-const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
+const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, students = [] }) => {
     const isEditing = !!editDoc;
     const [studentId, setStudentId] = useState('');
-    const [status, setStatus] = useState('Pending');
+    const [status, setStatus] = useState('pending');
+    const [documentType, setDocumentType] = useState('');
     const [file, setFile] = useState(null);
     const [dragging, setDragging] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRef = useRef();
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isOpen) {
             if (isEditing) {
-                const sId = STUDENTS.find(s => s.name === editDoc.studentName)?.id || '';
-                setStudentId(sId.toString());
-                setStatus(editDoc.status || 'Pending');
-                setFile({ name: editDoc.docName, size: parseFloat(editDoc.size) * 1024 * 1024 || 0 }); // Mock file
+                setStudentId(editDoc.studentMongoId || '');
+                setStatus(editDoc.status || 'pending');
+                setDocumentType(editDoc.docName || '');
+                setFile(null); // When editing, we usually don't show the previous file for re-upload unless requested
             } else {
                 setStudentId('');
-                setStatus('Pending');
+                setStatus('pending');
+                setDocumentType('');
                 setFile(null);
             }
         }
@@ -51,19 +48,24 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
         handleFile(e.dataTransfer.files[0]);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!studentId || !file) return;
-        const student = STUDENTS.find(s => s.id === parseInt(studentId));
-        onUpload({
-            id: isEditing ? editDoc.id : Date.now(),
-            studentName: student ? student.name : 'Unknown',
-            docName: file.name,
-            date: isEditing ? editDoc.date : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            status: status,
-            size: isEditing && file.name === editDoc.docName ? editDoc.size : (file.size / 1024 / 1024).toFixed(2) + ' MB'
-        });
-        onClose();
+        if (!studentId || (!file && !isEditing) || !documentType) return;
+
+        setIsSubmitting(true);
+        try {
+            const formData = new FormData();
+            formData.append('studentId', studentId);
+            formData.append('documentType', documentType);
+            formData.append('status', status);
+            if (file) {
+                formData.append('file', file);
+            }
+
+            await onUpload(studentId, formData);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -77,7 +79,7 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Document' : 'Upload Document'}</h3>
-                            <p className="text-xs text-gray-500">{isEditing ? 'Update document details and status.' : 'Upload housing verification files.'}</p>
+                            <p className="text-xs text-gray-500">{isEditing ? 'Update document details and status.' : 'Upload housing verification or other files.'}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 cursor-pointer">
@@ -97,8 +99,24 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all"
                         >
                             <option value="">Choose a student...</option>
-                            {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            {students.map(s => (
+                                <option key={s._id} value={s._id}>{s.name} ({s.id})</option>
+                            ))}
                         </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                            Document Name / Type <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            placeholder="e.g., Housing Verification, ID Card..."
+                            value={documentType}
+                            onChange={(e) => setDocumentType(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
                     </div>
 
                     <div>
@@ -111,15 +129,15 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                             onChange={(e) => setStatus(e.target.value)}
                             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all"
                         >
-                            <option value="Pending">Pending</option>
-                            <option value="Secondary Completion">Secondary Completion</option>
-                            <option value="Completed">Completed</option>
+                            <option value="pending">Pending Approval</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
                         </select>
                     </div>
 
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                            Upload File <span className="text-red-400">*</span>
+                            {isEditing ? 'Replace File (Optional)' : 'Upload File *'}
                         </label>
                         <div
                             onDragOver={handleDragOver}
@@ -145,11 +163,22 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null }) => {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={onClose} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all cursor-pointer">
+                        <button type="button" onClick={onClose} disabled={isSubmitting} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all cursor-pointer disabled:opacity-50">
                             Cancel
                         </button>
-                        <button type="submit" disabled={!studentId || !file} className="flex-1 py-3 bg-primary disabled:bg-gray-200 disabled:text-gray-400 hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
-                            {isEditing ? 'Save Changes' : 'Upload Document'}
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || !studentId || (!file && !isEditing) || !documentType}
+                            className="flex-1 py-3 bg-primary disabled:bg-gray-200 disabled:text-gray-400 hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 size={18} className="animate-spin" />
+                                    Uploading...
+                                </>
+                            ) : (
+                                isEditing ? 'Save Changes' : 'Upload Document'
+                            )}
                         </button>
                     </div>
                 </form>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FileText, Download, Trash2, Upload, X, FileUp, Printer } from 'lucide-react';
+import { FileText, Download, Trash2, Upload, X, FileUp, Printer, AlertTriangle } from 'lucide-react';
 import api from '../api/axios';
 
 /* ── Inline Upload Modal ──────────────────────── */
@@ -76,6 +76,8 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
         }
     }, [triggerUpload, onUploadTriggered]);
 
+    const [deleteTarget, setDeleteTarget] = useState(null);
+
     const handleUpload = async (file) => {
         setIsUploading(true);
         const formData = new FormData();
@@ -95,11 +97,14 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Delete this document?")) return;
+    const handleDeleteRequest = (doc) => setDeleteTarget(doc);
+
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            const res = await api.delete(`/api/students/${student._id}/documents/${id}`);
+            const res = await api.delete(`/api/students/${student._id}/documents/${deleteTarget._id}`);
             setDocuments(res.data.data);
+            setDeleteTarget(null);
         } catch (error) {
             console.error('Error deleting document', error);
         }
@@ -165,7 +170,7 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
                                 >
                                     <Download size={16} />
                                 </button>
-                                <button onClick={() => handleDelete(doc._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
+                                <button onClick={() => handleDeleteRequest(doc)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
                                     <Trash2 size={16} />
                                 </button>
                             </div>
@@ -190,6 +195,29 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
                                 onUpload={handleUpload}
                             />
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5">
+                            <Trash2 size={32} className="text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Document</h3>
+                        <p className="text-gray-500 mb-2">Are you sure you want to delete</p>
+                        <p className="text-primary font-bold text-lg mb-6 max-w-full truncate px-4">"{deleteTarget.name}"?</p>
+                        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8 w-full text-left">
+                            <AlertTriangle size={16} className="shrink-0" />
+                            This action cannot be undone. The file will be permanently removed.
+                        </div>
+                        <div className="flex items-center gap-4 w-full">
+                            <button onClick={() => setDeleteTarget(null)} className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer">Cancel</button>
+                            <button onClick={handleConfirmDelete} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-100 cursor-pointer active:scale-95">Yes, Delete</button>
+                        </div>
                     </div>
                 </div>
             )}

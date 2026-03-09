@@ -2,8 +2,9 @@ import React from 'react';
 import { X, FileText, Calendar, User, CheckCircle, Clock, Download, FileDown, MessageSquare, ClipboardCheck, Zap, Printer } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
 import PrintHeader from './PrintHeader';
+import PCPReportDocument from './PCPReportDocument';
 
-const PCPReportViewModal = ({ report, onClose, onDownload }) => {
+const PCPReportViewModal = ({ report, onClose }) => {
     if (!report) return null;
 
     return (
@@ -38,103 +39,15 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto bg-gray-50/30">
-                    <div className="p-8 space-y-8">
-                        <PrintHeader />
-
-                        {/* Summary Info Header (Document Style) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 print:grid print:grid-cols-3 gap-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:shadow-none print:border print:rounded-none print:p-4">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Date of Service</span>
-                                <span className="text-sm font-bold text-gray-900">{report.date}</span>
-                            </div>
-                            <div className="flex flex-col border-l border-gray-100 md:pl-6 print:pl-4">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Staff Member</span>
-                                <span className="text-sm font-bold text-gray-900 italic">{report.staff}</span>
-                            </div>
-                            <div className="flex flex-col border-l border-gray-100 md:pl-6 print:pl-4">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Documentation Created</span>
-                                <span className="text-sm font-bold text-gray-900">{report.createdDate}</span>
-                            </div>
-                        </div>
-
-                        {/* P.I.E Format Sections */}
-                        <div className="space-y-6">
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
-                                <div className="absolute top-0 right-0 p-8 text-indigo-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
-                                    <Zap size={120} />
-                                </div>
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">P</div>
-                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Purpose of Service</h4>
-                                    </div>
-                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
-                                        {report.purpose || 'No purpose notes provided.'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
-                                <div className="absolute top-0 right-0 p-8 text-violet-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
-                                    <ClipboardCheck size={120} />
-                                </div>
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">I</div>
-                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Interventions Delivered</h4>
-                                    </div>
-                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
-                                        {report.intervention || 'No intervention notes provided.'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:border print:rounded-none print:shadow-none print:p-6">
-                                <div className="absolute top-0 right-0 p-8 text-emerald-50/50 -rotate-12 group-hover:rotate-0 transition-all duration-700 no-print">
-                                    <CheckCircle size={120} />
-                                </div>
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-6 print:mb-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary text-black flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20 print:shadow-none print:rounded-none">E</div>
-                                        <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5 print:border-none">Effectiveness of Interventions</h4>
-                                    </div>
-                                    <p className="text-gray-700 leading-relaxed font-medium bg-primary/5 p-6 rounded-2xl border border-primary/10 print:p-0 print:border-none print:bg-transparent">
-                                        {report.effectiveness || 'No effectiveness notes provided.'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Additional Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4">
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:border print:rounded-none print:shadow-none print:p-4">
-                                <div className="flex items-center gap-2.5 mb-4 text-gray-400 print:mb-2 print:text-gray-900">
-                                    <MessageSquare size={18} className="no-print" />
-                                    <h4 className="text-sm font-black uppercase tracking-widest">Staff Notes</h4>
-                                </div>
-                                <p className="text-sm text-gray-600 leading-relaxed print:text-gray-900 font-medium">
-                                    {report.staffNotes || 'No additional staff notes recorded for this session.'}
-                                </p>
-                            </div>
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center print:border print:rounded-none print:shadow-none print:p-4">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 print:mb-2">Digital Signature</p>
-                                <div className="px-6 py-3 bg-gray-50 rounded-2xl border border-dashed border-gray-200 print:border-none print:bg-transparent print:p-0">
-                                    <p className="text-3xl font-dance text-primary italic font-medium print:text-gray-900 print:text-3xl">
-                                        {report.staffSignature || report.staff}
-                                    </p>
-                                </div>
-                                <p className="text-[10px] text-gray-400 mt-2 font-medium italic">Verified Digitally on {report.createdDate || report.date}</p>
-                            </div>
-                        </div>
-                    </div>
+                <div id="pcp-report-content" className="flex-1 overflow-y-auto bg-gray-50/30">
+                    <PCPReportDocument report={report} />
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between print:mt-auto">
+                <div className="px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-between print:mt-auto no-print">
                     <div className="flex items-center gap-2 text-gray-400 text-sm font-medium italic">
                         <FileText size={16} />
-                        Service Documentation Report - {report.id}
+                        Service Documentation Report - {report.id || 'Draft'}
                     </div>
                     <div className="flex items-center gap-3">
                         <button
@@ -145,17 +58,10 @@ const PCPReportViewModal = ({ report, onClose, onDownload }) => {
                         </button>
                         <button
                             onClick={() => window.print()}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer no-print focus:ring-2 focus:ring-gray-100"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
                         >
                             <Printer size={18} />
                             Print Report
-                        </button>
-                        <button
-                            onClick={() => onDownload(report)}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
-                        >
-                            <FileDown size={18} />
-                            Download PDF
                         </button>
                     </div>
                 </div>

@@ -17,7 +17,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
         <>
             {/* Desktop */}
             <tr className="hidden md:table-row hover:bg-gray-50/50 transition-colors group cursor-pointer">
-                <td className="px-6 py-4 text-sm font-medium text-gray-500">{student.studentId}</td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-500">{student.studentId || student.id}</td>
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-110">
@@ -58,7 +58,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         </div>
                         <div>
                             <h4 className="font-bold text-gray-900">{student.name}</h4>
-                            <p className="text-xs text-gray-500">ID: {student.studentId}</p>
+                            <p className="text-xs text-gray-500">ID: {student.studentId || student.id}</p>
                         </div>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyles(student.status)}`}>

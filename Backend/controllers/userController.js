@@ -13,6 +13,19 @@ const getStaff = async (req, res) => {
     }
 };
 
+// @desc    Get current user profile
+// @route   GET /api/users/me
+// @access  Private
+const getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
 // @desc    Update current user profile
 // @route   PUT /api/users/profile
 // @access  Private
@@ -28,6 +41,10 @@ const updateProfile = async (req, res) => {
                 user.password = req.body.password;
             }
 
+            if (req.file) {
+                user.avatar = `/uploads/avatars/${req.file.filename}`;
+            }
+
             const updatedUser = await user.save();
 
             res.status(200).json({
@@ -36,7 +53,8 @@ const updateProfile = async (req, res) => {
                     _id: updatedUser._id,
                     name: updatedUser.name,
                     email: updatedUser.email,
-                    role: updatedUser.role
+                    role: updatedUser.role,
+                    avatar: updatedUser.avatar
                 }
             });
         } else {
@@ -50,5 +68,6 @@ const updateProfile = async (req, res) => {
 
 module.exports = {
     getStaff,
+    getMe,
     updateProfile
 };

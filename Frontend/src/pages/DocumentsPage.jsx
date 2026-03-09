@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer, Loader2, Trash2 } from 'lucide-react';
+import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer, Loader2, Trash2, ClipboardList } from 'lucide-react';
 import DocumentsTable from '../components/DocumentsTable';
 import UploadDocumentModal from '../components/UploadDocumentModal';
 import DocumentPreviewModal from '../components/DocumentPreviewModal';
@@ -8,7 +8,8 @@ import PCPReportForm from '../components/PCPReportForm';
 import PCPReportsTable from '../components/PCPReportsTable';
 import PCPReportViewModal from '../components/PCPReportViewModal';
 import PrintHeader from '../components/PrintHeader';
-import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport } from '../api/documentApi';
+import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport, uploadDocument } from '../api/documentApi';
+import { getAllStudents } from '../api/studentApi';
 
 const DocumentsPage = ({ role }) => {
     const userRole = role;
@@ -21,6 +22,7 @@ const DocumentsPage = ({ role }) => {
     const [editingPCP, setEditingPCP] = useState(null);
     const [activeTab, setActiveTab] = useState('pcp');
     const [isLoading, setIsLoading] = useState(true);
+    const [students, setStudents] = useState([]);
 
     const [previewDoc, setPreviewDoc] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
@@ -28,20 +30,21 @@ const DocumentsPage = ({ role }) => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const [docsData, pcpData] = await Promise.all([
+            const [docsData, pcpData, studentsData] = await Promise.all([
                 getAllDocuments(),
-                getAllPcpReports()
+                getAllPcpReports(),
+                getAllStudents()
             ]);
 
             // Format data for standard table
             const formattedDocs = docsData.map(d => ({
                 id: d._id,
-                studentMongoId: d.studentMongoId,
-                studentName: d.studentName,
-                docName: d.name,
-                url: d.url,
-                date: d.uploadDate,
-                status: 'Completed', // Standard status
+                studentMongoId: d.studentId?._id || d.studentId,
+                studentName: d.studentId?.name || 'Unknown Student',
+                docName: d.documentType,
+                url: d.fileUrl,
+                date: new Date(d.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                status: d.status,
                 size: d.size || 'N/A'
             }));
 
@@ -49,15 +52,18 @@ const DocumentsPage = ({ role }) => {
             const formattedPCP = pcpData.map(r => ({
                 ...r,
                 id: r._id,
-                studentName: r.studentName,
+                studentMongoId: r.studentId?._id || r.studentId,
+                studentName: r.studentId?.name || 'Unknown Student',
                 type: 'PCP / IGP Report',
                 date: new Date(r.dateOfService).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                 status: r.status,
-                staff: r.staffSignature
+                staff: r.staffSignature,
+                createdDate: new Date(r.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
             }));
 
             setDocuments(formattedDocs);
             setPcpReports(formattedPCP);
+            setStudents(studentsData);
         } catch (err) {
             console.error('Error fetching document data:', err);
         } finally {
@@ -69,10 +75,18 @@ const DocumentsPage = ({ role }) => {
         fetchData();
     }, []);
 
-    const handleUpload = () => {
-        fetchData();
-        setIsUploadOpen(false);
-        setEditingDoc(null);
+
+
+    const handleUpload = async (studentId, formData) => {
+        try {
+            await uploadDocument(studentId, formData);
+            fetchData();
+            setIsUploadOpen(false);
+            setEditingDoc(null);
+        } catch (err) {
+            console.error('Error uploading document:', err);
+            alert('Failed to upload document.');
+        }
     };
 
     const handleSavePCP = async (reportData, studentMongoId) => {
@@ -110,7 +124,7 @@ const DocumentsPage = ({ role }) => {
         if (doc.url) {
             window.open(doc.url, '_blank');
         } else {
-            alert('No URL available for this document.');
+            alert('This report can be viewed and printed via the "View" button.');
         }
     };
 
@@ -160,24 +174,26 @@ const DocumentsPage = ({ role }) => {
 
                 {/* Tab Switcher */}
                 {userRole === 'admin' && (
-                    <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit no-print">
+                    <div className="flex items-center p-1.5 bg-gray-100/80 backdrop-blur-md rounded-2xl w-fit no-print border border-gray-200/50 shadow-inner">
                         <button
                             onClick={() => setActiveTab('pcp')}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer ${activeTab === 'pcp'
-                                ? 'bg-primary text-black shadow-primary/20'
-                                : 'bg-white text-gray-600 hover:text-primary hover:bg-gray-50 border border-gray-200'
+                            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'pcp'
+                                ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
+                                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
                                 }`}
                         >
-                            PCP / IGP Reports
+                            <ClipboardList size={18} className={activeTab === 'pcp' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
+                            <span className="relative z-10 text-sm">PCP / IGP Reports</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('standard')}
-                            className={`px-6 py-3 text-sm font-bold transition-all relative ${activeTab === 'standard'
-                                ? 'text-primary'
-                                : 'text-gray-500 hover:text-gray-700'
+                            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'standard'
+                                ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
+                                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
                                 }`}
                         >
-                            Standard Documents
+                            <FileText size={18} className={activeTab === 'standard' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
+                            <span className="relative z-10 text-sm">Standard Documents</span>
                         </button>
                     </div>
                 )}
@@ -226,6 +242,7 @@ const DocumentsPage = ({ role }) => {
                 onClose={() => { setIsUploadOpen(false); setEditingDoc(null); }}
                 onUpload={handleUpload}
                 editDoc={editingDoc}
+                students={students}
             />
 
             <PCPReportForm
@@ -272,6 +289,8 @@ const DocumentsPage = ({ role }) => {
                     </div>
                 </div>
             )}
+
+
         </div>
     );
 };

@@ -34,7 +34,8 @@ const createStaff = async (req, res) => {
             name,
             email,
             password,
-            role: role || 'staff'
+            role: role || 'staff',
+            status: req.body.status || 'Active'
         });
 
         res.status(201).json({
@@ -43,7 +44,8 @@ const createStaff = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                status: user.status
             }
         });
     } catch (error) {
@@ -63,14 +65,20 @@ const updateStaff = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Staff member not found' });
         }
 
-        user = await User.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        }).select('-password');
+        // Update fields if they exist in request body
+        if (req.body.name) user.name = req.body.name;
+        if (req.body.email) user.email = req.body.email;
+        if (req.body.role) user.role = req.body.role;
+        if (req.body.status) user.status = req.body.status;
+        if (req.body.password) user.password = req.body.password;
+
+        await user.save();
+
+        const updatedUser = await User.findById(user._id).select('-password');
 
         res.status(200).json({
             success: true,
-            data: user
+            data: updatedUser
         });
     } catch (error) {
         console.error(error);

@@ -9,6 +9,8 @@ import PrintHeader from '../components/PrintHeader';
 import { getAllStaff } from '../api/staffApi';
 import { uploadDocument } from '../api/documentApi';
 
+import { getSettings } from '../api/settingApi';
+
 /* ────────────────────────────────
    EDIT STUDENT MODAL
    ──────────────────────────────── */
@@ -19,20 +21,27 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
     });
     const [staffOptions, setStaffOptions] = useState([]);
     const [isLoadingStaff, setIsLoadingStaff] = useState(false);
+    const [threshold, setThreshold] = useState(250);
 
     useEffect(() => {
-        const fetchStaff = async () => {
+        const fetchInitialData = async () => {
             try {
                 setIsLoadingStaff(true);
-                const res = await getAllStaff();
-                setStaffOptions(res.data || []);
+                const [staffRes, settingsRes] = await Promise.all([
+                    getAllStaff(),
+                    getSettings()
+                ]);
+                setStaffOptions(staffRes.data || []);
+                if (settingsRes.success) {
+                    setThreshold(settingsRes.data.completionPointsThreshold);
+                }
             } catch (err) {
-                console.error('Failed to fetch staff', err);
+                console.error('Failed to fetch initial data', err);
             } finally {
                 setIsLoadingStaff(false);
             }
         };
-        fetchStaff();
+        fetchInitialData();
     }, []);
 
     const handleChange = (e) => {
@@ -68,6 +77,23 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                         </div>
                     ))}
                     <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Total Points</label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                name="points"
+                                value={form.points || 0}
+                                onChange={handleChange}
+                                min={0}
+                                max={threshold}
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-primary text-xs">
+                                / {threshold}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Assigned Staff</label>
                         <select
                             name="assignedStaff"
@@ -92,6 +118,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                         >
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
+                            <option value="Secondary Completion">Secondary Completion</option>
                             <option value="Dropped">Dropped</option>
                         </select>
                     </div>
@@ -129,11 +156,17 @@ const StudentProfilePage = () => {
 
     const fetchStudent = async () => {
         try {
-            const res = await api.get(`/api/students/${id}`);
-            const data = res.data;
+            const [studentRes, settingsRes] = await Promise.all([
+                api.get(`/api/students/${id}`),
+                getSettings()
+            ]);
+
+            const data = studentRes.data;
+            const threshold = settingsRes.success ? settingsRes.data.completionPointsThreshold : 250;
+
             setStudentData({
                 ...data,
-                totalPoints: data.totalPoints || 250,
+                totalPoints: threshold,
                 enrolledDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
             });
         } catch (error) {

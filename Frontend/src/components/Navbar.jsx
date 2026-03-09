@@ -5,8 +5,8 @@ import { Search, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
 const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     const location = useLocation();
 
-    const userName = localStorage.getItem('userName') || (role === 'admin' ? 'Admin' : 'Staff');
-    const userRole = localStorage.getItem('userRole') || role;
+    const userName = sessionStorage.getItem('userName') || (role === 'admin' ? 'Admin' : 'Staff');
+    const userRole = sessionStorage.getItem('userRole') || role;
 
     const getPageTitle = () => {
         const path = location.pathname;
@@ -57,7 +57,15 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                     </div>
                     <div className="relative group">
                         <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">
-                            <User size={24} />
+                            {sessionStorage.getItem('userAvatar') ? (
+                                <img
+                                    src={`http://localhost:5000${sessionStorage.getItem('userAvatar')}`}
+                                    alt="Avatar"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <User size={24} />
+                            )}
                         </button>
 
                         {/* Mock Dropdown */}

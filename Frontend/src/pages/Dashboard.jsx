@@ -14,7 +14,7 @@ import { getDashboardStats } from '../api/dashboardApi';
 const Dashboard = ({ role }) => {
     const [statsData, setStatsData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [userName, setUserName] = useState(localStorage.getItem('userName') || 'User');
+    const [userName, setUserName] = useState(sessionStorage.getItem('userName') || 'User');
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -139,8 +139,8 @@ const Dashboard = ({ role }) => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${student.status === 'Completed'
-                                                        ? 'bg-emerald-100 text-emerald-700'
-                                                        : 'bg-primary/20 text-black'
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : 'bg-primary/20 text-black'
                                                     }`}>
                                                     {student.status}
                                                 </span>
@@ -162,25 +162,41 @@ const Dashboard = ({ role }) => {
                     </div>
                 </div>
 
-                {/* Action Items List Simulation */}
+                {/* Recent Activities Area */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm min-h-[400px]">
                     <div className="p-6 border-b border-gray-100">
-                        <h3 className="font-bold text-gray-900 text-lg">Action Required</h3>
+                        <h3 className="font-bold text-gray-900 text-lg">Recent Activities</h3>
                     </div>
                     <div className="p-6 space-y-6">
-                        {[1, 2, 3].map((item) => (
-                            <div key={item} className="flex gap-4 group cursor-pointer">
-                                <div className="mt-1">
-                                    <CheckCircle2 className="text-gray-200 group-hover:text-emerald-500 transition-colors" size={20} />
+                        {statsData?.recentActivities?.length > 0 ? (
+                            statsData.recentActivities.map((activity) => (
+                                <div key={activity.id} className="flex gap-4 group">
+                                    <div className="mt-1">
+                                        <CheckCircle2 className="text-emerald-500 transition-colors" size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900">
+                                            {activity.name} attended {activity.workshop}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                {activity.points} pts
+                                            </span>
+                                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                <Calendar size={12} />
+                                                {activity.date}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-900">Verify new workshop attendance</p>
-                                    <p className="text-xs text-gray-500 mt-1">Due in 2 hours • High Priority</p>
-                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center text-gray-400 italic py-8">
+                                No recent activities found.
                             </div>
-                        ))}
+                        )}
                         <button className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 rounded-xl text-sm font-bold text-gray-400 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                            + Add New Task
+                            + Add New Activity
                         </button>
                     </div>
                 </div>

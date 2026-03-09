@@ -10,10 +10,15 @@ const workshopSchema = new mongoose.Schema(
         description: {
             type: String,
         },
-        points: {
+        pointsReward: {
             type: Number,
             default: 1,
         },
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        }
     },
     {
         timestamps: true,

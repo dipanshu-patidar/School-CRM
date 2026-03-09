@@ -62,10 +62,13 @@ const LoginPage = ({ onLogin }) => {
             const response = await api.post('/api/auth/login', { email, password });
             const { token, user } = response.data;
 
-            // Save token to localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userName', user.name);
+            // Save token and user info to sessionStorage
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('userEmail', user.email);
+            sessionStorage.setItem('userName', user.name);
+            sessionStorage.setItem('userRole', user.role);
+            sessionStorage.setItem('userAvatar', user.avatar || '');
+            sessionStorage.setItem('user', JSON.stringify(user));
 
             // Pass the verified role to handleLogin in App.jsx
             onLogin(user.role);

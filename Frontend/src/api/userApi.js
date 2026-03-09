@@ -5,6 +5,11 @@ export const updateProfile = async (userData) => {
     return response.data;
 };
 
+export const getMe = async () => {
+    const response = await api.get('/api/users/me');
+    return response.data;
+};
+
 export const getStaffList = async () => {
     const response = await api.get('/api/staff');
     return response.data;

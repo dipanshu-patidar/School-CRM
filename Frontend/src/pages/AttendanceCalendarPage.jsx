@@ -61,7 +61,7 @@ const AttendanceCalendarPage = () => {
             if (!record || !record.studentMongoId) return;
 
             if (window.confirm(`Are you sure you want to delete attendance for ${record.studentName}?`)) {
-                await deleteStudentAttendance(record.studentMongoId, id);
+                await deleteStudentAttendance(id);
                 fetchAttendance();
                 setSelectedRecord(null);
             }

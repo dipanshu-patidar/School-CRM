@@ -7,7 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 const AttendanceCalendar = ({ records, onDateClick, onEventClick }) => {
   // Convert records to FullCalendar events
   const events = records.map(record => ({
-    id: record.id.toString(),
+    id: (record._id || record.id || '').toString(),
     title: `${record.studentName} — ${record.workshop}`,
     date: record.date,
     extendedProps: {

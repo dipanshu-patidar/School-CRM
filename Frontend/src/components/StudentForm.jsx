@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { getSettings } from '../api/settingApi';
 
 const StudentForm = ({ form, onChange }) => {
     const [staffOptions, setStaffOptions] = useState([]);
+    const [threshold, setThreshold] = useState(250);
 
     useEffect(() => {
-        const fetchStaff = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/api/users/staff');
-                setStaffOptions(res.data.data);
+                const [staffRes, settingsRes] = await Promise.all([
+                    api.get('/api/users/staff'),
+                    getSettings()
+                ]);
+                setStaffOptions(staffRes.data.data);
+                if (settingsRes.success) {
+                    setThreshold(settingsRes.data.completionPointsThreshold);
+                }
             } catch (err) {
-                console.error('Failed to fetch staff', err);
+                console.error('Failed to fetch initial data', err);
             }
         };
-        fetchStaff();
+        fetchData();
     }, []);
 
     return (
@@ -22,16 +30,16 @@ const StudentForm = ({ form, onChange }) => {
             <div className="grid grid-cols-1 gap-4">
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                        Student ID <span className="text-red-400">*</span>
+                        Student ID
                     </label>
                     <input
                         type="text"
                         name="studentId"
                         value={form.studentId || ''}
                         onChange={onChange}
-                        placeholder="e.g. STU001"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                        required
+                        placeholder="Auto-generated (e.g. STU-001)"
+                        className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 text-sm placeholder-gray-400 focus:outline-none cursor-not-allowed"
+                        disabled
                     />
                 </div>
             </div>
@@ -113,12 +121,12 @@ const StudentForm = ({ form, onChange }) => {
                         value={form.points || 0}
                         onChange={onChange}
                         min={0}
-                        max={250}
+                        max={threshold}
                         placeholder="0"
                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                     <p className="text-xs text-gray-400 mt-1.5">
-                        Students need <span className="font-bold text-primary">250 points</span> for program completion.
+                        Students need <span className="font-bold text-primary">{threshold} points</span> for program completion.
                     </p>
                 </div>
                 <div>
@@ -136,7 +144,7 @@ const StudentForm = ({ form, onChange }) => {
                         <option value="Dropped">Dropped</option>
                     </select>
                     <p className="text-xs text-gray-400 mt-1.5">
-                        Auto-set to <span className="font-bold text-primary">Completed</span> when points ≥ 250.
+                        Auto-set to <span className="font-bold text-primary">Completed</span> when points ≥ {threshold}.
                     </p>
                 </div>
             </div>

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getWorkshops,
+    getWorkshopById,
     createWorkshop,
     updateWorkshop,
     deleteWorkshop
@@ -13,6 +14,7 @@ router.route('/')
     .post(protect, authorize('admin'), createWorkshop);
 
 router.route('/:id')
+    .get(protect, getWorkshopById)
     .put(protect, authorize('admin'), updateWorkshop)
     .delete(protect, authorize('admin'), deleteWorkshop);
 

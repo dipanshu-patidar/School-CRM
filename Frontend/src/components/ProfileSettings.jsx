@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { updateProfile } from '../api/userApi';
+import { updateProfile, getMe } from '../api/userApi';
 
 const ProfileSettings = () => {
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || {});
+    const [user, setUser] = useState({});
     const [personalInfo, setPersonalInfo] = useState({
-        name: user.name || '',
-        email: user.email || ''
+        name: '',
+        email: ''
     });
 
     const [passwords, setPasswords] = useState({
@@ -18,7 +18,29 @@ const ProfileSettings = () => {
     const [status, setStatus] = useState({ type: '', message: '' });
 
     const [avatarPreview, setAvatarPreview] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=256&h=256&auto=format&fit=crop');
+    const [avatarFile, setAvatarFile] = useState(null);
     const fileInputRef = useRef(null);
+
+    const fetchUserData = async () => {
+        try {
+            const response = await getMe();
+            const userData = response.data;
+            setUser(userData);
+            setPersonalInfo({
+                name: userData.name || '',
+                email: userData.email || ''
+            });
+            if (userData.avatar) {
+                setAvatarPreview(`http://localhost:5000${userData.avatar}`);
+            }
+        } catch (err) {
+            console.error('Error fetching user data:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
@@ -29,29 +51,43 @@ const ProfileSettings = () => {
 
         try {
             setIsLoading(true);
-            const updateData = {
-                name: personalInfo.name,
-                email: personalInfo.email,
-            };
+            const formData = new FormData();
+            formData.append('name', personalInfo.name);
+            formData.append('email', personalInfo.email);
+
             if (passwords.newPassword) {
-                updateData.password = passwords.newPassword;
+                formData.append('password', passwords.newPassword);
             }
 
-            const response = await updateProfile(updateData);
+            if (avatarFile) {
+                formData.append('avatar', avatarFile);
+            }
 
-            // Update local storage
+            const response = await updateProfile(formData);
+
+            // Update session storage
             const updatedUser = response.data;
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+            const currentSessionUser = JSON.parse(sessionStorage.getItem('user')) || {};
+            sessionStorage.setItem('user', JSON.stringify({ ...currentSessionUser, ...updatedUser }));
+            sessionStorage.setItem('userName', updatedUser.name);
+            if (updatedUser.avatar) {
+                sessionStorage.setItem('userAvatar', updatedUser.avatar);
+            }
             setUser(updatedUser);
 
             setStatus({ type: 'success', message: 'Profile updated successfully!' });
             setPasswords({ newPassword: '', confirmPassword: '' });
+            setAvatarFile(null);
+
+            if (updatedUser.avatar) {
+                setAvatarPreview(`http://localhost:5000${updatedUser.avatar}`);
+            }
         } catch (err) {
             console.error('Error updating profile:', err);
             setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update profile.' });
         } finally {
             setIsLoading(false);
-            setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+            setTimeout(() => setStatus({ type: '', message: '' }), 5000);
         }
     };
 
@@ -62,6 +98,7 @@ const ProfileSettings = () => {
                 alert("File size should not be more than 2MB.");
                 return;
             }
+            setAvatarFile(file);
             setAvatarPreview(URL.createObjectURL(file));
         }
     };

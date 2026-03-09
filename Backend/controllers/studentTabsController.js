@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const Document = require('../models/Document');
 const { cloudinary } = require('../config/cloudinary');
 const https = require('https');
 const http = require('http');
@@ -133,6 +134,15 @@ const uploadDocument = async (req, res) => {
             size: sizeStr,
             uploadDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
         };
+
+        // Also create in global Document collection for central admin access
+        await Document.create({
+            studentId: student._id,
+            documentType: req.file.originalname, // Default to filename for now
+            fileUrl: req.file.path,
+            status: 'approved', // Profile uploads are usually pre-approved or direct
+            uploadedBy: req.user._id
+        });
 
         student.documents.unshift(newDoc);
         await student.save();

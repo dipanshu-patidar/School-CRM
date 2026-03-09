@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, UserPlus, Save } from 'lucide-react';
 import StudentForm from './StudentForm';
+import { getSettings } from '../api/settingApi';
 
 const EMPTY_FORM = {
     studentId: '',
@@ -15,13 +16,26 @@ const EMPTY_FORM = {
 const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
     const isEditing = !!editStudent;
     const [form, setForm] = useState({ ...EMPTY_FORM });
+    const [threshold, setThreshold] = useState(250);
 
     // Sync form whenever modal opens or editStudent changes
     useEffect(() => {
         if (isOpen) {
             setForm(editStudent ? { ...editStudent } : { ...EMPTY_FORM });
+            fetchThreshold();
         }
     }, [isOpen, editStudent]);
+
+    const fetchThreshold = async () => {
+        try {
+            const response = await getSettings();
+            if (response.success) {
+                setThreshold(response.data.completionPointsThreshold);
+            }
+        } catch (error) {
+            console.error('Error fetching threshold:', error);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -33,11 +47,11 @@ const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.name || !form.email || !form.studentId) return;
+        if (!form.name || !form.email) return;
         onSave({
             ...form,
             points: parseInt(form.points) || 0,
-            totalPoints: 250
+            totalPoints: threshold
         });
         onClose();
     };

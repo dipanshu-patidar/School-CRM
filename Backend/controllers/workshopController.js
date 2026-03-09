@@ -1,4 +1,5 @@
 const Workshop = require('../models/Workshop');
+const Attendance = require('../models/Attendance');
 
 // @desc    Get all workshops
 // @route   GET /api/workshops
@@ -6,7 +7,44 @@ const Workshop = require('../models/Workshop');
 const getWorkshops = async (req, res) => {
     try {
         const workshops = await Workshop.find().sort({ createdAt: -1 });
-        res.status(200).json(workshops);
+
+        // Map to return expected format: id, name, pointsReward, createdAt
+        const formattedWorkshops = workshops.map(w => ({
+            id: w._id,
+            _id: w._id, // Legacy support just in case frontend needs it
+            name: w.name,
+            description: w.description,
+            pointsReward: w.pointsReward,
+            createdAt: w.createdAt
+        }));
+
+        res.status(200).json(formattedWorkshops);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Get single workshop
+// @route   GET /api/workshops/:id
+// @access  Private
+const getWorkshopById = async (req, res) => {
+    try {
+        const workshop = await Workshop.findById(req.params.id);
+
+        if (!workshop) {
+            return res.status(404).json({ success: false, message: 'Workshop not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            workshop: {
+                id: workshop._id,
+                name: workshop.name,
+                description: workshop.description,
+                pointsReward: workshop.pointsReward
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -18,15 +56,28 @@ const getWorkshops = async (req, res) => {
 // @access  Private/Admin
 const createWorkshop = async (req, res) => {
     try {
-        const { name, description, points } = req.body;
+        const { name, description } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ success: false, message: 'Please add a workshop name' });
+        }
 
         const workshop = await Workshop.create({
             name,
             description,
-            points: points || 1
+            pointsReward: 1, // Rule: automatically set to 1
+            createdBy: req.user._id // Rule: Store admin user id
         });
 
-        res.status(201).json({ success: true, data: workshop });
+        res.status(201).json({
+            success: true,
+            workshop: {
+                id: workshop._id,
+                name: workshop.name,
+                description: workshop.description,
+                pointsReward: workshop.pointsReward
+            }
+        });
     } catch (error) {
         console.error(error);
         if (error.code === 11000) {
@@ -41,17 +92,35 @@ const createWorkshop = async (req, res) => {
 // @access  Private/Admin
 const updateWorkshop = async (req, res) => {
     try {
+        const { name, description } = req.body;
+
         let workshop = await Workshop.findById(req.params.id);
         if (!workshop) return res.status(404).json({ success: false, message: 'Workshop not found' });
 
-        workshop = await Workshop.findByIdAndUpdate(req.params.id, req.body, {
+        // Build object with only allowed fields (no pointsReward)
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+
+        workshop = await Workshop.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });
 
-        res.status(200).json({ success: true, data: workshop });
+        res.status(200).json({
+            success: true,
+            workshop: {
+                id: workshop._id,
+                name: workshop.name,
+                description: workshop.description,
+                pointsReward: workshop.pointsReward
+            }
+        });
     } catch (error) {
         console.error(error);
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: 'Workshop name already exists' });
+        }
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
@@ -64,6 +133,18 @@ const deleteWorkshop = async (req, res) => {
         const workshop = await Workshop.findById(req.params.id);
         if (!workshop) return res.status(404).json({ success: false, message: 'Workshop not found' });
 
+        // Rule: prevent deletion if attendance exists
+        // Frontend sends workshopName to attendance so we search by workshop name or ID.
+        // In attendanceController we used workshopName in workshopId field. Let's check against name.
+        const attendanceExists = await Attendance.findOne({ workshopId: workshop.name });
+
+        if (attendanceExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'Workshop cannot be deleted because attendance records exist.'
+            });
+        }
+
         await workshop.deleteOne();
 
         res.status(200).json({ success: true, data: {} });
@@ -75,6 +156,7 @@ const deleteWorkshop = async (req, res) => {
 
 module.exports = {
     getWorkshops,
+    getWorkshopById,
     createWorkshop,
     updateWorkshop,
     deleteWorkshop

@@ -7,7 +7,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        role: 'Staff',
+        role: 'staff',
         status: 'Active',
         password: ''
     });
@@ -19,7 +19,7 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                     name: editStaff.name || '',
                     email: editStaff.email || '',
                     role: editStaff.role || 'staff',
-                    status: 'Active',
+                    status: editStaff.status || 'Active',
                     password: ''
                 });
             } else {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Loader2, UserX } from 'lucide-react';
 import StaffModal from './StaffModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { getAllStaff, createStaff, updateStaff, deleteStaff } from '../api/staffApi';
 
 const StaffManagement = () => {
@@ -9,6 +10,11 @@ const StaffManagement = () => {
     const [editingStaff, setEditingStaff] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Delete Modal States
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [staffToDelete, setStaffToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchStaff = async () => {
         try {
@@ -43,14 +49,23 @@ const StaffManagement = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this staff member?')) {
-            try {
-                await deleteStaff(id);
-                fetchStaff();
-            } catch (err) {
-                alert('Error deleting staff');
-            }
+    const handleDelete = (staff) => {
+        setStaffToDelete(staff);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!staffToDelete) return;
+        try {
+            setIsDeleting(true);
+            await deleteStaff(staffToDelete._id);
+            await fetchStaff();
+            setIsDeleteModalOpen(false);
+            setStaffToDelete(null);
+        } catch (err) {
+            alert('Error deleting staff');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -115,7 +130,11 @@ const StaffManagement = () => {
                                         <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 capitalize">{staff.role}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Active</span>
+                                        {staff.status === 'Active' ? (
+                                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Active</span>
+                                        ) : (
+                                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">Inactive</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
@@ -128,7 +147,7 @@ const StaffManagement = () => {
                                             </button>
                                             <button
                                                 title="Delete Staff"
-                                                onClick={() => handleDelete(staff._id)}
+                                                onClick={() => handleDelete(staff)}
                                                 className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer inline-flex"
                                             >
                                                 <Trash2 size={16} />
@@ -151,6 +170,15 @@ const StaffManagement = () => {
                 onClose={() => { setIsModalOpen(false); setEditingStaff(null); }}
                 onSave={handleSaveStaff}
                 editStaff={editingStaff}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => { setIsDeleteModalOpen(false); setStaffToDelete(null); }}
+                onConfirm={handleConfirmDelete}
+                isLoading={isDeleting}
+                title="Delete Staff Member?"
+                message={`Are you sure you want to delete ${staffToDelete?.name || 'this staff member'}? This action cannot be undone and they will lose all access.`}
             />
         </div>
     );

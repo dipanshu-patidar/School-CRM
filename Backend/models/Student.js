@@ -34,7 +34,7 @@ const studentSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['Active', 'Completed', 'Dropped'],
+            enum: ['Active', 'Completed', 'Secondary Completion', 'Dropped'],
             default: 'Active',
         },
         assignedStaff: {
@@ -90,15 +90,15 @@ studentSchema.pre('validate', async function () {
         // Find highest existing Student ID
         const lastStudent = await this.constructor.findOne({}, {}, { sort: { 'createdAt': -1 } });
 
-        let newIdValue = 101; // Starting ID
+        let newIdValue = 1; // Starting ID
         if (lastStudent && lastStudent.studentId) {
             // Extract the numerical part if it exists
-            const lastIdInt = parseInt(lastStudent.studentId, 10);
-            if (!isNaN(lastIdInt)) {
-                newIdValue = lastIdInt + 1;
+            const match = lastStudent.studentId.match(/\d+$/);
+            if (match) {
+                newIdValue = parseInt(match[0], 10) + 1;
             }
         }
-        this.studentId = newIdValue.toString();
+        this.studentId = `STU-${newIdValue.toString().padStart(3, '0')}`;
     }
 });
 
@@ -107,7 +107,7 @@ studentSchema.pre('save', function () {
     if (this.status !== 'Dropped') {
         if (this.points >= 250) {
             this.status = 'Completed';
-        } else {
+        } else if (this.status !== 'Secondary Completion') {
             this.status = 'Active';
         }
     }

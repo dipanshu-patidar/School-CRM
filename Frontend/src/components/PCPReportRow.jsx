@@ -1,8 +1,8 @@
 import React from 'react';
-import { Eye, Pencil, Download, Trash2, FileText, Calendar, User, Printer } from 'lucide-react';
+import { Eye, Pencil, Trash2, FileText, Calendar, User, Printer } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
 
-const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }) => {
+const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
     return (
         <>
             {/* Desktop Row */}
@@ -10,9 +10,9 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                            {report.studentName.charAt(0)}
+                            {(report?.studentName || 'U').charAt(0)}
                         </div>
-                        <span className="text-sm font-semibold text-gray-900">{report.studentName}</span>
+                        <span className="text-sm font-semibold text-gray-900">{report?.studentName || 'Unknown Student'}</span>
                     </div>
                 </td>
                 <td className="px-6 py-4">
@@ -49,13 +49,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                         >
                             <Pencil size={16} />
                         </button>
-                        <button
-                            title="Download PDF"
-                            onClick={() => onDownload(report)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
-                        >
-                            <Download size={16} />
-                        </button>
+
                         <button
                             title="Print Report"
                             onClick={() => window.print()}
@@ -121,12 +115,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDownload, onDelete, userRole }
                     >
                         <Pencil size={14} />
                     </button>
-                    <button
-                        onClick={() => onDownload(report)}
-                        className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all"
-                    >
-                        <Download size={14} />
-                    </button>
+
                     <button
                         onClick={() => window.print()}
                         className="p-2.5 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"

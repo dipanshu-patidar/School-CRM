@@ -22,6 +22,14 @@ const login = async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        // Check if account is active
+        if (user.status === 'Inactive') {
+            return res.status(403).json({
+                success: false,
+                message: 'Your account is inactive. Please contact your administrator.'
+            });
+        }
+
         // Check if password matches
         const isMatch = await user.matchPassword(password);
 

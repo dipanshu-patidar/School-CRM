@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const Document = require('../models/Document');
 
 // @desc    Get all students
 // @route   GET /api/students
@@ -90,6 +91,22 @@ const getStudentById = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized to access this student' });
         }
 
+        // Fetch documents from the global Document collection for this student
+        const globalDocs = await Document.find({ studentId: req.params.id });
+
+        // Format global documents to match the profile expectations
+        const formattedGlobalDocs = globalDocs.map(d => ({
+            _id: d._id,
+            name: d.documentType, // Use documentType as the name
+            url: d.fileUrl,
+            status: d.status,
+            uploadDate: new Date(d.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            size: d.size || 'N/A'
+        }));
+
+        // Merge with embedded documents
+        const allDocuments = [...formattedGlobalDocs, ...student.documents];
+
         res.status(200).json({
             id: student.studentId,
             _id: student._id,
@@ -105,7 +122,7 @@ const getStudentById = async (req, res) => {
             progress: `${student.points} / 250`,
             notes: student.notes,
             attendance: student.attendance,
-            documents: student.documents
+            documents: allDocuments
         });
     } catch (error) {
         console.error(error);

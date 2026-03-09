@@ -8,8 +8,8 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                     <FileText size={36} className="text-gray-300" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No housing documents uploaded yet</h3>
-                <p className="text-gray-500 max-w-xs mb-8">Start by adding a student's housing verification document.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No standard documents uploaded yet</h3>
+                <p className="text-gray-500 max-w-xs mb-8">Start by adding a student's program documentation or housing verification.</p>
                 <button
                     onClick={onUpload}
                     className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"

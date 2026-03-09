@@ -24,9 +24,9 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 // Main student routes
 router.get('/', protect, getStudents);
 router.post('/', protect, authorize('admin'), createStudent);
-router.get('/attendance', protect, getAllAttendance);
-router.get('/pcp-reports', protect, getAllPcpReports);
-router.get('/all-documents', protect, getAllDocuments);
+// router.get('/attendance', protect, getAllAttendance);
+// router.get('/pcp-reports', protect, getAllPcpReports);
+// router.get('/all-documents', protect, getAllDocuments);
 
 router.route('/:id')
     .get(protect, getStudentById)

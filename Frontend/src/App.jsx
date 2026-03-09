@@ -13,16 +13,20 @@ import Dashboard from './pages/Dashboard';
 import StaffPage from './pages/StaffPage';
 
 function App() {
-  const [role, setRole] = useState(localStorage.getItem('userRole'));
+  const [role, setRole] = useState(sessionStorage.getItem('userRole'));
 
   const handleLogin = (selectedRole) => {
     setRole(selectedRole);
-    localStorage.setItem('userRole', selectedRole);
+    sessionStorage.setItem('userRole', selectedRole);
   };
 
   const handleLogout = () => {
     setRole(null);
-    localStorage.removeItem('userRole');
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userEmail');
+    sessionStorage.removeItem('userName');
+    sessionStorage.removeItem('user');
   };
 
   return (

@@ -5,6 +5,24 @@ const staffOptions = ['Sarah Lee', 'Michael Brown', 'Tom Harris', 'Carol Kim', '
 const StudentForm = ({ form, onChange }) => {
     return (
         <div className="space-y-5">
+            {/* Row 0: Student ID */}
+            <div className="grid grid-cols-1 gap-4">
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Student ID <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        name="studentId"
+                        value={form.studentId || ''}
+                        onChange={onChange}
+                        placeholder="e.g. STU001"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        required
+                    />
+                </div>
+            </div>
+
             {/* Row 1: Name + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

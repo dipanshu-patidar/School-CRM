@@ -17,7 +17,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
         <>
             {/* Desktop */}
             <tr className="hidden md:table-row hover:bg-gray-50/50 transition-colors group cursor-pointer">
-                <td className="px-6 py-4 text-sm font-medium text-gray-500">{student.id}</td>
+                <td className="px-6 py-4 text-sm font-medium text-gray-500">{student.studentId}</td>
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-110">
@@ -36,7 +36,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                 </td>
                 <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
-                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
+                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student._id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                             <Eye size={17} />
                         </button>
                         <button title="Edit Student" onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer">
@@ -58,7 +58,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         </div>
                         <div>
                             <h4 className="font-bold text-gray-900">{student.name}</h4>
-                            <p className="text-xs text-gray-500">ID: {student.id}</p>
+                            <p className="text-xs text-gray-500">ID: {student.studentId}</p>
                         </div>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyles(student.status)}`}>
@@ -71,7 +71,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         <span className="text-sm font-bold text-gray-900">{student.points}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
+                        <button onClick={() => navigate(`/dashboard/students/${student._id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
                         <button onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={17} /></button>
                         <button onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={17} /></button>
                     </div>

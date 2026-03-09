@@ -3,6 +3,7 @@ import { X, UserPlus, Save } from 'lucide-react';
 import StudentForm from './StudentForm';
 
 const EMPTY_FORM = {
+    studentId: '',
     name: '',
     phone: '',
     email: '',
@@ -32,13 +33,11 @@ const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.name || !form.email) return;
+        if (!form.name || !form.email || !form.studentId) return;
         onSave({
             ...form,
             points: parseInt(form.points) || 0,
-            totalPoints: 250,
-            id: isEditing ? editStudent.id : Date.now(),
-            enrolledDate: isEditing ? editStudent.enrolledDate : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            totalPoints: 250
         });
         onClose();
     };

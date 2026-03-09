@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Users,
     GraduationCap,
@@ -6,15 +6,65 @@ import {
     TrendingUp,
     Calendar,
     MoreVertical,
-    CheckCircle2
+    CheckCircle2,
+    Loader2
 } from 'lucide-react';
+import { getDashboardStats } from '../api/dashboardApi';
 
 const Dashboard = ({ role }) => {
+    const [statsData, setStatsData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [userName, setUserName] = useState(localStorage.getItem('userName') || 'User');
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                setLoading(true);
+                const response = await getDashboardStats();
+                setStatsData(response.data);
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
     const stats = [
-        { label: 'Total Students', value: '1,284', change: '+12.5%', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
-        { label: 'Active Workshops', value: '42', change: '+3.2%', icon: GraduationCap, color: 'text-primary', bg: 'bg-primary/10' },
-        { label: 'Attendance Rate', value: '94.8%', change: '+1.4%', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
-        { label: 'Completion Rate', value: '89.2%', change: '+5.7%', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10' },
+        {
+            label: 'Total Students',
+            value: statsData?.totalStudents || '0',
+            change: '+0%',
+            icon: Users,
+            color: 'text-primary',
+            bg: 'bg-primary/10'
+        },
+        {
+            label: 'Active Workshops',
+            value: statsData?.totalWorkshops || '0',
+            change: '+0%',
+            icon: GraduationCap,
+            color: 'text-primary',
+            bg: 'bg-primary/10'
+        },
+        {
+            label: 'Attendance Rate',
+            value: `${statsData?.attendanceRate || 0}%`,
+            change: '+0%',
+            icon: Clock,
+            color: 'text-primary',
+            bg: 'bg-primary/10'
+        },
+        {
+            label: 'Completion Rate',
+            value: `${statsData?.completionRate || 0}%`,
+            change: '+0%',
+            icon: TrendingUp,
+            color: 'text-primary',
+            bg: 'bg-primary/10'
+        },
     ];
 
     return (
@@ -22,7 +72,7 @@ const Dashboard = ({ role }) => {
             {/* Header Secion */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Welcome Back, John</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Welcome Back, {userName}</h1>
                     <p className="text-gray-500 mt-1">Shining Light CRM — Dashboard Overview</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -60,22 +110,55 @@ const Dashboard = ({ role }) => {
 
             {/* Placeholder Content Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Recent Students Table Simulation */}
+                {/* Recent Students Table */}
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Recent Student Submissions</h3>
-                        <button className="text-primary text-sm font-bold hover:underline">View All</button>
+                        <button className="text-primary text-sm font-bold hover:underline cursor-pointer">View All</button>
                     </div>
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50/50">
-                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                            <Users className="text-gray-300" size={32} />
-                        </div>
-                        <p className="text-gray-900 font-semibold italic text-lg opacity-60">
-                            "Dashboard Content Here"
-                        </p>
-                        <p className="text-gray-400 text-sm mt-2 max-w-xs">
-                            This area will dynamically display student data and recent activities based on your role.
-                        </p>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-gray-50/50">
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Points</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {statsData?.recentStudents?.length > 0 ? (
+                                    statsData.recentStudents.map((student) => (
+                                        <tr key={student._id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                                                        {student.name.charAt(0)}
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-gray-900">{student.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${student.status === 'Completed'
+                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                        : 'bg-primary/20 text-black'
+                                                    }`}>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-bold text-gray-700">
+                                                {student.points}/{student.totalPoints}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="3" className="px-6 py-12 text-center text-gray-400 italic">
+                                            No recent student data found.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

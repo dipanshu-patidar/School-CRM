@@ -1,21 +1,16 @@
-import React, { useState } from 'react';
-import { UserPlus, Download, Trash2, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UserPlus, Download, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import StudentFilters from '../components/StudentFilters';
 import StudentsTable from '../components/StudentsTable';
 import StudentModal from '../components/StudentModal';
-
-const initialStudents = [
-    { id: 101, name: 'John Doe', points: 120, totalPoints: 250, status: 'Active', phone: '+1 234 567 890', email: 'john@example.com', assignedStaff: 'Sarah Lee', enrolledDate: '01 Jan 2026' },
-    { id: 102, name: 'Sara Smith', points: 250, totalPoints: 250, status: 'Completed', phone: '+1 987 654 321', email: 'sara@example.com', assignedStaff: 'Tom Harris', enrolledDate: '15 Jan 2026' },
-    { id: 103, name: 'Mike Brown', points: 60, totalPoints: 250, status: 'Active', phone: '+1 456 789 012', email: 'mike@example.com', assignedStaff: 'Sarah Lee', enrolledDate: '20 Jan 2026' },
-    { id: 104, name: 'Emily White', points: 180, totalPoints: 250, status: 'Active', phone: '+1 321 654 987', email: 'emily@example.com', assignedStaff: 'Carol Kim', enrolledDate: '05 Feb 2026' },
-    { id: 105, name: 'David Black', points: 300, totalPoints: 300, status: 'Completed', phone: '+1 654 321 789', email: 'david@example.com', assignedStaff: 'Tom Harris', enrolledDate: '10 Feb 2026' },
-];
+import { getAllStudents, createStudent, updateStudent, deleteStudent } from '../api/studentApi';
 
 const StudentsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
-    const [students, setStudents] = useState(initialStudents);
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,9 +19,28 @@ const StudentsPage = () => {
     // Delete modal state
     const [deleteTarget, setDeleteTarget] = useState(null);
 
+    const fetchStudents = async () => {
+        try {
+            setLoading(true);
+            const response = await getAllStudents();
+            setStudents(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching students:', err);
+            setError('Failed to load students.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStudents();
+    }, []);
+
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.id.toString().includes(searchTerm);
+            student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            student._id.toString().includes(searchTerm);
         const matchesStatus = statusFilter === 'All' || student.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -41,21 +55,33 @@ const StudentsPage = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveStudent = (savedStudent) => {
-        if (editingStudent) {
-            setStudents(prev => prev.map(s => s.id === savedStudent.id ? savedStudent : s));
-        } else {
-            setStudents(prev => [...prev, savedStudent]);
+    const handleSaveStudent = async (studentData) => {
+        try {
+            if (editingStudent) {
+                await updateStudent(editingStudent._id, studentData);
+            } else {
+                await createStudent(studentData);
+            }
+            fetchStudents();
+            setIsModalOpen(false);
+            setEditingStudent(null);
+        } catch (err) {
+            console.error('Error saving student:', err);
+            alert(err.response?.data?.message || 'Error saving student');
         }
-        setIsModalOpen(false);
-        setEditingStudent(null);
     };
 
     const handleDeleteRequest = (student) => setDeleteTarget(student);
 
-    const handleConfirmDelete = () => {
-        setStudents(prev => prev.filter(s => s.id !== deleteTarget.id));
-        setDeleteTarget(null);
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteStudent(deleteTarget._id);
+            fetchStudents();
+            setDeleteTarget(null);
+        } catch (err) {
+            console.error('Error deleting student:', err);
+            alert('Error deleting student');
+        }
     };
 
     return (
@@ -90,12 +116,31 @@ const StudentsPage = () => {
                     setStatusFilter={setStatusFilter}
                     totalStudents={students.length}
                 />
-                <StudentsTable
-                    students={filteredStudents}
-                    onAddStudent={handleAddStudent}
-                    onDeleteStudent={handleDeleteRequest}
-                    onEditStudent={handleEditStudent}
-                />
+
+                {loading ? (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center">
+                        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                        <p className="text-gray-500 font-medium">Loading students...</p>
+                    </div>
+                ) : error ? (
+                    <div className="bg-white rounded-2xl border border-red-100 shadow-sm py-20 flex flex-col items-center justify-center text-center px-4">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Failed to load data</h3>
+                        <p className="text-gray-500 max-w-xs mb-6">{error}</p>
+                        <button onClick={fetchStudents} className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all cursor-pointer">
+                            Try Again
+                        </button>
+                    </div>
+                ) : (
+                    <StudentsTable
+                        students={filteredStudents}
+                        onAddStudent={handleAddStudent}
+                        onDeleteStudent={handleDeleteRequest}
+                        onEditStudent={handleEditStudent}
+                    />
+                )}
             </div>
 
             {/* Add / Edit Student Modal */}

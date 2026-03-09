@@ -36,7 +36,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
                     <tbody className="divide-y divide-gray-100">
                         {students.map((student) => (
                             <StudentRow
-                                key={student.id}
+                                key={student._id}
                                 student={student}
                                 onDelete={onDeleteStudent}
                                 onEdit={onEditStudent}
@@ -50,7 +50,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
             <div className="md:hidden p-4 bg-gray-50/30">
                 {students.map((student) => (
                     <StudentRow
-                        key={student.id}
+                        key={student._id}
                         student={student}
                         onDelete={onDeleteStudent}
                         onEdit={onEditStudent}

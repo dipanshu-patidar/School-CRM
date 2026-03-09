@@ -43,7 +43,7 @@ const StudentProfileCard = ({ student }) => {
                             <div className="p-1.5 rounded-lg bg-gray-50">
                                 <UserCog size={14} className="text-gray-400" />
                             </div>
-                            <span>{student.assignedStaff}</span>
+                            <span>{student.assignedStaff?.name || 'Unassigned'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <div className="p-1.5 rounded-lg bg-gray-50">

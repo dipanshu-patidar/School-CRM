@@ -36,7 +36,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                 </td>
                 <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
-                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
+                        <button title="View Profile" onClick={() => navigate(`/dashboard/students/${student._id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                             <Eye size={17} />
                         </button>
                         <button title="Edit Student" onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer">
@@ -71,7 +71,7 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         <span className="text-sm font-bold text-gray-900">{student.points}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button onClick={() => navigate(`/dashboard/students/${student.id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
+                        <button onClick={() => navigate(`/dashboard/students/${student._id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
                         <button onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={17} /></button>
                         <button onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={17} /></button>
                     </div>

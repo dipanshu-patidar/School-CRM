@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Download, Trash2, AlertTriangle } from 'lucide-react';
+import api from '../api/axios';
 import StudentFilters from '../components/StudentFilters';
 import StudentsTable from '../components/StudentsTable';
 import StudentModal from '../components/StudentModal';
 
-const initialStudents = [
-    { id: 101, name: 'John Doe', points: 120, totalPoints: 250, status: 'Active', phone: '+1 234 567 890', email: 'john@example.com', assignedStaff: 'Sarah Lee', enrolledDate: '01 Jan 2026' },
-    { id: 102, name: 'Sara Smith', points: 250, totalPoints: 250, status: 'Completed', phone: '+1 987 654 321', email: 'sara@example.com', assignedStaff: 'Tom Harris', enrolledDate: '15 Jan 2026' },
-    { id: 103, name: 'Mike Brown', points: 60, totalPoints: 250, status: 'Active', phone: '+1 456 789 012', email: 'mike@example.com', assignedStaff: 'Sarah Lee', enrolledDate: '20 Jan 2026' },
-    { id: 104, name: 'Emily White', points: 180, totalPoints: 250, status: 'Active', phone: '+1 321 654 987', email: 'emily@example.com', assignedStaff: 'Carol Kim', enrolledDate: '05 Feb 2026' },
-    { id: 105, name: 'David Black', points: 300, totalPoints: 300, status: 'Completed', phone: '+1 654 321 789', email: 'david@example.com', assignedStaff: 'Tom Harris', enrolledDate: '10 Feb 2026' },
-];
-
 const StudentsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
-    const [students, setStudents] = useState(initialStudents);
+    const [students, setStudents] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchStudents = async () => {
+        try {
+            const res = await api.get('/api/students');
+            // Adding a totalPoints property here for components that need it
+            const formatted = res.data.map(s => ({ ...s, totalPoints: 250, enrolledDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) }));
+            setStudents(formatted);
+        } catch (error) {
+            console.error("Error fetching students:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStudents();
+    }, []);
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,21 +52,34 @@ const StudentsPage = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveStudent = (savedStudent) => {
-        if (editingStudent) {
-            setStudents(prev => prev.map(s => s.id === savedStudent.id ? savedStudent : s));
-        } else {
-            setStudents(prev => [...prev, savedStudent]);
+    const handleSaveStudent = async (savedStudent) => {
+        try {
+            if (editingStudent) {
+                // Determine Staff ID (if not changed, it might still have the name or old value, so proper handling is needed. Assuming it passes correct ID)
+                await api.put(`/api/students/${editingStudent._id}`, savedStudent);
+            } else {
+                await api.post('/api/students', savedStudent);
+            }
+            fetchStudents(); // Refresh data
+            setIsModalOpen(false);
+            setEditingStudent(null);
+        } catch (error) {
+            console.error("Error saving student:", error);
+            alert("Error saving student. Please ensure all values including Staff are selected.");
         }
-        setIsModalOpen(false);
-        setEditingStudent(null);
     };
 
     const handleDeleteRequest = (student) => setDeleteTarget(student);
 
-    const handleConfirmDelete = () => {
-        setStudents(prev => prev.filter(s => s.id !== deleteTarget.id));
-        setDeleteTarget(null);
+    const handleConfirmDelete = async () => {
+        try {
+            await api.delete(`/api/students/${deleteTarget._id}`);
+            fetchStudents();
+            setDeleteTarget(null);
+        } catch (error) {
+            console.error("Error deleting student:", error);
+            alert("Failed to delete student.");
+        }
     };
 
     return (

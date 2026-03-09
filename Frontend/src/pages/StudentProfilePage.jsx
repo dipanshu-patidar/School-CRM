@@ -1,44 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer } from 'lucide-react';
+import api from '../api/axios';
 import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
 import StudentTabs from '../components/StudentTabs';
 import PrintHeader from '../components/PrintHeader';
 
-const ALL_STUDENTS = [
-    {
-        id: 101, name: 'John Doe', points: 120, totalPoints: 250, status: 'Active',
-        phone: '+1 234 567 890', email: 'john@example.com',
-        assignedStaff: 'Sarah Lee', enrolledDate: '01 Jan 2026',
-    },
-    {
-        id: 102, name: 'Sara Smith', points: 250, totalPoints: 250, status: 'Completed',
-        phone: '+1 987 654 321', email: 'sara@example.com',
-        assignedStaff: 'Tom Harris', enrolledDate: '15 Jan 2026',
-    },
-    {
-        id: 103, name: 'Mike Brown', points: 60, totalPoints: 250, status: 'Active',
-        phone: '+1 456 789 012', email: 'mike@example.com',
-        assignedStaff: 'Sarah Lee', enrolledDate: '20 Jan 2026',
-    },
-    {
-        id: 104, name: 'Emily White', points: 180, totalPoints: 250, status: 'Active',
-        phone: '+1 321 654 987', email: 'emily@example.com',
-        assignedStaff: 'Carol Kim', enrolledDate: '05 Feb 2026',
-    },
-    {
-        id: 105, name: 'David Black', points: 300, totalPoints: 300, status: 'Completed',
-        phone: '+1 654 321 789', email: 'david@example.com',
-        assignedStaff: 'Tom Harris', enrolledDate: '10 Feb 2026',
-    },
-];
-
 /* ────────────────────────────────
    EDIT STUDENT MODAL
 ──────────────────────────────── */
 const EditStudentModal = ({ student, onClose, onSave }) => {
-    const [form, setForm] = useState({ ...student });
+    const [form, setForm] = useState({
+        ...student,
+        assignedStaff: student.assignedStaff?._id || student.assignedStaff || ''
+    });
+    const [staffOptions, setStaffOptions] = useState([]);
+
+    useEffect(() => {
+        const fetchStaff = async () => {
+            try {
+                const res = await api.get('/api/users/staff');
+                setStaffOptions(res.data.data);
+            } catch (err) {
+                console.error('Failed to fetch staff', err);
+            }
+        };
+        fetchStaff();
+    }, []);
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -62,7 +51,6 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                         { label: 'Full Name', name: 'name', type: 'text' },
                         { label: 'Email', name: 'email', type: 'email' },
                         { label: 'Phone', name: 'phone', type: 'text' },
-                        { label: 'Assigned Staff', name: 'assignedStaff', type: 'text' },
                     ].map(field => (
                         <div key={field.name}>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">{field.label}</label>
@@ -75,6 +63,20 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                             />
                         </div>
                     ))}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Assigned Staff</label>
+                        <select
+                            name="assignedStaff"
+                            value={form.assignedStaff}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm cursor-pointer"
+                        >
+                            <option value="">Select staff member...</option>
+                            {staffOptions.map(staff => (
+                                <option key={staff._id} value={staff._id}>{staff.name} ({staff.email})</option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
                         <select
@@ -179,15 +181,44 @@ const StudentProfilePage = () => {
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [studentData, setStudentData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [studentData, setStudentData] = useState(
-        ALL_STUDENTS.find(s => s.id === parseInt(id)) || null
-    );
-
-    const handleSaveEdit = (updated) => {
-        setStudentData(updated);
-        setShowEditModal(false);
+    const fetchStudent = async () => {
+        try {
+            // Find by DB _id OR internal studentId ? We'll assume the param is the internal `id` OR MongoDB `_id`. 
+            // In standard flows, id param is usually _id. Since students list maps _id, we should adjust.
+            // But let's fetch all students and find the one matching the string ID if param `id` is the studentId.
+            // Wait, the easiest way is the GET api/students/:id endpoint which expects the MongoDB _id.
+            const res = await api.get(`/api/students/${id}`);
+            setStudentData({
+                ...res.data,
+                totalPoints: 250,
+                enrolledDate: new Date().toLocaleDateString('en-GB')
+            });
+        } catch (error) {
+            console.error('Error fetching student', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    useEffect(() => {
+        fetchStudent();
+    }, [id]);
+
+    const handleSaveEdit = async (updated) => {
+        try {
+            await api.put(`/api/students/${updated._id}`, updated);
+            fetchStudent();
+            setShowEditModal(false);
+        } catch (error) {
+            console.error('Error updating student', error);
+            alert('Failed to update student profile.');
+        }
+    };
+
+    if (isLoading) return <div className="p-8 text-center font-medium">Loading Student Profile...</div>;
 
     if (!studentData) {
         return (

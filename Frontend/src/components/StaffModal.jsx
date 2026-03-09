@@ -18,15 +18,15 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                 setFormData({
                     name: editStaff.name || '',
                     email: editStaff.email || '',
-                    role: editStaff.role || 'Staff',
-                    status: editStaff.status || 'Active',
+                    role: editStaff.role || 'staff',
+                    status: 'Active',
                     password: ''
                 });
             } else {
                 setFormData({
                     name: '',
                     email: '',
-                    role: 'Staff',
+                    role: 'staff',
                     status: 'Active',
                     password: ''
                 });
@@ -36,11 +36,11 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({
-            id: isEditing ? editStaff.id : Date.now(),
-            ...formData
-        });
-        onClose();
+        const dataToSave = { ...formData };
+        if (isEditing && !dataToSave.password) {
+            delete dataToSave.password;
+        }
+        onSave(dataToSave);
     };
 
     if (!isOpen) return null;
@@ -103,8 +103,8 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none"
                             >
-                                <option value="Admin">Admin</option>
-                                <option value="Staff">Staff</option>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
                             </select>
                         </div>
 

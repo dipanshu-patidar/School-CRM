@@ -1,5 +1,7 @@
 const Student = require('../models/Student');
 const { cloudinary } = require('../config/cloudinary');
+const https = require('https');
+const http = require('http');
 
 // ─────────────────────────────────────────────────────────
 // NOTES
@@ -168,134 +170,29 @@ const deleteDocument = async (req, res) => {
     }
 };
 
-// @desc    Add PCP Report to student
-// @route   POST /api/students/:id/pcp-reports
+// @desc    Download Document (proxy with correct filename)
+// @route   GET /api/students/:id/documents/:docId/download
 // @access  Private
-const addPcpReport = async (req, res) => {
+const downloadDocument = async (req, res) => {
     try {
         const student = await Student.findById(req.params.id);
         if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
-        student.pcpReports.push(req.body);
-        await student.save();
+        const doc = student.documents.find(d => d._id.toString() === req.params.docId);
+        if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
 
-        res.status(201).json({ success: true, data: student.pcpReports[student.pcpReports.length - 1] });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
+        // Set headers so browser downloads with the correct filename
+        res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
 
-// @desc    Delete PCP Report
-// @route   DELETE /api/students/:studentId/pcp-reports/:reportId
-// @access  Private
-const deletePcpReport = async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.studentId);
-        if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
-
-        student.pcpReports = student.pcpReports.filter(r => r._id.toString() !== req.params.reportId);
-        await student.save();
-
-        res.status(200).json({ success: true, data: {} });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Get all PCP Reports (global)
-// @route   GET /api/students/pcp-reports
-// @access  Private
-const getAllPcpReports = async (req, res) => {
-    try {
-        let filter = {};
-        if (req.user.role === 'staff') {
-            filter.assignedStaff = req.user._id;
-        }
-
-        const students = await Student.find(filter).select('name pcpReports');
-
-        let allReports = [];
-        students.forEach(student => {
-            student.pcpReports.forEach(report => {
-                allReports.push({
-                    ...report.toObject(),
-                    studentName: student.name,
-                    studentMongoId: student._id
-                });
-            });
+        // Pipe the file from Cloudinary through our server to the client
+        const protocol = doc.url.startsWith('https') ? https : http;
+        protocol.get(doc.url, (fileStream) => {
+            fileStream.pipe(res);
+        }).on('error', (err) => {
+            console.error('Proxy download error:', err);
+            res.status(500).json({ success: false, message: 'Failed to download file' });
         });
-
-        res.status(200).json({ success: true, data: allReports });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Get all Standard Documents (global)
-// @route   GET /api/students/all-documents
-// @access  Private
-const getAllDocuments = async (req, res) => {
-    try {
-        let filter = {};
-        if (req.user.role === 'staff') {
-            filter.assignedStaff = req.user._id;
-        }
-
-        const students = await Student.find(filter).select('name documents');
-
-        let allDocs = [];
-        students.forEach(student => {
-            student.documents.forEach(doc => {
-                allDocs.push({
-                    ...doc.toObject(),
-                    studentName: student.name,
-                    studentMongoId: student._id
-                });
-            });
-        });
-
-        res.status(200).json({ success: true, data: allDocs });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Get All Attendance Records (Global)
-// @route   GET /api/students/attendance
-// @access  Private
-const getAllAttendance = async (req, res) => {
-    try {
-        let filter = {};
-        if (req.user.role === 'staff') {
-            filter = { assignedStaff: req.user._id };
-        }
-
-        const students = await Student.find(filter).select('name studentId attendance');
-
-        // Flatten attendance records and add student name/ID to each
-        const allRecords = [];
-        students.forEach(student => {
-            student.attendance.forEach(record => {
-                allRecords.push({
-                    _id: record._id,
-                    studentMongoId: student._id,
-                    studentId: student.studentId,
-                    studentName: student.name,
-                    workshop: record.workshopName,
-                    date: record.date,
-                    points: record.pointsEarned
-                });
-            });
-        });
-
-        // Sort by date descending
-        allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        res.status(200).json(allRecords);
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -309,9 +206,5 @@ module.exports = {
     deleteAttendance,
     uploadDocument,
     deleteDocument,
-    addPcpReport,
-    deletePcpReport,
-    getAllPcpReports,
-    getAllDocuments,
-    getAllAttendance
+    downloadDocument
 };

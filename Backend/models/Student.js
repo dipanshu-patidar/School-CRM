@@ -34,7 +34,7 @@ const studentSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['Active', 'Completed'],
+            enum: ['Active', 'Completed', 'Dropped'],
             default: 'Active',
         },
         assignedStaff: {
@@ -102,12 +102,14 @@ studentSchema.pre('validate', async function () {
     }
 });
 
-// Pre-save hook to update status based on points
+// Pre-save hook to update status based on points (skipped if manually set to 'Dropped')
 studentSchema.pre('save', function () {
-    if (this.points >= 250) {
-        this.status = 'Completed';
-    } else {
-        this.status = 'Active';
+    if (this.status !== 'Dropped') {
+        if (this.points >= 250) {
+            this.status = 'Completed';
+        } else {
+            this.status = 'Active';
+        }
     }
 });
 

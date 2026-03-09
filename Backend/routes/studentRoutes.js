@@ -15,11 +15,7 @@ const {
     deleteAttendance,
     uploadDocument,
     deleteDocument,
-    getAllAttendance,
-    addPcpReport,
-    deletePcpReport,
-    getAllPcpReports,
-    getAllDocuments
+    downloadDocument
 } = require('../controllers/studentTabsController');
 
 const { upload } = require('../config/cloudinary');
@@ -44,10 +40,12 @@ router.delete('/:studentId/notes/:noteId', protect, deleteNote);
 router.post('/:id/attendance', protect, addAttendance);
 router.delete('/:studentId/attendance/:attendanceId', protect, deleteAttendance);
 
-router.post('/:id/documents', protect, upload.single('document'), uploadDocument);
-router.delete('/:studentId/documents/:docId', protect, authorize('admin'), deleteDocument);
-
-router.post('/:id/pcp-reports', protect, addPcpReport);
-router.delete('/:studentId/pcp-reports/:reportId', protect, deletePcpReport);
+// Documents routes
+router.route('/:id/documents')
+    .post(protect, upload.single('document'), uploadDocument);
+router.route('/:id/documents/:docId/download')
+    .get(protect, downloadDocument);
+router.route('/:id/documents/:docId')
+    .delete(protect, authorize('admin'), deleteDocument);
 
 module.exports = router;

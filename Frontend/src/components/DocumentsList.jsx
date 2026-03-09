@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { FileText, Download, Trash2, Upload, X, FileUp, Printer } from 'lucide-react';
 import api from '../api/axios';
 
@@ -64,10 +64,17 @@ const UploadModal = ({ onClose, onUpload }) => {
 };
 
 /* ── Documents List ───────────────────────────── */
-const DocumentsList = ({ student, initialDocuments = [] }) => {
+const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUploadTriggered }) => {
     const [documents, setDocuments] = useState(initialDocuments);
     const [showUpload, setShowUpload] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+
+    useEffect(() => {
+        if (triggerUpload) {
+            setShowUpload(true);
+            if (onUploadTriggered) onUploadTriggered();
+        }
+    }, [triggerUpload, onUploadTriggered]);
 
     const handleUpload = async (file) => {
         setIsUploading(true);
@@ -95,6 +102,28 @@ const DocumentsList = ({ student, initialDocuments = [] }) => {
             setDocuments(res.data.data);
         } catch (error) {
             console.error('Error deleting document', error);
+        }
+    };
+
+    const handleDownload = async (docId, name) => {
+        try {
+            // Call our backend proxy so the file is served with the correct filename
+            const response = await api.get(
+                `/api/students/${student._id}/documents/${docId}/download`,
+                { responseType: 'blob' }
+            );
+            const blob = new Blob([response.data], { type: 'application/octet-stream' });
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = name; // Correct filename from our backend
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            console.error('Download failed', err);
+            alert('Download failed. Please try again.');
         }
     };
 
@@ -129,14 +158,13 @@ const DocumentsList = ({ student, initialDocuments = [] }) => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity no-print">
-                                <a
-                                    href={doc.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer focus:ring-2 focus:ring-primary/20"
+                                <button
+                                    title="Download"
+                                    onClick={() => handleDownload(doc._id, doc.name)}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
                                 >
                                     <Download size={16} />
-                                </a>
+                                </button>
                                 <button onClick={() => handleDelete(doc._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
                                     <Trash2 size={16} />
                                 </button>

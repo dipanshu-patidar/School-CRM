@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'school_crm_documents',
-        resource_type: 'auto', // allow pdf, doc, images, etc.
+        resource_type: 'auto', // auto detects file type (pdf, doc, image, etc.)
     },
 });
 

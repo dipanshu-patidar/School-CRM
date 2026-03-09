@@ -101,7 +101,7 @@ const StudentForm = ({ form, onChange }) => {
                 </div>
             </div>
 
-            {/* Row 3: Current Points (Only visible when editing to prevent confusion during creation) */}
+            {/* Row 3: Current Points + Status */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -119,6 +119,24 @@ const StudentForm = ({ form, onChange }) => {
                     />
                     <p className="text-xs text-gray-400 mt-1.5">
                         Students need <span className="font-bold text-primary">250 points</span> for program completion.
+                    </p>
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Status
+                    </label>
+                    <select
+                        name="status"
+                        value={form.status || 'Active'}
+                        onChange={onChange}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer appearance-none"
+                    >
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Dropped">Dropped</option>
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1.5">
+                        Auto-set to <span className="font-bold text-primary">Completed</span> when points ≥ 250.
                     </p>
                 </div>
             </div>

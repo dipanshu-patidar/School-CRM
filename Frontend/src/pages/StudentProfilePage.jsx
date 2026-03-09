@@ -92,6 +92,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                         >
                             <option value="Active">Active</option>
                             <option value="Completed">Completed</option>
+                            <option value="Dropped">Dropped</option>
                         </select>
                     </div>
                 </div>
@@ -112,85 +113,6 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
     );
 };
 
-/* ────────────────────────────────
-   UPLOAD DOCUMENT MODAL
-   ──────────────────────────────── */
-const UploadDocumentModal = ({ studentId, onClose, onUploadSuccess }) => {
-    const [dragging, setDragging] = useState(false);
-    const [file, setFile] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
-
-    const handleFile = (e) => {
-        if (e.target.files[0]) setFile(e.target.files[0]);
-    };
-
-    const handleUpload = async () => {
-        if (!file) return;
-        setIsUploading(true);
-        const formData = new FormData();
-        formData.append('document', file);
-        try {
-            await uploadDocument(studentId, formData);
-            onUploadSuccess();
-            onClose();
-        } catch (error) {
-            console.error('Upload failed', error);
-            alert('Failed to upload document.');
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isUploading && onClose()} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">Upload Document</h3>
-                    <button onClick={onClose} disabled={isUploading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer">
-                        <X size={18} />
-                    </button>
-                </div>
-
-                <div
-                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                    onDragLeave={() => setDragging(false)}
-                    onDrop={(e) => { e.preventDefault(); setDragging(false); setFile(e.dataTransfer.files[0]); }}
-                    className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}`}
-                    onClick={() => !isUploading && document.getElementById('file-input').click()}
-                >
-                    <FileUp size={36} className="mx-auto mb-3 text-primary/50" />
-                    {file ? (
-                        <div>
-                            <p className="font-bold text-gray-800">{file.name}</p>
-                            <p className="text-xs text-gray-400 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
-                        </div>
-                    ) : (
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Drag & drop or click to upload</p>
-                            <p className="text-xs text-gray-400 mt-1">PDF, DOC, JPG, PNG — Max 10 MB</p>
-                        </div>
-                    )}
-                    <input id="file-input" type="file" className="hidden" onChange={handleFile} />
-                </div>
-
-                <div className="flex gap-3 mt-6">
-                    <button onClick={onClose} disabled={isUploading} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer">
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleUpload}
-                        disabled={!file || isUploading}
-                        className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:text-gray-400 text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
-                    >
-                        {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                        {isUploading ? 'Uploading...' : 'Upload'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 /* ────────────────────────────────
    MAIN PAGE
@@ -200,7 +122,8 @@ const StudentProfilePage = () => {
     const navigate = useNavigate();
 
     const [showEditModal, setShowEditModal] = useState(false);
-    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [activeTab, setActiveTab] = useState('Attendance');
+    const [triggerDocumentUpload, setTriggerDocumentUpload] = useState(false);
     const [studentData, setStudentData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -256,7 +179,8 @@ const StudentProfilePage = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className={`space-y-6 ${(showEditModal || showUploadModal) ? 'no-print' : ''}`}>
+            {/* Main Content Isolation - hidden when modals are open */}
+            <div className={`space-y-6 ${showEditModal ? 'no-print' : ''}`}>
                 <PrintHeader />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
                     <div>
@@ -286,7 +210,10 @@ const StudentProfilePage = () => {
                             Edit Student
                         </button>
                         <button
-                            onClick={() => setShowUploadModal(true)}
+                            onClick={() => {
+                                setActiveTab('Documents');
+                                setTriggerDocumentUpload(true);
+                            }}
                             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
                         >
                             <Upload size={16} />
@@ -301,7 +228,14 @@ const StudentProfilePage = () => {
                     <ProgressBar current={studentData.points} total={studentData.totalPoints} />
                 </div>
 
-                <StudentTabs student={studentData} />
+                {/* Tabs */}
+                <StudentTabs
+                    student={studentData}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    triggerDocumentUpload={triggerDocumentUpload}
+                    setTriggerDocumentUpload={setTriggerDocumentUpload}
+                />
             </div>
 
             {showEditModal && (
@@ -309,13 +243,6 @@ const StudentProfilePage = () => {
                     student={studentData}
                     onClose={() => setShowEditModal(false)}
                     onSave={handleSaveEdit}
-                />
-            )}
-            {showUploadModal && (
-                <UploadDocumentModal
-                    studentId={id}
-                    onClose={() => setShowUploadModal(false)}
-                    onUploadSuccess={fetchStudent}
                 />
             )}
         </div>

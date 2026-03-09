@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, CalendarDays } from 'lucide-react';
 import api from '../api/axios';
 
 const AttendanceTable = ({ student, records = [] }) => {
+    const navigate = useNavigate();
     const [attendance, setAttendance] = useState(records);
     const [showInput, setShowInput] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -41,7 +43,7 @@ const AttendanceTable = ({ student, records = [] }) => {
         <div className="p-6 space-y-4">
             <div className="flex justify-end gap-2">
                 <button
-                    onClick={() => setShowInput(true)}
+                    onClick={() => navigate('/dashboard/attendance')}
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer no-print"
                 >
                     <Plus size={16} />

@@ -39,7 +39,7 @@ const getStudents = async (req, res) => {
 // @route   POST /api/students
 // @access  Private/Admin
 const createStudent = async (req, res) => {
-    const { name, phone, email, assignedStaff } = req.body;
+    const { name, phone, email, assignedStaff, status, points } = req.body;
 
     if (!name || !phone || !email || !assignedStaff) {
         return res.status(400).json({ success: false, message: 'Please provide all required fields' });
@@ -56,7 +56,9 @@ const createStudent = async (req, res) => {
             name,
             phone,
             email,
-            assignedStaff
+            assignedStaff,
+            ...(points !== undefined && { points }),
+            ...(status && { status }),
         });
 
         res.status(201).json({
@@ -123,13 +125,14 @@ const updateStudent = async (req, res) => {
         }
 
         // Only update allowed fields
-        const { name, phone, email, assignedStaff, points } = req.body;
+        const { name, phone, email, assignedStaff, points, status } = req.body;
 
         if (name) student.name = name;
         if (phone) student.phone = phone;
         if (email) student.email = email;
         if (assignedStaff) student.assignedStaff = assignedStaff;
-        if (points !== undefined) student.points = points; // points logic handled by pre-save hook
+        if (points !== undefined) student.points = points;
+        if (status) student.status = status; // Allow manual override (e.g., Dropped)
 
         await student.save(); // using save to trigger pre-save hook for status updates
 

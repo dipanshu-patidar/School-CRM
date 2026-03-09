@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
-import { Plus, Info, Star, CalendarCheck, Table as TableIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Info, Star, CalendarCheck, Loader2, AlertTriangle, Table as TableIcon } from 'lucide-react';
 import AttendanceStats from '../components/AttendanceStats';
 import AttendanceToggle from '../components/AttendanceToggle';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import { MarkAttendanceModal, AttendanceEventModal } from '../components/AttendanceEventModal';
-
-// Mock Initial Data
-const initialRecords = [
-    { id: 1, studentId: 101, studentName: 'John Doe', workshop: 'Financial Literacy', date: new Date().toISOString().split('T')[0], points: 1 },
-    { id: 2, studentId: 102, studentName: 'Sara Smith', workshop: 'Social Wellness', date: new Date().toISOString().split('T')[0], points: 1 },
-];
+import { getAllAttendance, deleteStudentAttendance } from '../api/attendanceApi';
 
 const AttendanceCalendarPage = () => {
-    const [records, setRecords] = useState(initialRecords);
+    const [records, setRecords] = useState([]);
     const [view, setView] = useState('calendar'); // 'calendar' or 'table'
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Modal States
     const [isMarkModalOpen, setIsMarkModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
-
     const [selectedRecord, setSelectedRecord] = useState(null);
+
+    const fetchAttendance = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getAllAttendance();
+            setRecords(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching attendance:', err);
+            setError('Failed to load attendance records.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAttendance();
+    }, []);
 
     // Handlers
     const handleAddClick = () => {
@@ -36,12 +50,25 @@ const AttendanceCalendarPage = () => {
         setSelectedRecord(record);
     };
 
-    const handleSaveAttendance = (newRecord) => {
-        setRecords(prev => [...prev, newRecord]);
+    const handleSaveAttendance = () => {
+        fetchAttendance(); // Refresh all records
+        setIsMarkModalOpen(false);
     };
 
-    const handleDeleteAttendance = (id) => {
-        setRecords(prev => prev.filter(r => r.id !== id));
+    const handleDeleteAttendance = async (id) => {
+        try {
+            const record = records.find(r => r._id === id);
+            if (!record || !record.studentMongoId) return;
+
+            if (window.confirm(`Are you sure you want to delete attendance for ${record.studentName}?`)) {
+                await deleteStudentAttendance(record.studentMongoId, id);
+                fetchAttendance();
+                setSelectedRecord(null);
+            }
+        } catch (err) {
+            console.error('Error deleting attendance:', err);
+            alert('Failed to delete attendance record.');
+        }
     };
 
     return (
@@ -83,7 +110,23 @@ const AttendanceCalendarPage = () => {
             </div>
 
             {/* Main Content Area */}
-            {view === 'calendar' ? (
+            {isLoading ? (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-24 flex flex-col items-center justify-center">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                    <p className="text-gray-500 font-medium">Loading attendance records...</p>
+                </div>
+            ) : error ? (
+                <div className="bg-white rounded-2xl border border-red-100 shadow-sm py-20 flex flex-col items-center justify-center text-center px-4">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
+                        <AlertTriangle size={32} />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Failed to load attendance</h3>
+                    <p className="text-gray-500 max-w-xs mb-6 text-sm">{error}</p>
+                    <button onClick={fetchAttendance} className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-all cursor-pointer">
+                        Try Again
+                    </button>
+                </div>
+            ) : view === 'calendar' ? (
                 <AttendanceCalendar
                     records={records}
                     onDateClick={handleDateClick}
@@ -109,8 +152,8 @@ const AttendanceCalendarPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {records.sort((a, b) => new Date(b.date) - new Date(a.date)).map(record => (
-                                        <tr key={record.id} onClick={() => handleEventClick(record)} className="hover:bg-gray-50/50 cursor-pointer transition-colors">
+                                    {(records || []).map(record => (
+                                        <tr key={record._id} onClick={() => handleEventClick(record)} className="hover:bg-gray-50/50 cursor-pointer transition-colors">
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900">{new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">{record.studentName}</td>
                                             <td className="px-6 py-4 text-sm text-gray-600">{record.workshop}</td>

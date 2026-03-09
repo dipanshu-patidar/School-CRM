@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Pencil, Trash2, Loader2, UserX } from 'lucide-react';
 import StaffModal from './StaffModal';
 import { getAllStaff, createStaff, updateStaff, deleteStaff } from '../api/staffApi';
 
@@ -58,6 +58,7 @@ const StaffManagement = () => {
         setEditingStaff(staff);
         setIsModalOpen(true);
     };
+
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100">
@@ -75,13 +76,23 @@ const StaffManagement = () => {
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[300px]">
                 {isLoading ? (
-                    <div className="p-12 text-center text-gray-500 font-medium">Loading staff...</div>
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                        <p className="text-gray-500 font-medium">Loading staff members...</p>
+                    </div>
                 ) : error ? (
-                    <div className="p-12 text-center text-red-500 font-medium">{error}</div>
+                    <div className="flex flex-col items-center justify-center py-20 text-red-500 font-medium">
+                        <AlertTriangle className="mb-2" size={32} />
+                        {error}
+                        <button onClick={fetchStaff} className="mt-4 text-primary font-bold hover:underline">Try Again</button>
+                    </div>
                 ) : staffList.length === 0 ? (
-                    <div className="p-12 text-center text-gray-500 font-medium">No staff members found.</div>
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <UserX className="w-12 h-12 text-gray-300 mb-4" />
+                        <p className="text-gray-500 font-medium">No staff members found.</p>
+                    </div>
                 ) : (
                     <table className="w-full text-left">
                         <thead>
@@ -98,7 +109,7 @@ const StaffManagement = () => {
                                 <tr key={staff._id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 font-bold text-gray-900">{staff.name}</td>
                                     <td className="px-6 py-4 text-sm text-primary hover:underline cursor-pointer">
-                                        <a href={`mailto:${staff.email}`}>{staff.email}</a>
+                                        <a href={`mailto:${staff.email}`} onClick={e => e.stopPropagation()}>{staff.email}</a>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 capitalize">{staff.role}</span>
@@ -109,16 +120,18 @@ const StaffManagement = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button
+                                                title="Edit Staff"
                                                 onClick={() => handleEdit(staff)}
                                                 className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer inline-flex"
                                             >
                                                 <Pencil size={16} />
                                             </button>
                                             <button
+                                                title="Delete Staff"
                                                 onClick={() => handleDelete(staff._id)}
                                                 className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer inline-flex"
                                             >
-                                                <LogOut size={16} className="rotate-90" />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </td>

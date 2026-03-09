@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { FileText, Download, Trash2, Upload, X, FileUp, Printer } from 'lucide-react';
+import api from '../api/axios';
 
 /* ── Inline Upload Modal ──────────────────────── */
 const UploadModal = ({ onClose, onUpload }) => {
@@ -51,7 +52,7 @@ const UploadModal = ({ onClose, onUpload }) => {
                     </button>
                     <button
                         disabled={!file}
-                        onClick={() => { onUpload(file); onClose(); }}
+                        onClick={() => { onUpload(file); }}
                         className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:text-gray-400 text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
                         <Upload size={16} /> Upload
@@ -63,26 +64,39 @@ const UploadModal = ({ onClose, onUpload }) => {
 };
 
 /* ── Documents List ───────────────────────────── */
-const DocumentsList = () => {
-    const [documents, setDocuments] = useState([
-        { id: 1, name: 'Lease.pdf', uploadDate: '10 Mar 2026', size: '245 KB' },
-        { id: 2, name: 'Mortgage.pdf', uploadDate: '12 Mar 2026', size: '1.2 MB' },
-    ]);
+const DocumentsList = ({ student, initialDocuments = [] }) => {
+    const [documents, setDocuments] = useState(initialDocuments);
     const [showUpload, setShowUpload] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
-    const handleUpload = (file) => {
-        const newDoc = {
-            id: Date.now(),
-            name: file.name,
-            uploadDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            size: file.size < 1024 * 1024
-                ? `${(file.size / 1024).toFixed(0)} KB`
-                : `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        };
-        setDocuments(prev => [newDoc, ...prev]);
+    const handleUpload = async (file) => {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('document', file);
+
+        try {
+            const res = await api.post(`/api/students/${student._id}/documents`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setDocuments(res.data.data);
+            setShowUpload(false);
+        } catch (error) {
+            console.error('Error uploading document', error);
+            alert('Upload failed.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
-    const handleDelete = (id) => setDocuments(prev => prev.filter(d => d.id !== id));
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this document?")) return;
+        try {
+            const res = await api.delete(`/api/students/${student._id}/documents/${id}`);
+            setDocuments(res.data.data);
+        } catch (error) {
+            console.error('Error deleting document', error);
+        }
+    };
 
     return (
         <div className="space-y-4 p-6">
@@ -104,7 +118,7 @@ const DocumentsList = () => {
             ) : (
                 <div className="divide-y divide-gray-100">
                     {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between py-4 group hover:bg-gray-50 rounded-lg px-3 transition-all">
+                        <div key={doc._id} className="flex items-center justify-between py-4 group hover:bg-gray-50 rounded-lg px-3 transition-all">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-primary/10 rounded-lg text-primary">
                                     <FileText size={20} />
@@ -115,17 +129,15 @@ const DocumentsList = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity no-print">
-                                <button
-                                    title="Print Document"
-                                    onClick={() => window.print()}
-                                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+                                <a
+                                    href={doc.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer focus:ring-2 focus:ring-primary/20"
                                 >
-                                    <Printer size={16} />
-                                </button>
-                                <button className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
                                     <Download size={16} />
-                                </button>
-                                <button onClick={() => handleDelete(doc.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
+                                </a>
+                                <button onClick={() => handleDelete(doc._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer">
                                     <Trash2 size={16} />
                                 </button>
                             </div>
@@ -135,10 +147,23 @@ const DocumentsList = () => {
             )}
 
             {showUpload && (
-                <UploadModal
-                    onClose={() => setShowUpload(false)}
-                    onUpload={handleUpload}
-                />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Add loading state wrapper or use the modal normally. If uploading, maybe show a spinner inside. */}
+                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isUploading && setShowUpload(false)} />
+                    <div className="relative z-10">
+                        {isUploading ? (
+                            <div className="bg-white rounded-2xl p-8 flex flex-col items-center shadow-2xl animate-in zoom-in-95">
+                                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <p className="font-bold text-gray-700">Uploading to Cloudinary...</p>
+                            </div>
+                        ) : (
+                            <UploadModal
+                                onClose={() => setShowUpload(false)}
+                                onUpload={handleUpload}
+                            />
+                        )}
+                    </div>
+                </div>
             )}
         </div>
     );

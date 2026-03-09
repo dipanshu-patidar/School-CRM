@@ -24,7 +24,7 @@ const StudentProfileCard = ({ student }) => {
                             {student.status}
                         </span>
                     </div>
-                    <p className="text-gray-500 text-sm mb-4">Student ID: #{student.id}</p>
+                    <p className="text-gray-500 text-sm mb-4">Student ID: #{student.studentId || student.id}</p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -43,7 +43,7 @@ const StudentProfileCard = ({ student }) => {
                             <div className="p-1.5 rounded-lg bg-gray-50">
                                 <UserCog size={14} className="text-gray-400" />
                             </div>
-                            <span>{student.assignedStaff}</span>
+                            <span>{student.assignedStaff?.name || 'Unassigned'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                             <div className="p-1.5 rounded-lg bg-gray-50">

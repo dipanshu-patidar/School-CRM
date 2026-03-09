@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, AlertTriangle, X, BookOpen, Pencil, Eye, Calendar, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, AlertTriangle, X, BookOpen, Pencil, Eye, Calendar, Star, Loader2 } from 'lucide-react';
 import WorkshopTable from '../components/WorkshopTable';
 import WorkshopRuleCard from '../components/WorkshopRuleCard';
-
-const initialWorkshops = [
-    { id: 1, name: 'Financial Literacy', points: 1, createdDate: '12 Jan 2026' },
-    { id: 2, name: 'Social Wellness', points: 1, createdDate: '15 Jan 2026' },
-    { id: 3, name: 'Emotional Support', points: 1, createdDate: '18 Jan 2026' },
-    { id: 4, name: 'Career Development', points: 1, createdDate: '22 Jan 2026' },
-];
+import { getWorkshops, createWorkshop, updateWorkshop, deleteWorkshop } from '../api/workshopApi';
 
 /* ── Workshop Modal ──────────────────────────── */
 const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
     const isEditing = !!editWorkshop;
     const [name, setName] = useState(editWorkshop?.name || '');
     const [description, setDescription] = useState(editWorkshop?.description || '');
+    const [isLoading, setIsLoading] = useState(false);
 
     React.useEffect(() => {
         if (isOpen) {
@@ -25,19 +20,31 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!name.trim()) return;
-        onSave({
-            id: isEditing ? editWorkshop.id : Date.now(),
-            name: name.trim(),
-            description: description.trim(),
-            points: 1,
-            createdDate: isEditing
-                ? editWorkshop.createdDate
-                : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-        });
-        onClose();
+
+        try {
+            setIsLoading(true);
+            const workshopData = {
+                name: name.trim(),
+                description: description.trim(),
+                points: 1
+            };
+
+            if (isEditing) {
+                await updateWorkshop(editWorkshop._id, workshopData);
+            } else {
+                await createWorkshop(workshopData);
+            }
+            onSave();
+            onClose();
+        } catch (err) {
+            console.error('Error saving workshop:', err);
+            alert(err.response?.data?.message || 'Failed to save workshop.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -107,8 +114,13 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer">
                             Cancel
                         </button>
-                        <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
-                            {isEditing ? <><Pencil size={15} /> Save Changes</> : <><Plus size={15} /> Add Workshop</>}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            {isLoading ? <Loader2 size={15} className="animate-spin" /> : (isEditing ? <Pencil size={15} /> : <Plus size={15} />)}
+                            {isEditing ? 'Save Changes' : 'Add Workshop'}
                         </button>
                     </div>
                 </form>
@@ -190,11 +202,33 @@ const WorkshopViewModal = ({ workshop, onClose }) => {
 
 /* ── Main Page ───────────────────────────────── */
 const WorkshopsPage = () => {
-    const [workshops, setWorkshops] = useState(initialWorkshops);
+    const [workshops, setWorkshops] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingWorkshop, setEditingWorkshop] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [viewTarget, setViewTarget] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchWorkshops = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getWorkshops();
+            // Map backend data to match expected frontend structure (createdDate)
+            const mapped = data.map(w => ({
+                ...w,
+                createdDate: new Date(w.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+            }));
+            setWorkshops(mapped);
+        } catch (err) {
+            console.error('Error fetching workshops:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchWorkshops();
+    }, []);
 
     const handleAdd = () => {
         setEditingWorkshop(null);
@@ -206,19 +240,21 @@ const WorkshopsPage = () => {
         setIsModalOpen(true);
     };
 
-    const handleSave = (saved) => {
-        if (editingWorkshop) {
-            setWorkshops(prev => prev.map(w => w.id === saved.id ? saved : w));
-        } else {
-            setWorkshops(prev => [...prev, saved]);
-        }
+    const handleSave = () => {
+        fetchWorkshops();
         setIsModalOpen(false);
         setEditingWorkshop(null);
     };
 
-    const handleConfirmDelete = () => {
-        setWorkshops(prev => prev.filter(w => w.id !== deleteTarget.id));
-        setDeleteTarget(null);
+    const handleConfirmDelete = async () => {
+        try {
+            await deleteWorkshop(deleteTarget._id);
+            fetchWorkshops();
+            setDeleteTarget(null);
+        } catch (err) {
+            console.error('Error deleting workshop:', err);
+            alert('Failed to delete workshop.');
+        }
     };
 
     return (
@@ -242,13 +278,20 @@ const WorkshopsPage = () => {
             <WorkshopRuleCard />
 
             {/* Table */}
-            <WorkshopTable
-                workshops={workshops}
-                onEdit={handleEdit}
-                onDelete={setDeleteTarget}
-                onAdd={handleAdd}
-                onView={setViewTarget}
-            />
+            {isLoading ? (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-20 flex flex-col items-center justify-center">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                    <p className="text-gray-500 font-medium">Loading workshops...</p>
+                </div>
+            ) : (
+                <WorkshopTable
+                    workshops={workshops}
+                    onEdit={handleEdit}
+                    onDelete={setDeleteTarget}
+                    onAdd={handleAdd}
+                    onView={setViewTarget}
+                />
+            )}
 
             {/* Workshop View Modal */}
             <WorkshopViewModal workshop={viewTarget} onClose={() => setViewTarget(null)} />

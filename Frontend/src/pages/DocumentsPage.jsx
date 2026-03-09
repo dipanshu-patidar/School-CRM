@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer, Loader2, Trash2 } from 'lucide-react';
 import DocumentsTable from '../components/DocumentsTable';
 import UploadDocumentModal from '../components/UploadDocumentModal';
 import DocumentPreviewModal from '../components/DocumentPreviewModal';
@@ -7,72 +7,99 @@ import CompletionRuleCard from '../components/CompletionRuleCard';
 import PCPReportForm from '../components/PCPReportForm';
 import PCPReportsTable from '../components/PCPReportsTable';
 import PCPReportViewModal from '../components/PCPReportViewModal';
-import { Trash2 } from 'lucide-react';
 import PrintHeader from '../components/PrintHeader';
-
-const initialDocs = [
-    { id: 1, studentName: 'John Doe', docName: 'Lease.pdf', date: '12 Mar 2026', status: 'Completed', size: '2.4 MB' },
-    { id: 2, studentName: 'Sara Smith', docName: 'Mortgage_Agreement.pdf', date: '10 Mar 2026', status: 'Secondary Completion', size: '4.1 MB' },
-];
-
-const initialPCPReports = [
-    { id: 201, studentName: 'John Doe', type: 'PCP / IGP Report', date: '05 Mar 2026', serviceDateRaw: '2026-03-05', staff: 'Sarah Lee', createdDate: '05 Mar 2026', status: 'Completed', purpose: 'Goal Setting', intervention: 'Direct Support', effectiveness: 'Highly Effective' },
-    { id: 202, studentName: 'Sara Smith', type: 'PCP / IGP Report', date: '01 Mar 2026', serviceDateRaw: '2026-03-01', staff: 'Tom Harris', createdDate: '02 Mar 2026', status: 'Draft', purpose: 'Initial Assessment', intervention: 'Consultation', effectiveness: 'Pending' },
-];
+import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport } from '../api/documentApi';
 
 const DocumentsPage = ({ role }) => {
-    // renamed local usage to match the prop
     const userRole = role;
 
-    const [documents, setDocuments] = useState(initialDocs);
-    const [pcpReports, setPcpReports] = useState(initialPCPReports);
+    const [documents, setDocuments] = useState([]);
+    const [pcpReports, setPcpReports] = useState([]);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [isPCPModalOpen, setIsPCPModalOpen] = useState(false);
     const [editingDoc, setEditingDoc] = useState(null);
     const [editingPCP, setEditingPCP] = useState(null);
-    const [activeTab, setActiveTab] = useState('pcp'); // 'pcp' or 'standard'
+    const [activeTab, setActiveTab] = useState('pcp');
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Modal state for view and delete
     const [previewDoc, setPreviewDoc] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
-    const handleUpload = (newDoc) => {
-        if (editingDoc) {
-            setDocuments(prev => prev.map(d => d.id === newDoc.id ? newDoc : d));
-        } else {
-            setDocuments(prev => [newDoc, ...prev]);
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const [docsData, pcpData] = await Promise.all([
+                getAllDocuments(),
+                getAllPcpReports()
+            ]);
+
+            // Format data for standard table
+            const formattedDocs = docsData.map(d => ({
+                id: d._id,
+                studentMongoId: d.studentMongoId,
+                studentName: d.studentName,
+                docName: d.name,
+                url: d.url,
+                date: d.uploadDate,
+                status: 'Completed', // Standard status
+                size: d.size || 'N/A'
+            }));
+
+            // Format data for PCP table
+            const formattedPCP = pcpData.map(r => ({
+                ...r,
+                id: r._id,
+                studentName: r.studentName,
+                type: 'PCP / IGP Report',
+                date: new Date(r.dateOfService).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                status: r.status,
+                staff: r.staffSignature
+            }));
+
+            setDocuments(formattedDocs);
+            setPcpReports(formattedPCP);
+        } catch (err) {
+            console.error('Error fetching document data:', err);
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleUpload = () => {
+        fetchData();
         setIsUploadOpen(false);
         setEditingDoc(null);
     };
 
-    const handleSavePCP = (newReport) => {
-        if (editingPCP) {
-            setPcpReports(prev => prev.map(r => r.id === newReport.id ? newReport : r));
-        } else {
-            setPcpReports(prev => [newReport, ...prev]);
+    const handleSavePCP = async (reportData, studentMongoId) => {
+        try {
+            await addPcpReport(studentMongoId, reportData);
+            fetchData();
+            setIsPCPModalOpen(false);
+            setEditingPCP(null);
+        } catch (err) {
+            console.error('Error saving PCP report:', err);
+            alert('Failed to save report.');
         }
-        setIsPCPModalOpen(false);
-        setEditingPCP(null);
     };
 
-    const handleEditPCP = (report) => {
-        setEditingPCP(report);
-        setIsPCPModalOpen(true);
-    };
-
-    const handleEdit = (doc) => {
-        setEditingDoc(doc);
-        setIsUploadOpen(true);
-    };
-
-    const handleDelete = () => {
-        if (deleteTarget.type === 'PCP / IGP Report') {
-            setPcpReports(prev => prev.filter(r => r.id !== deleteTarget.id));
-        } else {
-            setDocuments(prev => prev.filter(d => d.id !== deleteTarget.id));
+    const handleDelete = async () => {
+        try {
+            if (deleteTarget.type === 'PCP / IGP Report') {
+                await deletePcpReport(deleteTarget.studentMongoId, deleteTarget.id);
+            } else {
+                await deleteDocument(deleteTarget.studentMongoId, deleteTarget.id);
+            }
+            fetchData();
+            setDeleteTarget(null);
+        } catch (err) {
+            console.error('Error deleting:', err);
+            alert('Failed to delete item.');
         }
-        setDeleteTarget(null);
     };
 
     const handlePrintAll = () => {
@@ -80,8 +107,11 @@ const DocumentsPage = ({ role }) => {
     };
 
     const handleDownload = (doc) => {
-        // Mock download action
-        alert(`Downloading ${doc.docName}...`);
+        if (doc.url) {
+            window.open(doc.url, '_blank');
+        } else {
+            alert('No URL available for this document.');
+        }
     };
 
     return (
@@ -139,9 +169,6 @@ const DocumentsPage = ({ role }) => {
                                 }`}
                         >
                             PCP / IGP Reports
-                            {activeTab === 'pcp' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
-                            )}
                         </button>
                         <button
                             onClick={() => setActiveTab('standard')}
@@ -151,45 +178,49 @@ const DocumentsPage = ({ role }) => {
                                 }`}
                         >
                             Standard Documents
-                            {activeTab === 'standard' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
-                            )}
                         </button>
                     </div>
                 )}
 
-                {/* Tab Secret Content */}
+                {/* Main Content */}
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    {activeTab === 'pcp' || userRole === 'staff' ? (
-                        <PCPReportsTable
-                            reports={pcpReports}
-                            onView={setPreviewDoc}
-                            onEdit={handleEditPCP}
-                            onDownload={handleDownload}
-                            onDelete={setDeleteTarget}
-                            onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
-                            userRole={userRole}
-                        />
+                    {isLoading ? (
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-20 flex flex-col items-center justify-center">
+                            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                            <p className="text-gray-500 font-medium">Loading documents...</p>
+                        </div>
                     ) : (
-                        <div className="space-y-6">
-                            <div className="mb-2">
-                                <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
-                                <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
-                            </div>
-                            <DocumentsTable
-                                documents={documents}
+                        activeTab === 'pcp' || userRole === 'staff' ? (
+                            <PCPReportsTable
+                                reports={pcpReports}
                                 onView={setPreviewDoc}
+                                onEdit={(r) => { setEditingPCP(r); setIsPCPModalOpen(true); }}
                                 onDownload={handleDownload}
                                 onDelete={setDeleteTarget}
-                                onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
-                                onEdit={handleEdit}
+                                onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
+                                userRole={userRole}
                             />
-                        </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="mb-2">
+                                    <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
+                                    <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
+                                </div>
+                                <DocumentsTable
+                                    documents={documents}
+                                    onView={setPreviewDoc}
+                                    onDownload={handleDownload}
+                                    onDelete={setDeleteTarget}
+                                    onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
+                                    onEdit={(d) => { setEditingDoc(d); setIsUploadOpen(true); }}
+                                />
+                            </div>
+                        )
                     )}
                 </div>
             </div>
 
-            {/* Modals - Outside the hidden container */}
+            {/* Modals */}
             <UploadDocumentModal
                 isOpen={isUploadOpen}
                 onClose={() => { setIsUploadOpen(false); setEditingDoc(null); }}
@@ -203,7 +234,7 @@ const DocumentsPage = ({ role }) => {
                 onSave={handleSavePCP}
                 editData={editingPCP}
             />
-            {/* Correct view modal selection based on doc type */}
+
             {previewDoc && (
                 previewDoc.type === 'PCP / IGP Report' ? (
                     <PCPReportViewModal
@@ -218,6 +249,7 @@ const DocumentsPage = ({ role }) => {
                     />
                 )
             )}
+
             {/* Delete Confirmation Modal */}
             {deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

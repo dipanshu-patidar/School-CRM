@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
-import { X, FileText, Save, User, Calendar, Info, Activity, Target, Zap, FileUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, FileText, Save, User, Calendar, Info, Activity, Target, Zap, FileUp, Loader2 } from 'lucide-react';
 import DocumentUploadField from './DocumentUploadField';
-
-const STUDENTS = [
-    { id: 101, name: 'John Doe' },
-    { id: 102, name: 'Sara Smith' },
-    { id: 103, name: 'Mike Brown' },
-];
+import { getStudents } from '../api/studentApi';
 
 const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
+    const [students, setStudents] = useState([]);
+    const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+
     const [formData, setFormData] = useState({
-        studentId: '',
+        studentMongoId: '',
         dateOfService: new Date().toISOString().split('T')[0],
         serviceDescription: '',
         faceToFace: 'Face-to-Face',
@@ -23,17 +21,18 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
         status: 'Completed'
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isOpen) {
+            fetchStudents();
             if (editData) {
                 setFormData({
                     ...editData,
-                    studentId: STUDENTS.find(s => s.name === editData.studentName)?.id.toString() || '',
-                    dateOfService: editData.serviceDateRaw || new Date().toISOString().split('T')[0]
+                    studentMongoId: editData.studentMongoId || '',
+                    dateOfService: editData.dateOfService || new Date().toISOString().split('T')[0]
                 });
             } else {
                 setFormData({
-                    studentId: '',
+                    studentMongoId: '',
                     dateOfService: new Date().toISOString().split('T')[0],
                     serviceDescription: '',
                     faceToFace: 'Face-to-Face',
@@ -49,6 +48,18 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
         }
     }, [isOpen, editData]);
 
+    const fetchStudents = async () => {
+        try {
+            setIsLoadingStudents(true);
+            const data = await getStudents();
+            setStudents(data);
+        } catch (err) {
+            console.error('Error fetching students:', err);
+        } finally {
+            setIsLoadingStudents(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     const handleChange = (e) => {
@@ -62,20 +73,10 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
 
     const handleSubmit = (e, status = 'Completed') => {
         e.preventDefault();
-        const student = STUDENTS.find(s => s.id === parseInt(formData.studentId));
         onSave({
             ...formData,
-            id: editData ? editData.id : Date.now(),
-            studentName: student ? student.name : 'Unknown',
-            docName: 'PCP / IGP Report',
-            date: new Date(formData.dateOfService).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            serviceDateRaw: formData.dateOfService,
-            createdDate: editData ? editData.createdDate : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            status: status,
-            type: 'PCP / IGP Report',
-            staff: formData.staffSignature || 'Staff'
-        });
-        onClose();
+            status: status
+        }, formData.studentMongoId);
     };
 
     return (
@@ -89,7 +90,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                             <FileText size={24} className="text-primary" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">New PCP / IGP Report</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{editData ? 'Edit Report' : 'New PCP / IGP Report'}</h3>
                             <p className="text-sm text-gray-500 font-medium">Create a structured service documentation using P.I.E format.</p>
                         </div>
                     </div>
@@ -99,7 +100,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                 </div>
 
                 {/* Form Body */}
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/30">
+                <form id="pcpForm" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/30">
                     {/* SECTION 1 — BASIC INFORMATION */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 mb-2">
@@ -116,13 +117,14 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     <User size={16} className="absolute left-3 top-3 text-gray-400" />
                                     <select
                                         required
-                                        name="studentId"
-                                        value={formData.studentId}
+                                        name="studentMongoId"
+                                        value={formData.studentMongoId}
                                         onChange={handleChange}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
+                                        disabled={!!editData || isLoadingStudents}
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50"
                                     >
-                                        <option value="">Select Student...</option>
-                                        {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                        <option value="">{isLoadingStudents ? 'Loading Students...' : 'Select Student...'}</option>
+                                        {students.map(s => <option key={s._id} value={s._id}>{s.name} ({s.studentId})</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -302,7 +304,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                         Save as Draft
                     </button>
                     <button
-                        onClick={(e) => handleSubmit(e, 'Completed')}
+                        form="pcpForm"
                         type="submit"
                         className="flex items-center gap-2 px-8 py-2.5 bg-primary hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
                     >

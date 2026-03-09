@@ -5,6 +5,8 @@ export const getAllStudents = async () => {
     return response.data;
 };
 
+export const getStudents = getAllStudents;
+
 export const getStudent = async (id) => {
     const response = await api.get(`/api/students/${id}`);
     return response.data;

@@ -1,44 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer } from 'lucide-react';
+import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer, Loader2 } from 'lucide-react';
+import api from '../api/axios';
 import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
 import StudentTabs from '../components/StudentTabs';
 import PrintHeader from '../components/PrintHeader';
-
-const ALL_STUDENTS = [
-    {
-        id: 101, name: 'John Doe', points: 120, totalPoints: 250, status: 'Active',
-        phone: '+1 234 567 890', email: 'john@example.com',
-        assignedStaff: 'Sarah Lee', enrolledDate: '01 Jan 2026',
-    },
-    {
-        id: 102, name: 'Sara Smith', points: 250, totalPoints: 250, status: 'Completed',
-        phone: '+1 987 654 321', email: 'sara@example.com',
-        assignedStaff: 'Tom Harris', enrolledDate: '15 Jan 2026',
-    },
-    {
-        id: 103, name: 'Mike Brown', points: 60, totalPoints: 250, status: 'Active',
-        phone: '+1 456 789 012', email: 'mike@example.com',
-        assignedStaff: 'Sarah Lee', enrolledDate: '20 Jan 2026',
-    },
-    {
-        id: 104, name: 'Emily White', points: 180, totalPoints: 250, status: 'Active',
-        phone: '+1 321 654 987', email: 'emily@example.com',
-        assignedStaff: 'Carol Kim', enrolledDate: '05 Feb 2026',
-    },
-    {
-        id: 105, name: 'David Black', points: 300, totalPoints: 300, status: 'Completed',
-        phone: '+1 654 321 789', email: 'david@example.com',
-        assignedStaff: 'Tom Harris', enrolledDate: '10 Feb 2026',
-    },
-];
+import { getAllStaff } from '../api/staffApi';
+import { uploadDocument } from '../api/documentApi';
 
 /* ────────────────────────────────
    EDIT STUDENT MODAL
-──────────────────────────────── */
+   ──────────────────────────────── */
 const EditStudentModal = ({ student, onClose, onSave }) => {
-    const [form, setForm] = useState({ ...student });
+    const [form, setForm] = useState({
+        ...student,
+        assignedStaff: student.assignedStaff?._id || student.assignedStaff || ''
+    });
+    const [staffOptions, setStaffOptions] = useState([]);
+    const [isLoadingStaff, setIsLoadingStaff] = useState(false);
+
+    useEffect(() => {
+        const fetchStaff = async () => {
+            try {
+                setIsLoadingStaff(true);
+                const res = await getAllStaff();
+                setStaffOptions(res.data || []);
+            } catch (err) {
+                console.error('Failed to fetch staff', err);
+            } finally {
+                setIsLoadingStaff(false);
+            }
+        };
+        fetchStaff();
+    }, []);
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -48,7 +43,6 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-gray-900">Edit Student</h3>
                     <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer">
@@ -56,13 +50,11 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                     </button>
                 </div>
 
-                {/* Form */}
                 <div className="space-y-4">
                     {[
                         { label: 'Full Name', name: 'name', type: 'text' },
                         { label: 'Email', name: 'email', type: 'email' },
                         { label: 'Phone', name: 'phone', type: 'text' },
-                        { label: 'Assigned Staff', name: 'assignedStaff', type: 'text' },
                     ].map(field => (
                         <div key={field.name}>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">{field.label}</label>
@@ -75,6 +67,21 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                             />
                         </div>
                     ))}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Assigned Staff</label>
+                        <select
+                            name="assignedStaff"
+                            value={form.assignedStaff}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm cursor-pointer"
+                            disabled={isLoadingStaff}
+                        >
+                            <option value="">{isLoadingStaff ? 'Loading staff...' : 'Select staff member...'}</option>
+                            {staffOptions.map(staff => (
+                                <option key={staff._id} value={staff._id}>{staff.name} ({staff.email})</option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
                         <select
@@ -89,7 +96,6 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                     </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 mt-8">
                     <button onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer">
                         Cancel
@@ -108,34 +114,50 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
 
 /* ────────────────────────────────
    UPLOAD DOCUMENT MODAL
-──────────────────────────────── */
-const UploadDocumentModal = ({ onClose }) => {
+   ──────────────────────────────── */
+const UploadDocumentModal = ({ studentId, onClose, onUploadSuccess }) => {
     const [dragging, setDragging] = useState(false);
     const [file, setFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleFile = (e) => {
         if (e.target.files[0]) setFile(e.target.files[0]);
     };
 
+    const handleUpload = async () => {
+        if (!file) return;
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('document', file);
+        try {
+            await uploadDocument(studentId, formData);
+            onUploadSuccess();
+            onClose();
+        } catch (error) {
+            console.error('Upload failed', error);
+            alert('Failed to upload document.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => !isUploading && onClose()} />
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in-95 duration-200">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-gray-900">Upload Document</h3>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer">
+                    <button onClick={onClose} disabled={isUploading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors cursor-pointer">
                         <X size={18} />
                     </button>
                 </div>
 
-                {/* Drop Zone */}
                 <div
                     onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={(e) => { e.preventDefault(); setDragging(false); setFile(e.dataTransfer.files[0]); }}
                     className={`border-2 border-dashed rounded-xl p-10 text-center transition-all cursor-pointer ${dragging ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'}`}
-                    onClick={() => document.getElementById('file-input').click()}
+                    onClick={() => !isUploading && document.getElementById('file-input').click()}
                 >
                     <FileUp size={36} className="mx-auto mb-3 text-primary/50" />
                     {file ? (
@@ -152,17 +174,17 @@ const UploadDocumentModal = ({ onClose }) => {
                     <input id="file-input" type="file" className="hidden" onChange={handleFile} />
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 mt-6">
-                    <button onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer">
+                    <button onClick={onClose} disabled={isUploading} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer">
                         Cancel
                     </button>
                     <button
-                        onClick={onClose}
-                        disabled={!file}
+                        onClick={handleUpload}
+                        disabled={!file || isUploading}
                         className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:text-gray-400 text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
-                        <Upload size={16} /> Upload
+                        {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                        {isUploading ? 'Uploading...' : 'Upload'}
                     </button>
                 </div>
             </div>
@@ -172,22 +194,48 @@ const UploadDocumentModal = ({ onClose }) => {
 
 /* ────────────────────────────────
    MAIN PAGE
-──────────────────────────────── */
+   ──────────────────────────────── */
 const StudentProfilePage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [studentData, setStudentData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [studentData, setStudentData] = useState(
-        ALL_STUDENTS.find(s => s.id === parseInt(id)) || null
-    );
-
-    const handleSaveEdit = (updated) => {
-        setStudentData(updated);
-        setShowEditModal(false);
+    const fetchStudent = async () => {
+        try {
+            const res = await api.get(`/api/students/${id}`);
+            const data = res.data;
+            setStudentData({
+                ...data,
+                totalPoints: data.totalPoints || 250,
+                enrolledDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+            });
+        } catch (error) {
+            console.error('Error fetching student', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    useEffect(() => {
+        fetchStudent();
+    }, [id]);
+
+    const handleSaveEdit = async (updated) => {
+        try {
+            await api.put(`/api/students/${id}`, updated);
+            fetchStudent();
+            setShowEditModal(false);
+        } catch (error) {
+            console.error('Error updating student', error);
+            alert('Failed to update student profile.');
+        }
+    };
+
+    if (isLoading) return <div className="p-8 text-center font-medium">Loading Student Profile...</div>;
 
     if (!studentData) {
         return (
@@ -208,7 +256,6 @@ const StudentProfilePage = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Main Content Isolation - hidden when modals are open */}
             <div className={`space-y-6 ${(showEditModal || showUploadModal) ? 'no-print' : ''}`}>
                 <PrintHeader />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
@@ -248,19 +295,15 @@ const StudentProfilePage = () => {
                     </div>
                 </div>
 
-                {/* Profile Summary Card */}
                 <StudentProfileCard student={studentData} />
 
-                {/* Progress Bar */}
                 <div className="no-print">
                     <ProgressBar current={studentData.points} total={studentData.totalPoints} />
                 </div>
 
-                {/* Tabs */}
                 <StudentTabs student={studentData} />
             </div>
 
-            {/* Modals */}
             {showEditModal && (
                 <EditStudentModal
                     student={studentData}
@@ -269,7 +312,11 @@ const StudentProfilePage = () => {
                 />
             )}
             {showUploadModal && (
-                <UploadDocumentModal onClose={() => setShowUploadModal(false)} />
+                <UploadDocumentModal
+                    studentId={id}
+                    onClose={() => setShowUploadModal(false)}
+                    onUploadSuccess={fetchStudent}
+                />
             )}
         </div>
     );

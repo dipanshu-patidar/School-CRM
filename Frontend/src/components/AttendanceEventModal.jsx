@@ -1,52 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserCheck, BookOpen, Star, Calendar, Trash2, Pencil } from 'lucide-react';
-
-const STUDENTS = [
-    { id: 101, name: 'John Doe' },
-    { id: 102, name: 'Sara Smith' },
-    { id: 103, name: 'Mike Brown' },
-    { id: 104, name: 'Emily White' },
-    { id: 105, name: 'David Black' },
-];
-
-const WORKSHOPS = [
-    'Financial Literacy',
-    'Social Wellness',
-    'Emotional Support',
-    'Career Development',
-];
+import { X, UserCheck, BookOpen, Star, Calendar, Trash2, Pencil, Loader2 } from 'lucide-react';
+import { getStudents } from '../api/studentApi';
+import { getWorkshops } from '../api/workshopApi';
+import { addStudentAttendance } from '../api/attendanceApi';
 
 /* ── Mark Attendance Modal ─────────────────── */
 export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) => {
+    const [students, setStudents] = useState([]);
+    const [workshops, setWorkshops] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
     const [form, setForm] = useState({
-        studentId: '',
+        studentMongoId: '',
         workshop: '',
         date: selectedDate || '',
     });
 
     useEffect(() => {
         if (isOpen) {
-            setForm({ studentId: '', workshop: '', date: selectedDate || '' });
+            setForm({ studentMongoId: '', workshop: '', date: selectedDate || '' });
+            fetchData();
         }
     }, [isOpen, selectedDate]);
+
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const [studentData, workshopData] = await Promise.all([
+                getStudents(),
+                getWorkshops()
+            ]);
+            setStudents(studentData);
+            setWorkshops(workshopData);
+        } catch (err) {
+            console.error('Error fetching modal data:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     if (!isOpen) return null;
 
     const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.studentId || !form.workshop || !form.date) return;
-        const student = STUDENTS.find(s => s.id === parseInt(form.studentId));
-        onSave({
-            id: Date.now(),
-            studentId: parseInt(form.studentId),
-            studentName: student?.name || '',
-            workshop: form.workshop,
-            date: form.date,
-            points: 1,
-        });
-        onClose();
+        if (!form.studentMongoId || !form.workshop || !form.date) return;
+
+        try {
+            setIsLoading(true);
+            // Points are always 1 according to requirements
+            await addStudentAttendance(form.studentMongoId, {
+                workshopName: form.workshop,
+                pointsEarned: 1,
+                date: form.date
+            });
+            onSave(); // Refresh parent
+        } catch (err) {
+            console.error('Error saving attendance:', err);
+            alert('Failed to save attendance record.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -73,10 +88,16 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                             Select Student <span className="text-red-400">*</span>
                         </label>
-                        <select name="studentId" value={form.studentId} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer">
-                            <option value="">Choose a student...</option>
-                            {STUDENTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        <select
+                            name="studentMongoId"
+                            value={form.studentMongoId}
+                            onChange={handleChange}
+                            required
+                            disabled={isLoading}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50"
+                        >
+                            <option value="">{isLoading ? 'Loading students...' : 'Choose a student...'}</option>
+                            {students.map(s => <option key={s._id} value={s._id}>{s.name} ({s.studentId})</option>)}
                         </select>
                     </div>
 
@@ -85,10 +106,16 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                             Select Workshop <span className="text-red-400">*</span>
                         </label>
-                        <select name="workshop" value={form.workshop} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer">
-                            <option value="">Choose a workshop...</option>
-                            {WORKSHOPS.map(w => <option key={w} value={w}>{w}</option>)}
+                        <select
+                            name="workshop"
+                            value={form.workshop}
+                            onChange={handleChange}
+                            required
+                            disabled={isLoading}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50"
+                        >
+                            <option value="">{isLoading ? 'Loading workshops...' : 'Choose a workshop...'}</option>
+                            {workshops.map(w => <option key={w._id} value={w.name}>{w.name}</option>)}
                         </select>
                     </div>
 
@@ -97,8 +124,14 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                             Date <span className="text-red-400">*</span>
                         </label>
-                        <input type="date" name="date" value={form.date} onChange={handleChange} required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                        <input
+                            type="date"
+                            name="date"
+                            value={form.date}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
                     </div>
 
                     {/* Points info */}
@@ -109,8 +142,13 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
 
                     <div className="flex gap-3 pt-2">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-50 cursor-pointer transition-all">Cancel</button>
-                        <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2">
-                            <UserCheck size={16} /> Save Attendance
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
+                            Save Attendance
                         </button>
                     </div>
                 </form>
@@ -167,7 +205,7 @@ export const AttendanceEventModal = ({ record, onClose, onDelete }) => {
 
                     <div className="flex gap-3">
                         <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-bold hover:bg-gray-50 cursor-pointer transition-all">Close</button>
-                        <button onClick={() => { onDelete(record.id); onClose(); }}
+                        <button onClick={() => { onDelete(record._id); }}
                             className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 rounded-xl font-bold cursor-pointer transition-all">
                             <Trash2 size={15} /> Delete
                         </button>

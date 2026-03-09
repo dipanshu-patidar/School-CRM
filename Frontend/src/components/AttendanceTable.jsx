@@ -1,34 +1,134 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Plus, Trash2, CalendarDays } from 'lucide-react';
+import api from '../api/axios';
 
-const AttendanceTable = ({ records }) => {
+const AttendanceTable = ({ student, records = [] }) => {
+    const [attendance, setAttendance] = useState(records);
+    const [showInput, setShowInput] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [formData, setFormData] = useState({ workshopName: '', pointsEarned: 1 });
+
+    const handleAdd = async () => {
+        if (!formData.workshopName.trim()) return;
+        setIsSaving(true);
+        try {
+            const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const payload = { ...formData, date: today };
+            const res = await api.post(`/api/students/${student._id}/attendance`, payload);
+            setAttendance(res.data.data.attendance || []);
+            setFormData({ workshopName: '', pointsEarned: 1 });
+            setShowInput(false);
+            // Ideally we also trigger a parent fetch here if we wanted points globally updated, but for now this works.
+        } catch (error) {
+            console.error('Failed to add attendance', error);
+            alert('Error adding attendance');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this attendance record? Points will be deducted.")) return;
+        try {
+            const res = await api.delete(`/api/students/${student._id}/attendance/${id}`);
+            setAttendance(res.data.data.attendance || []);
+        } catch (error) {
+            console.error('Error deleting attendance', error);
+        }
+    };
+
     return (
-        <div className="overflow-x-auto">
-            {records.length === 0 ? (
-                <div className="text-center py-16 text-gray-400">
-                    <p className="font-medium">No attendance records found.</p>
+        <div className="p-6 space-y-4">
+            <div className="flex justify-end gap-2">
+                <button
+                    onClick={() => setShowInput(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer no-print"
+                >
+                    <Plus size={16} />
+                    Add Attendance
+                </button>
+            </div>
+
+            {showInput && (
+                <div className="bg-primary/5 rounded-xl border border-primary/10 p-4 space-y-4">
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Workshop / Event</label>
+                            <input
+                                type="text"
+                                value={formData.workshopName}
+                                onChange={(e) => setFormData(prev => ({ ...prev, workshopName: e.target.value }))}
+                                placeholder="eg. Financial Literacy"
+                                className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                        <div className="w-32">
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Points</label>
+                            <input
+                                type="number"
+                                min="1"
+                                value={formData.pointsEarned}
+                                onChange={(e) => setFormData(prev => ({ ...prev, pointsEarned: Number(e.target.value) }))}
+                                className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            onClick={() => setShowInput(false)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            disabled={isSaving}
+                            onClick={handleAdd}
+                            className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer disabled:bg-gray-200"
+                        >
+                            {isSaving ? 'Saving...' : 'Save Record'}
+                        </button>
+                    </div>
                 </div>
-            ) : (
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50/50">
-                            <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Workshop Name</th>
-                            <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Points Earned</th>
-                            <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {records.map((record, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50 transition-colors cursor-pointer">
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{record.workshop}</td>
-                                <td className="px-6 py-4">
-                                    <span className="text-sm font-bold text-emerald-600">{record.points}</span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">{record.date}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
             )}
+
+            <div className="overflow-x-auto">
+                {attendance.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400">
+                        <CalendarDays size={40} className="mx-auto mb-3 opacity-30" />
+                        <p className="font-medium">No attendance records found.</p>
+                    </div>
+                ) : (
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-gray-50/50">
+                                <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Workshop Name</th>
+                                <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Points Earned</th>
+                                <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider text-right no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {attendance.map((record) => (
+                                <tr key={record._id} className="hover:bg-gray-50 transition-colors group">
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{record.workshopName}</td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-sm font-bold text-emerald-600">+{record.pointsEarned}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">{record.date}</td>
+                                    <td className="px-6 py-4 text-right no-print">
+                                        <button
+                                            onClick={() => handleDelete(record._id)}
+                                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
 };

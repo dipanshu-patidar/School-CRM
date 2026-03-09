@@ -5,6 +5,9 @@ import { Search, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
 const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     const location = useLocation();
 
+    const userName = localStorage.getItem('userName') || (role === 'admin' ? 'Admin' : 'Staff');
+    const userRole = localStorage.getItem('userRole') || role;
+
     const getPageTitle = () => {
         const path = location.pathname;
         if (path === '/dashboard') return 'Dashboard Overview';
@@ -49,8 +52,8 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                 {/* User Profile Dropdown Simulation */}
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold text-text">{role === 'admin' ? 'John Doe' : 'Staff Member'}</p>
-                        <p className="text-xs text-gray-500 capitalize">{role}</p>
+                        <p className="text-sm font-semibold text-text">{userName}</p>
+                        <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                     </div>
                     <div className="relative group">
                         <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">

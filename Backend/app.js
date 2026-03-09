@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const studentRoutes = require('./routes/studentRoutes');
+const userRoutes = require('./routes/userRoutes');
 const staffRoutes = require('./routes/staffRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const studentRoutes = require('./routes/studentRoutes');
+const workshopRoutes = require('./routes/workshopRoutes');
 
 const app = express();
 
@@ -15,9 +17,11 @@ app.use(cors());
 
 // Mount routers
 app.use('/api/auth', authRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/students', studentRoutes);
+app.use('/api/workshops', workshopRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

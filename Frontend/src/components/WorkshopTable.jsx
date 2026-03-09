@@ -37,7 +37,7 @@ const WorkshopTable = ({ workshops, onEdit, onDelete, onAdd, onView }) => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {workshops.map((w) => (
-                            <WorkshopRow key={w.id} workshop={w} onEdit={onEdit} onDelete={onDelete} onView={onView} />
+                            <WorkshopRow key={w._id} workshop={w} onEdit={onEdit} onDelete={onDelete} onView={onView} />
                         ))}
                     </tbody>
                 </table>
@@ -46,7 +46,7 @@ const WorkshopTable = ({ workshops, onEdit, onDelete, onAdd, onView }) => {
             {/* Mobile Card List */}
             <div className="md:hidden p-4 bg-gray-50/30">
                 {workshops.map((w) => (
-                    <WorkshopRow key={w.id} workshop={w} onEdit={onEdit} onDelete={onDelete} onView={onView} />
+                    <WorkshopRow key={w._id} workshop={w} onEdit={onEdit} onDelete={onDelete} onView={onView} />
                 ))}
             </div>
 

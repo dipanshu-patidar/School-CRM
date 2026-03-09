@@ -8,11 +8,9 @@ const TABS = ['Attendance', 'Documents', 'Notes'];
 const StudentTabs = ({ student }) => {
     const [activeTab, setActiveTab] = useState('Attendance');
 
-    const attendanceRecords = [
-        { workshop: 'Financial Literacy', points: '+1', date: '10 Mar 2026' },
-        { workshop: 'Social Wellness', points: '+1', date: '12 Mar 2026' },
-        { workshop: 'Career Development', points: '+1', date: '14 Mar 2026' },
-    ];
+    const attendanceRecords = student?.attendance || [];
+    const notes = student?.notes || [];
+    const documents = student?.documents || [];
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -34,9 +32,9 @@ const StudentTabs = ({ student }) => {
 
             {/* Tab Content */}
             <div className="transition-all">
-                {activeTab === 'Attendance' && <AttendanceTable records={attendanceRecords} />}
-                {activeTab === 'Documents' && <DocumentsList />}
-                {activeTab === 'Notes' && <NotesSection />}
+                {activeTab === 'Attendance' && <AttendanceTable student={student} records={attendanceRecords} />}
+                {activeTab === 'Documents' && <DocumentsList student={student} initialDocuments={documents} />}
+                {activeTab === 'Notes' && <NotesSection student={student} initialNotes={notes} />}
             </div>
         </div>
     );

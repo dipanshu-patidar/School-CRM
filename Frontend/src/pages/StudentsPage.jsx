@@ -22,8 +22,12 @@ const StudentsPage = () => {
     const fetchStudents = async () => {
         try {
             setLoading(true);
-            const response = await getAllStudents();
-            setStudents(response.data);
+            const data = await getAllStudents();
+            // getAllStudents returns the response data directly.
+            // If the controller returns a list, data IS the list.
+            // If the controller returns { success, data }, then data.data is the list.
+            // Our merged controller returns the array directly for getStudents.
+            setStudents(Array.isArray(data) ? data : (data.data || []));
             setError(null);
         } catch (err) {
             console.error('Error fetching students:', err);
@@ -37,10 +41,10 @@ const StudentsPage = () => {
         fetchStudents();
     }, []);
 
-    const filteredStudents = students.filter(student => {
-        const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredStudents = (students || []).filter(student => {
+        const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student._id.toString().includes(searchTerm);
+            student._id?.toString().includes(searchTerm);
         const matchesStatus = statusFilter === 'All' || student.status === statusFilter;
         return matchesSearch && matchesStatus;
     });

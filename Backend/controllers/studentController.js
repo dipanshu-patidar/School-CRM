@@ -2,56 +2,67 @@ const Student = require('../models/Student');
 
 // @desc    Get all students
 // @route   GET /api/students
-// @access  Private
-const getAllStudents = async (req, res) => {
+// @access  Private (Admin: all, Staff: assigned only)
+const getStudents = async (req, res) => {
     try {
-        const isStaff = req.user.role === 'staff';
-        const filter = isStaff ? { assignedStaff: req.user.name } : {};
-
-        const students = await Student.find(filter).sort({ createdAt: -1 });
-
-        res.status(200).json({
-            success: true,
-            count: students.length,
-            data: students
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-// @desc    Get single student
-// @route   GET /api/students/:id
-// @access  Private
-const getStudent = async (req, res) => {
-    try {
-        const student = await Student.findById(req.params.id);
-
-        if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+        let students;
+        if (req.user.role === 'admin') {
+            students = await Student.find().populate('assignedStaff', 'name email');
+        } else {
+            // Staff sees only their assigned students
+            students = await Student.find({ assignedStaff: req.user._id }).populate('assignedStaff', 'name email');
         }
 
-        res.status(200).json({ success: true, data: student });
+        // Map to match frontend expectations
+        const formattedStudents = students.map(student => ({
+            id: student.studentId,
+            _id: student._id,
+            name: student.name,
+            points: student.points,
+            status: student.status,
+            phone: student.phone,
+            email: student.email,
+            assignedStaff: student.assignedStaff ? {
+                _id: student.assignedStaff._id,
+                name: student.assignedStaff.name
+            } : null
+        }));
+
+        res.status(200).json(formattedStudents);
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
 
-// @desc    Create new student
+// @desc    Create student
 // @route   POST /api/students
-// @access  Private (Admin only or restricted staff)
+// @access  Private/Admin
 const createStudent = async (req, res) => {
+    const { name, phone, email, assignedStaff } = req.body;
+
+    if (!name || !phone || !email || !assignedStaff) {
+        return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+    }
+
     try {
-        // If staff creates, auto-assign to them
-        if (req.user.role === 'staff') {
-            req.body.assignedStaff = req.user.name;
+        // Check if student with email already exists
+        const emailExists = await Student.findOne({ email });
+        if (emailExists) {
+            return res.status(400).json({ success: false, message: 'Student with this email already exists' });
         }
 
-        const student = await Student.create(req.body);
+        const student = await Student.create({
+            name,
+            phone,
+            email,
+            assignedStaff
+        });
 
-        res.status(201).json({ success: true, data: student });
+        res.status(201).json({
+            success: true,
+            data: student
+        });
     } catch (error) {
         console.error(error);
         if (error.code === 11000) {
@@ -61,9 +72,48 @@ const createStudent = async (req, res) => {
     }
 };
 
+// @desc    Get student profile
+// @route   GET /api/students/:id
+// @access  Private
+const getStudentById = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id).populate('assignedStaff', 'name email');
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
+        // Check if staff is authorized to view this student
+        if (req.user.role !== 'admin' && student.assignedStaff._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to access this student' });
+        }
+
+        res.status(200).json({
+            id: student.studentId,
+            _id: student._id,
+            name: student.name,
+            phone: student.phone,
+            email: student.email,
+            points: student.points,
+            status: student.status,
+            assignedStaff: student.assignedStaff ? {
+                _id: student.assignedStaff._id,
+                name: student.assignedStaff.name
+            } : null,
+            progress: `${student.points} / 250`,
+            notes: student.notes,
+            attendance: student.attendance,
+            documents: student.documents
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
 // @desc    Update student
 // @route   PUT /api/students/:id
-// @access  Private
+// @access  Private/Admin
 const updateStudent = async (req, res) => {
     try {
         let student = await Student.findById(req.params.id);
@@ -72,17 +122,23 @@ const updateStudent = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
 
-        // Make sure user is student owner or admin
-        if (req.user.role === 'staff' && student.assignedStaff !== req.user.name) {
-            return res.status(401).json({ success: false, message: 'Not authorized to update this student' });
-        }
+        // Only update allowed fields
+        const { name, phone, email, assignedStaff, points } = req.body;
 
-        student = await Student.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
+        if (name) student.name = name;
+        if (phone) student.phone = phone;
+        if (email) student.email = email;
+        if (assignedStaff) student.assignedStaff = assignedStaff;
+        if (points !== undefined) student.points = points; // points logic handled by pre-save hook
+
+        await student.save(); // using save to trigger pre-save hook for status updates
+
+        const updatedStudent = await Student.findById(req.params.id).populate('assignedStaff', 'name email');
+
+        res.status(200).json({
+            success: true,
+            data: updatedStudent
         });
-
-        res.status(200).json({ success: true, data: student });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -91,7 +147,7 @@ const updateStudent = async (req, res) => {
 
 // @desc    Delete student
 // @route   DELETE /api/students/:id
-// @access  Private
+// @access  Private/Admin
 const deleteStudent = async (req, res) => {
     try {
         const student = await Student.findById(req.params.id);
@@ -100,14 +156,12 @@ const deleteStudent = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
 
-        // Make sure user is student owner or admin
-        if (req.user.role === 'staff' && student.assignedStaff !== req.user.name) {
-            return res.status(401).json({ success: false, message: 'Not authorized to delete this student' });
-        }
-
         await student.deleteOne();
 
-        res.status(200).json({ success: true, data: {} });
+        res.status(200).json({
+            success: true,
+            data: {}
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -115,9 +169,9 @@ const deleteStudent = async (req, res) => {
 };
 
 module.exports = {
-    getAllStudents,
-    getStudent,
+    getStudents,
     createStudent,
+    getStudentById,
     updateStudent,
     deleteStudent
 };

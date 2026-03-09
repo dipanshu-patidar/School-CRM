@@ -1,26 +1,37 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, StickyNote, Printer } from 'lucide-react';
+import api from '../api/axios';
 
-const NotesSection = () => {
-    const [notes, setNotes] = useState([
-        { id: 1, text: 'Student needs housing support.', date: '10 Mar 2026' },
-        { id: 2, text: 'Good progress in workshops this week.', date: '12 Mar 2026' },
-    ]);
+const NotesSection = ({ student, initialNotes = [] }) => {
+    const [notes, setNotes] = useState(initialNotes);
     const [newNote, setNewNote] = useState('');
     const [showInput, setShowInput] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleAddNote = () => {
+    const handleAddNote = async () => {
         if (!newNote.trim()) return;
-        setNotes(prev => [
-            { id: Date.now(), text: newNote.trim(), date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) },
-            ...prev,
-        ]);
-        setNewNote('');
-        setShowInput(false);
+        setIsSaving(true);
+        try {
+            const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const res = await api.post(`/api/students/${student._id}/notes`, { text: newNote.trim(), date: today });
+            setNotes(res.data.data);
+            setNewNote('');
+            setShowInput(false);
+        } catch (error) {
+            console.error('Failed to add note', error);
+            alert('Error adding note');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleDelete = (id) => {
-        setNotes(prev => prev.filter(n => n.id !== id));
+    const handleDelete = async (id) => {
+        try {
+            const res = await api.delete(`/api/students/${student._id}/notes/${id}`);
+            setNotes(res.data.data);
+        } catch (error) {
+            console.error('Error deleting note', error);
+        }
     };
 
     return (
@@ -60,10 +71,11 @@ const NotesSection = () => {
                             Cancel
                         </button>
                         <button
+                            disabled={isSaving}
                             onClick={handleAddNote}
-                            className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer"
+                            className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer disabled:bg-gray-200"
                         >
-                            Save Note
+                            {isSaving ? 'Saving...' : 'Save Note'}
                         </button>
                     </div>
                 </div>
@@ -77,7 +89,7 @@ const NotesSection = () => {
             ) : (
                 <div className="space-y-3">
                     {notes.map((note) => (
-                        <div key={note.id} className="bg-amber-50 border border-amber-100 rounded-xl p-4 group hover:shadow-sm transition-all">
+                        <div key={note._id} className="bg-amber-50 border border-amber-100 rounded-xl p-4 group hover:shadow-sm transition-all">
                             <div className="flex items-start justify-between gap-4">
                                 <p className="text-sm text-gray-800 leading-relaxed flex-1">{note.text}</p>
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all no-print">
@@ -90,7 +102,7 @@ const NotesSection = () => {
                                     </button>
                                     <button
                                         title="Delete Note"
-                                        onClick={() => handleDelete(note.id)}
+                                        onClick={() => handleDelete(note._id)}
                                         className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
                                     >
                                         <Trash2 size={14} />

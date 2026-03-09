@@ -8,7 +8,7 @@ const User = require('../models/User');
 const getDashboardStats = async (req, res) => {
     try {
         const isStaff = req.user.role === 'staff';
-        const filter = isStaff ? { assignedStaff: req.user.name } : {};
+        const filter = isStaff ? { assignedStaff: req.user._id } : {};
 
         const totalStudents = await Student.countDocuments(filter);
         const activeStudents = await Student.countDocuments({ ...filter, status: 'Active' });

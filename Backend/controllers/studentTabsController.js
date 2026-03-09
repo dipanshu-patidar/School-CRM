@@ -1,5 +1,7 @@
 const Student = require('../models/Student');
 const { cloudinary } = require('../config/cloudinary');
+const https = require('https');
+const http = require('http');
 
 // ─────────────────────────────────────────────────────────
 // NOTES
@@ -168,11 +170,41 @@ const deleteDocument = async (req, res) => {
     }
 };
 
+// @desc    Download Document (proxy with correct filename)
+// @route   GET /api/students/:id/documents/:docId/download
+// @access  Private
+const downloadDocument = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+        if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+
+        const doc = student.documents.find(d => d._id.toString() === req.params.docId);
+        if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
+
+        // Set headers so browser downloads with the correct filename
+        res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+
+        // Pipe the file from Cloudinary through our server to the client
+        const protocol = doc.url.startsWith('https') ? https : http;
+        protocol.get(doc.url, (fileStream) => {
+            fileStream.pipe(res);
+        }).on('error', (err) => {
+            console.error('Proxy download error:', err);
+            res.status(500).json({ success: false, message: 'Failed to download file' });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
 module.exports = {
     addNote,
     deleteNote,
     addAttendance,
     deleteAttendance,
     uploadDocument,
-    deleteDocument
+    deleteDocument,
+    downloadDocument
 };

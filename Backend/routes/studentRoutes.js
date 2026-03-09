@@ -14,7 +14,8 @@ const {
     addAttendance,
     deleteAttendance,
     uploadDocument,
-    deleteDocument
+    deleteDocument,
+    downloadDocument
 } = require('../controllers/studentTabsController');
 
 const { upload } = require('../config/cloudinary');
@@ -44,6 +45,8 @@ router.route('/:id/attendance/:attId')
 // Documents routes
 router.route('/:id/documents')
     .post(protect, upload.single('document'), uploadDocument);
+router.route('/:id/documents/:docId/download')
+    .get(protect, downloadDocument);
 router.route('/:id/documents/:docId')
     .delete(protect, authorize('admin'), deleteDocument);
 

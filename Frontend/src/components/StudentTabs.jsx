@@ -5,8 +5,11 @@ import NotesSection from './NotesSection';
 
 const TABS = ['Attendance', 'Documents', 'Notes'];
 
-const StudentTabs = ({ student }) => {
-    const [activeTab, setActiveTab] = useState('Attendance');
+const StudentTabs = ({ student, activeTab: externalTab, setActiveTab: setExternalTab, triggerDocumentUpload, setTriggerDocumentUpload }) => {
+    const [localTab, setLocalTab] = useState('Attendance');
+
+    const activeTab = externalTab !== undefined ? externalTab : localTab;
+    const setActiveTab = setExternalTab !== undefined ? setExternalTab : setLocalTab;
 
     const attendanceRecords = student?.attendance || [];
     const notes = student?.notes || [];
@@ -33,7 +36,14 @@ const StudentTabs = ({ student }) => {
             {/* Tab Content */}
             <div className="transition-all">
                 {activeTab === 'Attendance' && <AttendanceTable student={student} records={attendanceRecords} />}
-                {activeTab === 'Documents' && <DocumentsList student={student} initialDocuments={documents} />}
+                {activeTab === 'Documents' && (
+                    <DocumentsList
+                        student={student}
+                        initialDocuments={documents}
+                        triggerUpload={triggerDocumentUpload}
+                        onUploadTriggered={() => setTriggerDocumentUpload && setTriggerDocumentUpload(false)}
+                    />
+                )}
                 {activeTab === 'Notes' && <NotesSection student={student} initialNotes={notes} />}
             </div>
         </div>

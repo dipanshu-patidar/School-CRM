@@ -4,6 +4,7 @@ import ProfileSettings from '../components/ProfileSettings';
 import ProgramSettings from '../components/ProgramSettings';
 import CompletionRules from '../components/CompletionRules';
 import DocumentSettings from '../components/DocumentSettings';
+import StaffManagement from '../components/StaffManagement';
 
 const SettingsPage = ({ role }) => {
     const [activeTab, setActiveTab] = useState('profile');
@@ -18,6 +19,8 @@ const SettingsPage = ({ role }) => {
                 return <CompletionRules />;
             case 'documents':
                 return <DocumentSettings />;
+            case 'staff':
+                return <StaffManagement />;
             default:
                 return <ProfileSettings />;
         }

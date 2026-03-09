@@ -6,6 +6,7 @@ const MENU_ITEMS = [
     { id: 'program', label: 'Program Settings', icon: Settings },
     { id: 'rules', label: 'Completion Rules', icon: Target },
     { id: 'documents', label: 'Document Settings', icon: FileType },
+    { id: 'staff', label: 'Staff Management', icon: Users },
 ];
 
 const SettingsSidebar = ({ activeTab, setActiveTab, role }) => {

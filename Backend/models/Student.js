@@ -38,6 +38,28 @@ const studentSchema = new mongoose.Schema(
             ref: 'User',
             required: true,
         },
+        notes: [
+            {
+                text: { type: String, required: true },
+                date: { type: String, required: true },
+            }
+        ],
+        attendance: [
+            {
+                workshopName: { type: String, required: true },
+                pointsEarned: { type: Number, required: true },
+                date: { type: String, required: true },
+            }
+        ],
+        documents: [
+            {
+                name: { type: String, required: true },
+                url: { type: String, required: true },
+                size: { type: String },
+                uploadDate: { type: String, required: true },
+                publicId: { type: String } // Needed to delete from Cloudinary later
+            }
+        ]
     },
     {
         timestamps: true,

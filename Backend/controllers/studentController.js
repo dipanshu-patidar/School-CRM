@@ -97,7 +97,10 @@ const getStudentById = async (req, res) => {
                 _id: student.assignedStaff._id,
                 name: student.assignedStaff.name
             } : null,
-            progress: `${student.points} / 250`
+            progress: `${student.points} / 250`,
+            notes: student.notes,
+            attendance: student.attendance,
+            documents: student.documents
         });
     } catch (error) {
         console.error(error);

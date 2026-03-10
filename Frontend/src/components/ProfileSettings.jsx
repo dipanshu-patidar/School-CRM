@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { updateProfile, getMe } from '../api/userApi';
+import toast from 'react-hot-toast';
 
 const ProfileSettings = () => {
     const [user, setUser] = useState({});
@@ -15,7 +16,6 @@ const ProfileSettings = () => {
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [status, setStatus] = useState({ type: '', message: '' });
 
     const [avatarPreview, setAvatarPreview] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=256&h=256&auto=format&fit=crop');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -48,26 +48,30 @@ const ProfileSettings = () => {
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         if (passwords.newPassword && passwords.newPassword !== passwords.confirmPassword) {
-            setStatus({ type: 'error', message: 'Passwords do not match.' });
+            toast.error('Passwords do not match.');
             return;
         }
 
-        try {
-            setIsLoading(true);
-            const formData = new FormData();
-            formData.append('name', personalInfo.name);
-            formData.append('email', personalInfo.email);
+        setIsLoading(true);
+        const formData = new FormData();
+        formData.append('name', personalInfo.name);
+        formData.append('email', personalInfo.email);
 
-            if (passwords.newPassword) {
-                formData.append('password', passwords.newPassword);
-            }
+        if (passwords.newPassword) {
+            formData.append('password', passwords.newPassword);
+        }
 
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
-            }
+        if (avatarFile) {
+            formData.append('avatar', avatarFile);
+        }
 
-            const response = await updateProfile(formData);
+        const updatePromise = updateProfile(formData);
 
+        toast.promise(updatePromise, {
+            loading: 'Updating profile...',
+            success: 'Profile updated successfully!',
+            error: (err) => err.response?.data?.message || 'Failed to update profile.'
+        }).then((response) => {
             // Update session storage
             const updatedUser = response.data;
             const currentSessionUser = JSON.parse(sessionStorage.getItem('user')) || {};
@@ -78,7 +82,6 @@ const ProfileSettings = () => {
             }
             setUser(updatedUser);
 
-            setStatus({ type: 'success', message: 'Profile updated successfully!' });
             setPasswords({ newPassword: '', confirmPassword: '' });
             setAvatarFile(null);
 
@@ -88,20 +91,15 @@ const ProfileSettings = () => {
                     : `http://localhost:5000${updatedUser.avatar}`;
                 setAvatarPreview(avatarUrl);
             }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            setStatus({ type: 'error', message: err.response?.data?.message || 'Failed to update profile.' });
-        } finally {
-            setIsLoading(false);
-            setTimeout(() => setStatus({ type: '', message: '' }), 5000);
-        }
+        }).catch((err) => console.error('Error updating profile:', err))
+            .finally(() => setIsLoading(false));
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
-                alert("File size should not be more than 2MB.");
+                toast.error("File size should not be more than 2MB.");
                 return;
             }
             setAvatarFile(file);
@@ -111,14 +109,6 @@ const ProfileSettings = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-            {/* Status Message */}
-            {status.message && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
-                    {status.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
-                    <p className="text-sm font-bold">{status.message}</p>
-                </div>
-            )}
-
             {/* Personal Info Card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
                 <div className="flex items-center gap-2 mb-8">

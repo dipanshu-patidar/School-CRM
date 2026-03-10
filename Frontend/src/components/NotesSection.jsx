@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, StickyNote, Printer } from 'lucide-react';
 import api from '../api/axios';
+import toast from 'react-hot-toast';
 
 const NotesSection = ({ student, initialNotes = [] }) => {
     const [notes, setNotes] = useState(initialNotes);
@@ -11,27 +12,32 @@ const NotesSection = ({ student, initialNotes = [] }) => {
     const handleAddNote = async () => {
         if (!newNote.trim()) return;
         setIsSaving(true);
-        try {
-            const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            const res = await api.post(`/api/students/${student._id}/notes`, { text: newNote.trim(), date: today });
+        const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const savePromise = api.post(`/api/students/${student._id}/notes`, { text: newNote.trim(), date: today });
+
+        toast.promise(savePromise, {
+            loading: 'Saving note...',
+            success: 'Note added successfully!',
+            error: 'Error adding note'
+        }).then((res) => {
             setNotes(res.data.data);
             setNewNote('');
             setShowInput(false);
-        } catch (error) {
-            console.error('Failed to add note', error);
-            alert('Error adding note');
-        } finally {
-            setIsSaving(false);
-        }
+        }).catch((error) => console.error('Failed to add note', error))
+            .finally(() => setIsSaving(false));
     };
 
     const handleDelete = async (id) => {
-        try {
-            const res = await api.delete(`/api/students/${student._id}/notes/${id}`);
+        const deletePromise = api.delete(`/api/students/${student._id}/notes/${id}`);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting note...',
+            success: 'Note deleted!',
+            error: 'Error deleting note'
+        }).then((res) => {
             setNotes(res.data.data);
-        } catch (error) {
-            console.error('Error deleting note', error);
-        }
+        }).catch((error) => console.error('Error deleting note', error));
     };
 
     return (

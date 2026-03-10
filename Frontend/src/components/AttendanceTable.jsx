@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, CalendarDays } from 'lucide-react';
 import api from '../api/axios';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import toast from 'react-hot-toast';
 
 const AttendanceTable = ({ student, records = [] }) => {
     const navigate = useNavigate();
@@ -19,20 +20,21 @@ const AttendanceTable = ({ student, records = [] }) => {
     const handleAdd = async () => {
         if (!formData.workshopName.trim()) return;
         setIsSaving(true);
-        try {
-            const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            const payload = { ...formData, date: today };
-            const res = await api.post(`/api/students/${student._id}/attendance`, payload);
+        const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const payload = { ...formData, date: today };
+
+        const savePromise = api.post(`/api/students/${student._id}/attendance`, payload);
+
+        toast.promise(savePromise, {
+            loading: 'Saving attendance...',
+            success: 'Attendance recorded successfully!',
+            error: 'Failed to add attendance'
+        }).then((res) => {
             setAttendance(res.data.data.attendance || []);
             setFormData({ workshopName: '', pointsEarned: 1 });
             setShowInput(false);
-            // Ideally we also trigger a parent fetch here if we wanted points globally updated, but for now this works.
-        } catch (error) {
-            console.error('Failed to add attendance', error);
-            alert('Error adding attendance');
-        } finally {
-            setIsSaving(false);
-        }
+        }).catch((error) => console.error('Failed to add attendance', error))
+            .finally(() => setIsSaving(false));
     };
 
     const handleDeleteClick = (record) => {
@@ -43,17 +45,19 @@ const AttendanceTable = ({ student, records = [] }) => {
     const confirmDelete = async () => {
         if (!attendanceToDelete) return;
         setIsDeleting(true);
-        try {
-            const res = await api.delete(`/api/students/${student._id}/attendance/${attendanceToDelete._id}`);
+
+        const deletePromise = api.delete(`/api/students/${student._id}/attendance/${attendanceToDelete._id}`);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting attendance...',
+            success: 'Attendance deleted successfully!',
+            error: 'Failed to delete attendance record.'
+        }).then((res) => {
             setAttendance(res.data.data.attendance || []);
             setIsDeleteModalOpen(false);
             setAttendanceToDelete(null);
-        } catch (error) {
-            console.error('Error deleting attendance', error);
-            alert('Failed to delete attendance record.');
-        } finally {
-            setIsDeleting(false);
-        }
+        }).catch((error) => console.error('Error deleting attendance', error))
+            .finally(() => setIsDeleting(false));
     };
 
     return (

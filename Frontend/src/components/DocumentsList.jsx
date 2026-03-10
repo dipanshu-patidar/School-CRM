@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { FileText, Download, Trash2, Upload, X, FileUp, AlertTriangle } from 'lucide-react';
 import api from '../api/axios';
+import toast from 'react-hot-toast';
 
 /* ── Inline Upload Modal ──────────────────────── */
 const UploadModal = ({ onClose, onUpload }) => {
@@ -79,38 +80,45 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
         const formData = new FormData();
         formData.append('document', file);
 
-        try {
-            const res = await api.post(`/api/students/${student._id}/documents`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+        const uploadPromise = api.post(`/api/students/${student._id}/documents`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        toast.promise(uploadPromise, {
+            loading: 'Uploading document...',
+            success: 'Document uploaded successfully!',
+            error: 'Upload failed.'
+        }).then((res) => {
             setDocuments(res.data.data);
             setShowUpload(false);
-        } catch (error) {
-            console.error('Error uploading document', error);
-            alert('Upload failed.');
-        } finally {
-            setIsUploading(false);
-        }
+        }).catch((error) => console.error('Error uploading document', error))
+            .finally(() => setIsUploading(false));
     };
 
     const handleDeleteRequest = (doc) => setDeleteTarget(doc);
 
     const handleConfirmDelete = async () => {
         if (!deleteTarget) return;
-        try {
-            const res = await api.delete(`/api/students/${student._id}/documents/${deleteTarget._id}`);
+        const deletePromise = api.delete(`/api/students/${student._id}/documents/${deleteTarget._id}`);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting document...',
+            success: 'Document deleted successfully!',
+            error: 'Error deleting document'
+        }).then((res) => {
             setDocuments(res.data.data);
             setDeleteTarget(null);
-        } catch (error) {
-            console.error('Error deleting document', error);
-        }
+        }).catch((error) => console.error('Error deleting document', error));
     };
 
     const handleDownload = async (docId, name) => {
-        try {
-            const doc = documents.find(d => d._id === docId);
-            if (!doc || !doc.url) return alert('Document URL not found.');
+        const doc = documents.find(d => d._id === docId);
+        if (!doc || !doc.url) {
+            toast.error('Document URL not found.');
+            return;
+        }
 
+        const downloadPromise = (async () => {
             let fileName = name || doc.name || 'document';
             if (!fileName.toLowerCase().endsWith('.pdf')) fileName = `${fileName}.pdf`;
 
@@ -150,11 +158,17 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
+                return;
             }
-        } catch (err) {
-            console.error('Download failed:', err);
-            alert('Download failed. Please try again.');
-        }
+
+            throw new Error('No blob data available');
+        })();
+
+        toast.promise(downloadPromise, {
+            loading: 'Downloading document...',
+            success: 'Document downloaded successfully!',
+            error: 'Download failed. Please try again.'
+        }).catch((err) => console.error('Download failed:', err));
     };
 
     const getThumbnailUrl = (doc) => {

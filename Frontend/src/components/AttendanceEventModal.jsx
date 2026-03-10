@@ -3,6 +3,7 @@ import { X, UserCheck, BookOpen, Star, Calendar, Trash2, Pencil, Loader2, Search
 import { getStudents } from '../api/studentApi';
 import { getWorkshops } from '../api/workshopApi';
 import { addStudentAttendance } from '../api/attendanceApi';
+import toast from 'react-hot-toast';
 
 /* ── Mark Attendance Modal ─────────────────── */
 export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) => {
@@ -56,25 +57,29 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
         e.preventDefault();
         if (!form.studentMongoId || !form.workshop || !form.date) return;
 
-        try {
-            setIsLoading(true);
+        setIsLoading(true);
 
-            // Find selected workshop to get its points
-            const selectedWorkshop = workshops.find(w => w.name === form.workshop);
-            const pointsReward = selectedWorkshop?.pointsReward || 1;
+        // Find selected workshop to get its points
+        const selectedWorkshop = workshops.find(w => w.name === form.workshop);
+        const pointsReward = selectedWorkshop?.pointsReward || 1;
 
-            await addStudentAttendance(form.studentMongoId, {
-                workshopName: form.workshop,
-                pointsEarned: pointsReward,
-                date: form.date
-            });
+        const addPromise = addStudentAttendance(form.studentMongoId, {
+            workshopName: form.workshop,
+            pointsEarned: pointsReward,
+            date: form.date
+        });
+
+        toast.promise(addPromise, {
+            loading: 'Saving attendance...',
+            success: 'Attendance saved successfully!',
+            error: 'Failed to save attendance record.'
+        }).then(() => {
             onSave(); // Refresh parent
-        } catch (err) {
+        }).catch((err) => {
             console.error('Error saving attendance:', err);
-            alert('Failed to save attendance record.');
-        } finally {
+        }).finally(() => {
             setIsLoading(false);
-        }
+        });
     };
 
     const selectedWorkshopObj = workshops.find(w => w.name === form.workshop);

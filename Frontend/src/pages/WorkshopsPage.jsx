@@ -3,6 +3,7 @@ import { Plus, Trash2, AlertTriangle, X, BookOpen, Pencil, Eye, Calendar, Star, 
 import WorkshopTable from '../components/WorkshopTable';
 import WorkshopRuleCard from '../components/WorkshopRuleCard';
 import { getWorkshops, createWorkshop, updateWorkshop, deleteWorkshop } from '../api/workshopApi';
+import toast from 'react-hot-toast';
 
 /* ── Workshop Modal ──────────────────────────── */
 const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
@@ -26,27 +27,29 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
         e.preventDefault();
         if (!name.trim()) return;
 
-        try {
-            setIsLoading(true);
-            const workshopData = {
-                name: name.trim(),
-                description: description.trim(),
-                pointsReward: Number(points)
-            };
+        setIsLoading(true);
+        const workshopData = {
+            name: name.trim(),
+            description: description.trim(),
+            pointsReward: Number(points)
+        };
 
-            if (isEditing) {
-                await updateWorkshop(editWorkshop._id, workshopData);
-            } else {
-                await createWorkshop(workshopData);
-            }
+        const savePromise = isEditing
+            ? updateWorkshop(editWorkshop._id, workshopData)
+            : createWorkshop(workshopData);
+
+        toast.promise(savePromise, {
+            loading: isEditing ? 'Updating workshop...' : 'Adding workshop...',
+            success: isEditing ? 'Workshop updated successfully!' : 'Workshop added successfully!',
+            error: (err) => err.response?.data?.message || 'Failed to save workshop.'
+        }).then(() => {
             onSave();
             onClose();
-        } catch (err) {
+        }).catch((err) => {
             console.error('Error saving workshop:', err);
-            alert(err.response?.data?.message || 'Failed to save workshop.');
-        } finally {
+        }).finally(() => {
             setIsLoading(false);
-        }
+        });
     };
 
     return (
@@ -264,14 +267,18 @@ const WorkshopsPage = () => {
     };
 
     const handleConfirmDelete = async () => {
-        try {
-            await deleteWorkshop(deleteTarget._id);
+        const deletePromise = deleteWorkshop(deleteTarget._id);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting workshop...',
+            success: 'Workshop deleted successfully!',
+            error: 'Failed to delete workshop.'
+        }).then(() => {
             fetchWorkshops();
             setDeleteTarget(null);
-        } catch (err) {
+        }).catch((err) => {
             console.error('Error deleting workshop:', err);
-            alert('Failed to delete workshop.');
-        }
+        });
     };
 
     return (

@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Loader2, UserX } from 'lucide-react';
 import StaffModal from './StaffModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { getAllStaff, createStaff, updateStaff, deleteStaff } from '../api/staffApi';
+import toast from 'react-hot-toast';
 
 const StaffManagement = () => {
     const [staffList, setStaffList] = useState([]);
@@ -35,18 +36,19 @@ const StaffManagement = () => {
     }, []);
 
     const handleSaveStaff = async (staffData) => {
-        try {
-            if (editingStaff) {
-                await updateStaff(editingStaff._id, staffData);
-            } else {
-                await createStaff(staffData);
-            }
+        const savePromise = editingStaff
+            ? updateStaff(editingStaff._id, staffData)
+            : createStaff(staffData);
+
+        toast.promise(savePromise, {
+            loading: editingStaff ? 'Updating staff...' : 'Adding staff...',
+            success: editingStaff ? 'Staff updated successfully!' : 'Staff added successfully!',
+            error: (err) => err.response?.data?.message || 'Error saving staff'
+        }).then(() => {
             fetchStaff();
             setIsModalOpen(false);
             setEditingStaff(null);
-        } catch (err) {
-            alert(err.response?.data?.message || 'Error saving staff');
-        }
+        }).catch((err) => console.error('Error saving staff:', err));
     };
 
     const handleDelete = (staff) => {
@@ -56,17 +58,20 @@ const StaffManagement = () => {
 
     const handleConfirmDelete = async () => {
         if (!staffToDelete) return;
-        try {
-            setIsDeleting(true);
-            await deleteStaff(staffToDelete._id);
+
+        setIsDeleting(true);
+        const deletePromise = deleteStaff(staffToDelete._id);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting staff member...',
+            success: 'Staff member deleted successfully!',
+            error: 'Error deleting staff member.'
+        }).then(async () => {
             await fetchStaff();
             setIsDeleteModalOpen(false);
             setStaffToDelete(null);
-        } catch (err) {
-            alert('Error deleting staff');
-        } finally {
-            setIsDeleting(false);
-        }
+        }).catch((err) => console.error('Error deleting staff:', err))
+            .finally(() => setIsDeleting(false));
     };
 
     const handleEdit = (staff) => {

@@ -5,6 +5,7 @@ import StudentsTable from '../components/StudentsTable';
 import StudentModal from '../components/StudentModal';
 import { getAllStudents, createStudent, updateStudent, deleteStudent } from '../api/studentApi';
 import * as XLSX from 'xlsx';
+import toast from 'react-hot-toast';
 
 const StudentsPage = ({ role }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -61,37 +62,38 @@ const StudentsPage = ({ role }) => {
     };
 
     const handleSaveStudent = async (studentData) => {
-        try {
-            if (editingStudent) {
-                await updateStudent(editingStudent._id, studentData);
-            } else {
-                await createStudent(studentData);
-            }
+        const savePromise = editingStudent
+            ? updateStudent(editingStudent._id, studentData)
+            : createStudent(studentData);
+
+        toast.promise(savePromise, {
+            loading: editingStudent ? 'Updating student...' : 'Adding student...',
+            success: editingStudent ? 'Student updated successfully!' : 'Student added successfully!',
+            error: (err) => err.response?.data?.message || 'Error saving student'
+        }).then(() => {
             fetchStudents();
             setIsModalOpen(false);
             setEditingStudent(null);
-        } catch (err) {
-            console.error('Error saving student:', err);
-            alert(err.response?.data?.message || 'Error saving student');
-        }
+        }).catch((err) => console.error('Error saving student:', err));
     };
 
     const handleDeleteRequest = (student) => setDeleteTarget(student);
 
     const handleConfirmDelete = async () => {
-        try {
-            await deleteStudent(deleteTarget._id);
+        const deletePromise = deleteStudent(deleteTarget._id);
+        toast.promise(deletePromise, {
+            loading: 'Deleting student...',
+            success: 'Student deleted successfully!',
+            error: 'Error deleting student'
+        }).then(() => {
             fetchStudents();
             setDeleteTarget(null);
-        } catch (err) {
-            console.error('Error deleting student:', err);
-            alert('Error deleting student');
-        }
+        }).catch((err) => console.error('Error deleting student:', err));
     };
 
     const handleExport = () => {
         if (!filteredStudents || filteredStudents.length === 0) {
-            alert('No students to export');
+            toast.error('No students to export');
             return;
         }
 
@@ -112,6 +114,7 @@ const StudentsPage = ({ role }) => {
 
         // Generate Excel file and trigger download
         XLSX.writeFile(wb, "Student_List.xlsx");
+        toast.success('Students exported successfully!');
     };
 
     return (

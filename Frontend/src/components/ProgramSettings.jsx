@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '../api/settingApi';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ProgramSettings = () => {
     const [config, setConfig] = useState({
@@ -9,7 +10,6 @@ const ProgramSettings = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [status, setStatus] = useState({ type: '', message: '' });
 
     useEffect(() => {
         fetchSettings();
@@ -27,29 +27,25 @@ const ProgramSettings = () => {
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
-            setStatus({ type: 'error', message: 'Failed to load configuration' });
+            toast.error('Failed to load configuration');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleSave = async () => {
-        try {
-            setIsSaving(true);
-            const response = await updateSettings({
-                programName: config.programName,
-                completionPointsThreshold: config.completionPointsThreshold
-            });
-            if (response.success) {
-                setStatus({ type: 'success', message: 'Configuration saved successfully!' });
-                setTimeout(() => setStatus({ type: '', message: '' }), 3000);
-            }
-        } catch (error) {
-            console.error('Error saving settings:', error);
-            setStatus({ type: 'error', message: 'Failed to save configuration' });
-        } finally {
-            setIsSaving(false);
-        }
+        setIsSaving(true);
+        const savePromise = updateSettings({
+            programName: config.programName,
+            completionPointsThreshold: config.completionPointsThreshold
+        });
+
+        toast.promise(savePromise, {
+            loading: 'Saving configuration...',
+            success: 'Configuration saved successfully!',
+            error: 'Failed to save configuration'
+        }).catch((error) => console.error('Error saving settings:', error))
+            .finally(() => setIsSaving(false));
     };
 
     if (isLoading) {
@@ -67,13 +63,6 @@ const ProgramSettings = () => {
                     <div className="w-1 h-6 bg-primary rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-900">Program Configuration</h2>
                 </div>
-                {status.message && (
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold ${status.type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                        }`}>
-                        {status.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-                        {status.message}
-                    </div>
-                )}
             </div>
 
             <div className="space-y-6 max-w-xl">

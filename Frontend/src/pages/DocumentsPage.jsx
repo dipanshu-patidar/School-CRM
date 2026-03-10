@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, AlertTriangle, FileUp, FileText, FolderOpen, Printer, Loader2, Trash2, ClipboardList } from 'lucide-react';
+import toast from 'react-hot-toast';
 import DocumentsTable from '../components/DocumentsTable';
 import UploadDocumentModal from '../components/UploadDocumentModal';
 import DocumentPreviewModal from '../components/DocumentPreviewModal';
@@ -81,53 +82,50 @@ const DocumentsPage = ({ role }) => {
     }, []);
 
     const handleUpload = async (studentId, formData) => {
-        try {
-            if (editingDoc) {
-                // Update existing document
-                await updateDocument(editingDoc.id, formData);
-            } else {
-                // Create new document
-                await uploadDocument(studentId, formData);
-            }
-            // Refetch data and wait for it to complete
+        const uploadPromise = editingDoc
+            ? updateDocument(editingDoc.id, formData)
+            : uploadDocument(studentId, formData);
+
+        toast.promise(uploadPromise, {
+            loading: editingDoc ? 'Updating document...' : 'Uploading document...',
+            success: editingDoc ? 'Document updated successfully!' : 'Document uploaded successfully!',
+            error: 'Failed to upload document.'
+        }).then(async () => {
             await fetchData();
             setIsUploadOpen(false);
             setEditingDoc(null);
-        } catch (err) {
-            console.error('Error uploading document:', err);
-            alert('Failed to upload document.');
-        }
+        }).catch(err => console.error('Error uploading document:', err));
     };
 
     const handleSavePCP = async (reportData, studentMongoId) => {
-        try {
-            if (editingPCP) {
-                await updatePcpReport(editingPCP.id, reportData);
-            } else {
-                await addPcpReport(studentMongoId, reportData);
-            }
+        const savePromise = editingPCP
+            ? updatePcpReport(editingPCP.id, reportData)
+            : addPcpReport(studentMongoId, reportData);
+
+        toast.promise(savePromise, {
+            loading: editingPCP ? 'Updating report...' : 'Saving report...',
+            success: editingPCP ? 'Report updated successfully!' : 'Report saved successfully!',
+            error: 'Failed to save report.'
+        }).then(async () => {
             await fetchData();
             setIsPCPModalOpen(false);
             setEditingPCP(null);
-        } catch (err) {
-            console.error('Error saving PCP report:', err);
-            alert('Failed to save report.');
-        }
+        }).catch(err => console.error('Error saving PCP report:', err));
     };
 
     const handleDelete = async () => {
-        try {
-            if (deleteTarget.type === 'PCP / IGP Report') {
-                await deletePcpReport(deleteTarget.studentMongoId, deleteTarget.id);
-            } else {
-                await deleteDocument(deleteTarget.studentMongoId, deleteTarget.id);
-            }
+        const deletePromise = deleteTarget.type === 'PCP / IGP Report'
+            ? deletePcpReport(deleteTarget.studentMongoId, deleteTarget.id)
+            : deleteDocument(deleteTarget.studentMongoId, deleteTarget.id);
+
+        toast.promise(deletePromise, {
+            loading: 'Deleting item...',
+            success: 'Item deleted successfully!',
+            error: 'Failed to delete item.'
+        }).then(() => {
             fetchData();
             setDeleteTarget(null);
-        } catch (err) {
-            console.error('Error deleting:', err);
-            alert('Failed to delete item.');
-        }
+        }).catch(err => console.error('Error deleting:', err));
     };
 
     const handlePrintAll = () => {
@@ -136,11 +134,11 @@ const DocumentsPage = ({ role }) => {
 
     const handleDownload = async (doc) => {
         if (!doc.url && !doc.id) {
-            alert('No file available for download.');
+            toast.error('No file available for download.');
             return;
         }
 
-        try {
+        const downloadPromise = (async () => {
             let blob;
             let fileName = doc.docName || 'document';
             // Add .pdf extension if not present
@@ -191,10 +189,13 @@ const DocumentsPage = ({ role }) => {
             }
 
             throw new Error('No blob data available');
-        } catch (err) {
-            console.error('Download failed:', err);
-            alert('Download failed. Please try again.');
-        }
+        })();
+
+        toast.promise(downloadPromise, {
+            loading: 'Downloading document...',
+            success: 'Document downloaded successfully!',
+            error: 'Download failed. Please try again.'
+        }).catch(err => console.error('Download failed:', err));
     };
 
     const handleViewDoc = (item, isFull = false) => {

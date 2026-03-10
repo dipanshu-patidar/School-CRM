@@ -11,10 +11,12 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent,
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">No students found</h3>
                 <p className="text-gray-500 max-w-xs mb-8">Try adjusting your search filters or add a new student.</p>
-                <button onClick={onAddStudent} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95">
-                    <UserPlus size={18} />
-                    Add First Student
-                </button>
+                {role === 'admin' && (
+                    <button onClick={onAddStudent} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95">
+                        <UserPlus size={18} />
+                        Add First Student
+                    </button>
+                )}
             </div>
         );
     }

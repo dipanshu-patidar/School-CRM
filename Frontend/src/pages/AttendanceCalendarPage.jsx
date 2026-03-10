@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Info, Star, CalendarCheck, Loader2, AlertTriangle, Table as TableIcon } from 'lucide-react';
+import { Plus, Info, Star, CalendarCheck, Loader2, AlertTriangle, Table as TableIcon, Trash2 } from 'lucide-react';
 import AttendanceStats from '../components/AttendanceStats';
 import AttendanceToggle from '../components/AttendanceToggle';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import { MarkAttendanceModal, AttendanceEventModal } from '../components/AttendanceEventModal';
 import { getAllAttendance, deleteStudentAttendance } from '../api/attendanceApi';
+import toast from 'react-hot-toast';
 
 const AttendanceCalendarPage = () => {
     const [records, setRecords] = useState([]);
@@ -16,6 +17,7 @@ const AttendanceCalendarPage = () => {
     const [isMarkModalOpen, setIsMarkModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     const fetchAttendance = async () => {
         try {
@@ -55,20 +57,26 @@ const AttendanceCalendarPage = () => {
         setIsMarkModalOpen(false);
     };
 
-    const handleDeleteAttendance = async (id) => {
-        try {
-            const record = records.find(r => r._id === id);
-            if (!record || !record.studentMongoId) return;
-
-            if (window.confirm(`Are you sure you want to delete attendance for ${record.studentName}?`)) {
-                await deleteStudentAttendance(id);
-                fetchAttendance();
-                setSelectedRecord(null);
-            }
-        } catch (err) {
-            console.error('Error deleting attendance:', err);
-            alert('Failed to delete attendance record.');
+    const handleDeleteAttendance = (id) => {
+        const record = records.find(r => r._id === id);
+        if (record) {
+            setDeleteTarget(record);
         }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+
+        const deletePromise = deleteStudentAttendance(deleteTarget._id);
+        toast.promise(deletePromise, {
+            loading: 'Deleting attendance...',
+            success: 'Attendance deleted successfully!',
+            error: 'Failed to delete attendance record.'
+        }).then(() => {
+            fetchAttendance();
+            setSelectedRecord(null);
+            setDeleteTarget(null);
+        }).catch((err) => console.error('Error deleting attendance:', err));
     };
 
     return (
@@ -180,6 +188,29 @@ const AttendanceCalendarPage = () => {
                 onClose={() => setSelectedRecord(null)}
                 onDelete={handleDeleteAttendance}
             />
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDeleteTarget(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5">
+                            <Trash2 size={32} className="text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Attendance</h3>
+                        <p className="text-gray-500 mb-2">Are you sure you want to delete this record for</p>
+                        <p className="text-primary font-bold text-lg mb-6">"{deleteTarget.studentName}"?</p>
+                        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8 w-full">
+                            <AlertTriangle size={16} className="shrink-0" />
+                            This action cannot be undone. The student will lose points earned from this workshop.
+                        </div>
+                        <div className="flex items-center gap-4 w-full">
+                            <button onClick={() => setDeleteTarget(null)} className="flex-1 py-3 border border-gray-200 rounded-xl text-gray-700 font-bold hover:bg-gray-50 transition-all cursor-pointer">Cancel</button>
+                            <button onClick={handleConfirmDelete} className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-100 cursor-pointer active:scale-95">Yes, Delete</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

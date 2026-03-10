@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Upload, X, Save, FileUp, Printer, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../api/axios';
 import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
@@ -178,14 +179,15 @@ const StudentProfilePage = ({ role }) => {
     }, [id]);
 
     const handleSaveEdit = async (updated) => {
-        try {
-            await api.put(`/api/students/${id}`, updated);
+        const updatePromise = api.put(`/api/students/${id}`, updated);
+        toast.promise(updatePromise, {
+            loading: 'Updating student profile...',
+            success: 'Student profile updated successfully!',
+            error: 'Failed to update student profile.'
+        }).then(() => {
             fetchStudent();
             setShowEditModal(false);
-        } catch (error) {
-            console.error('Error updating student', error);
-            alert('Failed to update student profile.');
-        }
+        }).catch((error) => console.error('Error updating student', error));
     };
 
     if (isLoading) return <div className="p-8 text-center font-medium">Loading Student Profile...</div>;

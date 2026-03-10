@@ -33,7 +33,7 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
             </div>
 
             <div className="flex items-center gap-6">
-                {/* Search Bar */}
+                {/* Search Bar - Commented out temporarily 
                 <div className="relative hidden md:block">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
@@ -42,12 +42,14 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                         className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-64"
                     />
                 </div>
+                */}
 
-                {/* Notifications */}
+                {/* Notifications - Commented out temporarily
                 <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors group">
                     <Bell size={20} className="group-hover:text-primary transition-colors" />
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
                 </button>
+                */}
 
                 {/* User Profile Dropdown Simulation */}
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-200">

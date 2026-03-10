@@ -75,14 +75,14 @@ const Dashboard = ({ role }) => {
                     <h1 className="text-2xl font-bold text-gray-900">Welcome Back, {userName}</h1>
                     <p className="text-gray-500 mt-1">Shining Light CRM — Dashboard Overview</p>
                 </div>
-                <div className="flex items-center gap-3">
+                {/* <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                         <Calendar size={16} /> Last 30 Days
                     </button>
                     <button className="px-4 py-2 bg-primary text-black rounded-lg text-sm font-bold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
                         Generate Report
                     </button>
-                </div>
+                </div> */}
             </div>
 
             {/* Stats Grid */}
@@ -114,7 +114,7 @@ const Dashboard = ({ role }) => {
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Recent Student Submissions</h3>
-                        <button className="text-primary text-sm font-bold hover:underline cursor-pointer">View All</button>
+                        {/* <button className="text-primary text-sm font-bold hover:underline cursor-pointer">View All</button> */}
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
@@ -195,9 +195,6 @@ const Dashboard = ({ role }) => {
                                 No recent activities found.
                             </div>
                         )}
-                        <button className="w-full mt-4 py-3 border-2 border-dashed border-gray-100 rounded-xl text-sm font-bold text-gray-400 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                            + Add New Activity
-                        </button>
                     </div>
                 </div>
             </div>

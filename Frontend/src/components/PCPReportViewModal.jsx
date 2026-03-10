@@ -106,6 +106,39 @@ const PCPReportViewModal = ({ report, onClose }) => {
                             </div>
                         </div>
 
+                        {/* Attachment / Assessment File Section */}
+                        {report.assessmentFile && (
+                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group print:hidden">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-lg shadow-primary/5">
+                                        <Zap size={20} />
+                                    </div>
+                                    <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5">Assessment Attachment</h4>
+                                </div>
+                                <div className="rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 min-h-[400px] relative">
+                                    {report.assessmentFile.toLowerCase().endsWith('.pdf') ? (
+                                        <iframe
+                                            src={`${report.assessmentFile}#toolbar=0`}
+                                            className="w-full h-[500px] border-none"
+                                            title="Assessment PDF Preview"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center p-4">
+                                            <img
+                                                src={report.assessmentFile}
+                                                alt="Assessment Attachment"
+                                                className="max-w-full max-h-[600px] object-contain shadow-md rounded-lg"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-100 shadow-sm flex items-center gap-2">
+                                        <FileText size={14} className="text-primary" />
+                                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Attachment Preview</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Additional Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4">
                             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm print:border print:rounded-none print:shadow-none print:p-4">

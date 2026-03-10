@@ -36,13 +36,30 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                     </div>
                     <div className="flex-1 flex flex-col md:flex-row bg-gray-50/50 print:block">
 
-                        {/* Main Preview (Placeholder) */}
-                        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-100 border-b md:border-b-0 md:border-r border-gray-200">
-                            <FileText size={64} className="text-gray-300 mb-4" />
-                            <p className="text-gray-500 font-medium">Document Preview UI</p>
-                            <p className="text-sm text-gray-400 mt-2 text-center max-w-xs">
-                                In a full implementation, the PDF or image viewer would render here.
-                            </p>
+                        {/* Main Preview */}
+                        <div className="flex-1 p-0 flex flex-col items-center justify-center bg-gray-100 border-b md:border-b-0 md:border-r border-gray-200 overflow-hidden relative min-h-[400px]">
+                            {doc.url ? (
+                                doc.url.toLowerCase().endsWith('.pdf') ? (
+                                    <iframe
+                                        src={`${doc.url}#toolbar=0`}
+                                        className="w-full h-full border-none"
+                                        title="PDF Preview"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center p-4">
+                                        <img
+                                            src={doc.url}
+                                            alt={doc.docName}
+                                            className="max-w-full max-h-full object-contain shadow-lg rounded-lg"
+                                        />
+                                    </div>
+                                )
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-gray-400">
+                                    <FileText size={64} className="mb-4" />
+                                    <p className="font-medium">No preview available</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Sidebar Info */}

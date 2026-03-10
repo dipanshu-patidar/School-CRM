@@ -1,9 +1,40 @@
-import React, { useRef, useState } from 'react';
-import { FileUp, X, FileText, Image as ImageIcon, File } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { FileUp, X, FileText, Image as ImageIcon, File as FileIcon } from 'lucide-react';
 
 const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment Upload" }) => {
     const [dragging, setDragging] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const inputRef = useRef();
+
+    useEffect(() => {
+        if (!selectedFile) {
+            setPreviewUrl(null);
+            return;
+        }
+
+        if (selectedFile instanceof File) {
+            const url = URL.createObjectURL(selectedFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+
+        if (typeof selectedFile === 'string') {
+            let url = selectedFile;
+            // Cloudinary transformation for preview
+            if (url.includes('res.cloudinary.com')) {
+                const uploadIndex = url.indexOf('/upload/');
+                if (uploadIndex !== -1) {
+                    const parts = url.split('.');
+                    const extension = parts.pop().toLowerCase();
+                    const transformation = extension === 'pdf'
+                        ? 'w_400,h_500,c_fill,pg_1,f_jpg'
+                        : 'w_400,h_400,c_fill,f_auto,q_auto';
+                    url = url.slice(0, uploadIndex + 8) + transformation + url.slice(uploadIndex + 7);
+                }
+            }
+            setPreviewUrl(url);
+        }
+    }, [selectedFile]);
 
     const handleFile = (f) => {
         if (f) onFileSelect(f);
@@ -25,12 +56,35 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
     };
 
     const getFileIcon = (fileName) => {
-        const ext = fileName.split('.').pop().toLowerCase();
+        if (!fileName || typeof fileName !== 'string') return <FileIcon size={24} className="text-gray-500" />;
+        const ext = fileName.split('.').pop().split('?')[0].toLowerCase();
+
         if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return <ImageIcon size={24} className="text-blue-500" />;
         if (ext === 'pdf') return <FileText size={24} className="text-red-500" />;
-        if (['doc', 'docx'].includes(ext)) return <File size={24} className="text-primary" />;
-        return <File size={24} className="text-gray-500" />;
+        if (['doc', 'docx'].includes(ext)) return <FileIcon size={24} className="text-primary" />;
+        return <FileIcon size={24} className="text-gray-500" />;
     };
+
+    const getFileName = (file) => {
+        if (!file) return '';
+        if (typeof file === 'string') {
+            return file.split('/').pop().split('?')[0];
+        }
+        return file.name;
+    };
+
+    const getFileSize = (file) => {
+        if (typeof file === 'string') return 'Cloud Storage';
+        return `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+    };
+
+    const isPreviewable = (fName) => {
+        if (!fName) return false;
+        const ext = fName.split('.').pop().split('?')[0].toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'gif', 'pdf'].includes(ext);
+    };
+
+    const fileName = getFileName(selectedFile);
 
     return (
         <div className="space-y-2">
@@ -56,23 +110,37 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
                 />
 
                 {selectedFile ? (
-                    <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-primary/20 shadow-sm animate-in fade-in slide-in-from-top-2">
-                        <div className="p-2 bg-gray-50 rounded-lg">
-                            {getFileIcon(selectedFile.name)}
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                        {isPreviewable(fileName) && previewUrl && (
+                            <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+                                {fileName.toLowerCase().endsWith('.pdf') ? (
+                                    <div className="w-full h-full flex flex-col items-center justify-center">
+                                        <img src={previewUrl} alt="PDF Preview" className="h-full object-contain" />
+                                        <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded uppercase">PDF Thumbnail</div>
+                                    </div>
+                                ) : (
+                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                )}
+                            </div>
+                        )}
+                        <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-primary/20 shadow-sm relative">
+                            <div className="p-2 bg-gray-50 rounded-lg">
+                                {getFileIcon(fileName)}
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 truncate">{fileName}</p>
+                                <p className="text-xs text-gray-500">{getFileSize(selectedFile)}</p>
+                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onFileSelect(null);
+                                }}
+                                className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
-                        <div className="text-left flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 truncate">{selectedFile.name}</p>
-                            <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onFileSelect(null);
-                            }}
-                            className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
-                        >
-                            <X size={18} />
-                        </button>
                     </div>
                 ) : (
                     <div className="py-2">

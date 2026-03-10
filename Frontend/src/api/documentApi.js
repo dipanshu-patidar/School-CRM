@@ -14,15 +14,53 @@ export const addPcpReport = async (studentId, reportData) => {
     const formData = new FormData();
     formData.append('studentId', studentId);
 
+    const allowedKeys = [
+        'dateOfService', 'serviceDescription', 'faceToFace', 'faceToFaceIndicator',
+        'purpose', 'intervention', 'effectiveness', 'staffNotes', 'staffSignature', 'status'
+    ];
+
     Object.keys(reportData).forEach(key => {
-        if (key === 'assessmentFile' && reportData[key]) {
+        if (key === 'assessmentFile' && reportData[key] instanceof File) {
             formData.append('assessmentFile', reportData[key]);
-        } else if (reportData[key] !== null && reportData[key] !== undefined) {
+            return;
+        }
+        
+        if (allowedKeys.includes(key) && reportData[key] !== null && reportData[key] !== undefined) {
             formData.append(key, reportData[key]);
         }
     });
 
     const response = await api.post('/api/pcp-reports', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data.data;
+};
+
+export const updatePcpReport = async (reportId, reportData) => {
+    const formData = new FormData();
+    
+    // Define allowed keys for update to avoid sending metadata or populated objects
+    const allowedKeys = [
+        'dateOfService', 'serviceDescription', 'faceToFace', 'faceToFaceIndicator',
+        'purpose', 'intervention', 'effectiveness', 'staffNotes', 'staffSignature', 'status'
+    ];
+
+    Object.keys(reportData).forEach(key => {
+        if (key === 'assessmentFile') {
+            if (reportData[key] instanceof File) {
+                formData.append('assessmentFile', reportData[key]);
+            }
+            // If it's a string (URL), we don't need to append it again 
+            // the backend updateReport will preserve the old one if no new file is sent
+            return;
+        }
+
+        if (allowedKeys.includes(key) && reportData[key] !== null && reportData[key] !== undefined) {
+            formData.append(key, reportData[key]);
+        }
+    });
+
+    const response = await api.put(`/api/pcp-reports/${reportId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data.data;

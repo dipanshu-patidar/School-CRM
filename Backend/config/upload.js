@@ -13,27 +13,8 @@ ensureDir('uploads/documents');
 ensureDir('uploads/assessments');
 ensureDir('uploads/avatars');
 
-// Storage for standard documents
-const documentStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/documents');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-// Storage for PCP assessment files
-const assessmentStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/assessments');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Memory storage for ImageKit uploads
+const memoryStorage = multer.memoryStorage();
 
 // Storage for User Avatars
 const avatarStorage = multer.diskStorage({
@@ -58,19 +39,19 @@ const fileFilter = (req, file, cb) => {
 };
 
 const uploadDocument = multer({
-    storage: documentStorage,
+    storage: memoryStorage,
     fileFilter,
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB max
 });
 
 const uploadAssessment = multer({
-    storage: assessmentStorage,
+    storage: memoryStorage,
     fileFilter,
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB max
 });
 
 const uploadAvatar = multer({
-    storage: avatarStorage,
+    storage: memoryStorage,
     fileFilter,
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB max for profile pics
 });

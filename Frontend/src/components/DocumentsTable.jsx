@@ -65,7 +65,8 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                                 <td className="px-6 py-4">{getStatusBadge(doc.status)}</td>
                                 <td className="px-6 py-4 no-print">
                                     <div className="flex items-center justify-end gap-1">
-                                        <button title="View Document" onClick={() => onView(doc)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={16} /></button>
+                                        <button title="View Preview" onClick={() => onView(doc, false)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={16} /></button>
+                                        <button title="View Full" onClick={() => onView(doc, true)} className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-all cursor-pointer"><FileText size={16} /></button>
                                         <button title="Print Document" onClick={() => window.print()} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Printer size={16} /></button>
                                         <button title="Download Document" onClick={() => onDownload(doc)} className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all cursor-pointer"><Download size={16} /></button>
                                         <button title="Edit Document" onClick={() => onEdit(doc)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={16} /></button>
@@ -99,7 +100,8 @@ const DocumentsTable = ({ documents, onView, onDownload, onDelete, onUpload, onE
                             <span className="truncate">{doc.docName}</span>
                         </div>
                         <div className="flex items-center justify-end gap-1 border-t border-gray-50 pt-3 mt-2 no-print">
-                            <button onClick={() => onView(doc)} className="flex items-center justify-center gap-1.5 flex-1 py-1.5 rounded-lg text-sm font-bold text-black bg-primary hover:bg-primary-hover transition-all cursor-pointer"><Eye size={15} /> View</button>
+                            <button title="Preview" onClick={() => onView(doc, false)} className="p-2.5 rounded-lg text-gray-400 hover:bg-gray-50 transition-all cursor-pointer"><Eye size={15} /></button>
+                            <button title="Open Full" onClick={() => onView(doc, true)} className="flex items-center justify-center gap-1.5 flex-1 py-1.5 rounded-lg text-sm font-bold text-black bg-primary hover:bg-primary-hover transition-all cursor-pointer"><FileText size={15} /> View</button>
                             <button onClick={() => window.print()} className="p-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"><Printer size={15} /></button>
                             <button onClick={() => onDownload(doc)} className="flex items-center justify-center gap-1.5 flex-1 py-1.5 rounded-lg text-sm font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all cursor-pointer"><Download size={15} /> Save</button>
                             <button onClick={() => onEdit(doc)} className="p-2.5 rounded-lg text-amber-500 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={15} /></button>

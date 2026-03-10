@@ -42,6 +42,15 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
                         >
                             <Eye size={16} />
                         </button>
+                        {report.assessmentFile && (
+                            <button
+                                title="View Document"
+                                onClick={() => onView(report, true)}
+                                className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-all cursor-pointer"
+                            >
+                                <FileText size={16} />
+                            </button>
+                        )}
                         <button
                             title="Edit Report"
                             onClick={() => onEdit(report)}
@@ -106,8 +115,16 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
                         onClick={() => onView(report)}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all"
                     >
-                        <Eye size={14} /> View
+                        <Eye size={14} /> Report
                     </button>
+                    {report.assessmentFile && (
+                        <button
+                            onClick={() => onView(report, true)}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-black text-xs font-bold hover:bg-primary-hover transition-all"
+                        >
+                            <FileText size={14} /> Doc
+                        </button>
+                    )}
                     <button
                         onClick={() => onEdit(report)}
                         className="p-2.5 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all"

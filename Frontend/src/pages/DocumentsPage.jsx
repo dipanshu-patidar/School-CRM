@@ -7,8 +7,9 @@ import CompletionRuleCard from '../components/CompletionRuleCard';
 import PCPReportForm from '../components/PCPReportForm';
 import PCPReportsTable from '../components/PCPReportsTable';
 import PCPReportViewModal from '../components/PCPReportViewModal';
+import DocumentViewModal from '../components/DocumentViewModal';
 import PrintHeader from '../components/PrintHeader';
-import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport, uploadDocument, downloadDocument, updateDocument } from '../api/documentApi';
+import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport, updatePcpReport, uploadDocument, downloadDocument, updateDocument } from '../api/documentApi';
 import { getAllStudents } from '../api/studentApi';
 
 const DocumentsPage = ({ role }) => {
@@ -25,6 +26,7 @@ const DocumentsPage = ({ role }) => {
     const [students, setStudents] = useState([]);
 
     const [previewDoc, setPreviewDoc] = useState(null);
+    const [isPreviewFull, setIsPreviewFull] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
     const fetchData = async () => {
@@ -42,10 +44,11 @@ const DocumentsPage = ({ role }) => {
                 studentMongoId: d.studentId?._id || d.studentId,
                 studentName: d.studentId?.name || 'Unknown Student',
                 docName: d.documentType,
-                url: d.fileUrl,
+                url: d.fileUrl ? encodeURI(decodeURI(d.fileUrl)) : "",
                 date: new Date(d.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                 status: d.status,
-                size: d.size || 'N/A'
+                size: d.size || 'N/A',
+                type: 'Standard document'
             }));
 
             // Format data for PCP table
@@ -73,9 +76,9 @@ const DocumentsPage = ({ role }) => {
 
     useEffect(() => {
         fetchData();
+        window.onDownloadDocument = handleDownload;
+        return () => delete window.onDownloadDocument;
     }, []);
-
-
 
     const handleUpload = async (studentId, formData) => {
         try {
@@ -98,7 +101,11 @@ const DocumentsPage = ({ role }) => {
 
     const handleSavePCP = async (reportData, studentMongoId) => {
         try {
-            await addPcpReport(studentMongoId, reportData);
+            if (editingPCP) {
+                await updatePcpReport(editingPCP.id, reportData);
+            } else {
+                await addPcpReport(studentMongoId, reportData);
+            }
             await fetchData();
             setIsPCPModalOpen(false);
             setEditingPCP(null);
@@ -152,11 +159,22 @@ const DocumentsPage = ({ role }) => {
                 }
             }
 
-            // Direct Cloudinary download if API failed or no ID
+            // Direct download if API failed or no ID
             if (!blob && doc.url) {
-                const response = await fetch(doc.url);
-                if (!response.ok) throw new Error('Fetch failed');
-                blob = await response.blob();
+                try {
+                    const response = await fetch(doc.url);
+                    if (!response.ok) throw new Error('Fetch failed');
+                    blob = await response.blob();
+                } catch (fetchErr) {
+                    console.log('Fetch failed, trying window.open:', fetchErr.message);
+                    // Final fallback: just open in new tab with download parameter for ImageKit
+                    let downloadUrl = doc.url;
+                    if (downloadUrl.includes('ik.imagekit.io')) {
+                        downloadUrl += (downloadUrl.includes('?') ? '&' : '?') + 'ik-attachment=true';
+                    }
+                    window.open(downloadUrl, '_blank');
+                    return;
+                }
             }
 
             // Create and trigger download
@@ -177,6 +195,11 @@ const DocumentsPage = ({ role }) => {
             console.error('Download failed:', err);
             alert('Download failed. Please try again.');
         }
+    };
+
+    const handleViewDoc = (item, isFull = false) => {
+        setPreviewDoc(item);
+        setIsPreviewFull(isFull);
     };
 
     return (
@@ -224,30 +247,28 @@ const DocumentsPage = ({ role }) => {
                 </div>
 
                 {/* Tab Switcher */}
-                {userRole === 'admin' && (
-                    <div className="flex items-center p-1.5 bg-gray-100/80 backdrop-blur-md rounded-2xl w-fit no-print border border-gray-200/50 shadow-inner">
-                        <button
-                            onClick={() => setActiveTab('pcp')}
-                            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'pcp'
-                                ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
-                                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
-                                }`}
-                        >
-                            <ClipboardList size={18} className={activeTab === 'pcp' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
-                            <span className="relative z-10 text-sm">PCP / IGP Reports</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('standard')}
-                            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'standard'
-                                ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
-                                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
-                                }`}
-                        >
-                            <FileText size={18} className={activeTab === 'standard' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
-                            <span className="relative z-10 text-sm">Standard Documents</span>
-                        </button>
-                    </div>
-                )}
+                <div className="flex items-center p-1.5 bg-gray-100/80 backdrop-blur-md rounded-2xl w-fit no-print border border-gray-200/50 shadow-inner">
+                    <button
+                        onClick={() => setActiveTab('pcp')}
+                        className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'pcp'
+                            ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
+                            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
+                            }`}
+                    >
+                        <ClipboardList size={18} className={activeTab === 'pcp' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
+                        <span className="relative z-10 text-sm">PCP / IGP Reports</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('standard')}
+                        className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-bold transition-all duration-300 relative group overflow-hidden ${activeTab === 'standard'
+                            ? 'bg-primary text-black shadow-lg shadow-primary/25 active:scale-95'
+                            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
+                            }`}
+                    >
+                        <FileText size={18} className={activeTab === 'standard' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
+                        <span className="relative z-10 text-sm">Standard Documents</span>
+                    </button>
+                </div>
 
                 {/* Main Content */}
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -257,10 +278,10 @@ const DocumentsPage = ({ role }) => {
                             <p className="text-gray-500 font-medium">Loading documents...</p>
                         </div>
                     ) : (
-                        activeTab === 'pcp' || userRole === 'staff' ? (
+                        activeTab === 'pcp' ? (
                             <PCPReportsTable
                                 reports={pcpReports}
-                                onView={setPreviewDoc}
+                                onView={handleViewDoc}
                                 onEdit={(r) => { setEditingPCP(r); setIsPCPModalOpen(true); }}
                                 onDownload={handleDownload}
                                 onDelete={setDeleteTarget}
@@ -275,7 +296,7 @@ const DocumentsPage = ({ role }) => {
                                 </div>
                                 <DocumentsTable
                                     documents={documents}
-                                    onView={setPreviewDoc}
+                                    onView={handleViewDoc}
                                     onDownload={handleDownload}
                                     onDelete={setDeleteTarget}
                                     onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
@@ -305,16 +326,30 @@ const DocumentsPage = ({ role }) => {
 
             {previewDoc && (
                 previewDoc.type === 'PCP / IGP Report' ? (
-                    <PCPReportViewModal
-                        report={previewDoc}
-                        onClose={() => setPreviewDoc(null)}
-                        onDownload={handleDownload}
-                    />
+                    isPreviewFull ? (
+                        <DocumentPreviewModal
+                            doc={{ ...previewDoc, url: previewDoc.assessmentFile, docName: 'Assessment Attachment' }}
+                            onClose={() => setPreviewDoc(null)}
+                        />
+                    ) : (
+                        <PCPReportViewModal
+                            report={previewDoc}
+                            onClose={() => setPreviewDoc(null)}
+                            onDownload={handleDownload}
+                        />
+                    )
                 ) : (
-                    <DocumentPreviewModal
-                        doc={previewDoc}
-                        onClose={() => setPreviewDoc(null)}
-                    />
+                    isPreviewFull ? (
+                        <DocumentPreviewModal
+                            doc={previewDoc}
+                            onClose={() => setPreviewDoc(null)}
+                        />
+                    ) : (
+                        <DocumentViewModal
+                            doc={previewDoc}
+                            onClose={() => setPreviewDoc(null)}
+                        />
+                    )
                 )
             )}
 
@@ -340,8 +375,6 @@ const DocumentsPage = ({ role }) => {
                     </div>
                 </div>
             )}
-
-
         </div>
     );
 };

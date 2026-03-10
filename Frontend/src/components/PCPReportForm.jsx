@@ -25,10 +25,19 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
         if (isOpen) {
             fetchStudents();
             if (editData) {
+                // Only take the fields that the form actually manages
                 setFormData({
-                    ...editData,
                     studentMongoId: editData.studentMongoId || '',
-                    dateOfService: editData.dateOfService || new Date().toISOString().split('T')[0]
+                    dateOfService: editData.dateOfService ? new Date(editData.dateOfService).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    serviceDescription: editData.serviceDescription || '',
+                    faceToFace: editData.faceToFace || editData.faceToFaceIndicator || 'Face-to-Face',
+                    purpose: editData.purpose || '',
+                    intervention: editData.intervention || '',
+                    effectiveness: editData.effectiveness || '',
+                    staffNotes: editData.staffNotes || '',
+                    staffSignature: editData.staffSignature || '',
+                    assessmentFile: editData.assessmentFile || null,
+                    status: editData.status || 'Completed'
                 });
             } else {
                 setFormData({

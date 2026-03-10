@@ -1,6 +1,7 @@
 const Document = require('../models/Document');
 const Student = require('../models/Student');
 const Setting = require('../models/Setting');
+const imagekit = require('../config/imagekit');
 
 // Helper to evaluate completion rules based on CRM specs
 const evaluateStudentCompletion = async (studentId) => {
@@ -45,15 +46,26 @@ const uploadDocument = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Student ID and Document Type are required' });
         }
 
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Please upload a file' });
+        let fileUrl = '';
+        if (req.file) {
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: req.file.originalname,
+                    folder: '/documents'
+                });
+                fileUrl = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
         }
 
         const document = await Document.create({
             studentId,
             documentType,
             status: status || 'pending',
-            fileUrl: req.file.path, // Cloudinary provides secure URL in .path
+            fileUrl: fileUrl,
             uploadedBy: req.user._id
         });
 
@@ -144,7 +156,17 @@ const updateDocument = async (req, res) => {
 
         // If new file is uploaded, update the file URL
         if (req.file) {
-            document.fileUrl = req.file.path; // Cloudinary URL
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: req.file.originalname,
+                    folder: '/documents'
+                });
+                document.fileUrl = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
         }
 
         await document.save();

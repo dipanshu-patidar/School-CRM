@@ -24,6 +24,12 @@ const documentSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
+        },
+        publicId: {
+            type: String, // Cloudinary public_id
+        },
+        size: {
+            type: String, // Formatted size string
         }
     },
     {

@@ -166,6 +166,8 @@ const uploadDocument = async (req, res) => {
             studentId: student._id,
             documentType: req.file.originalname, // Default to filename for now
             fileUrl: req.file.path,
+            publicId: req.file.filename,
+            size: sizeStr,
             status: 'approved', // Profile uploads are usually pre-approved or direct
             uploadedBy: req.user._id
         });
@@ -188,26 +190,60 @@ const deleteDocument = async (req, res) => {
         const student = await Student.findById(req.params.id);
         if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
-        const doc = student.documents.find(d => d._id.toString() === req.params.docId);
-        if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
+        const { docId } = req.params;
+        let docToDelete = null;
+        let publicId = null;
 
-        // Delete from Cloudinary if it has a publicId
-        if (doc.publicId) {
-            await cloudinary.uploader.destroy(doc.publicId);
+        // 1. Check embedded documents
+        const embeddedDocIndex = student.documents.findIndex(d => d._id.toString() === docId);
+        if (embeddedDocIndex !== -1) {
+            docToDelete = student.documents[embeddedDocIndex];
+            publicId = docToDelete.publicId;
+            student.documents.splice(embeddedDocIndex, 1);
+            await student.save();
         }
 
-        // --- NEW LOGIC: Delete from global Document collection to sync Admin view ---
-        await Document.findOneAndDelete({
-            studentId: student._id,
-            fileUrl: doc.url
-        });
+        // 2. Check global Document collection
+        const globalDoc = await Document.findById(docId);
+        if (globalDoc) {
+            publicId = publicId || globalDoc.publicId;
+            // Also delete from student.documents if it matches by URL (fallback)
+            if (!docToDelete) {
+                student.documents = student.documents.filter(d => d.url !== globalDoc.fileUrl);
+                await student.save();
+            }
+            await Document.findByIdAndDelete(docId);
+        }
 
-        student.documents = student.documents.filter(d => d._id.toString() !== req.params.docId);
-        await student.save();
+        if (!docToDelete && !globalDoc) {
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
 
-        res.status(200).json({ success: true, data: student.documents });
+        // 3. Delete from Cloudinary if we have a publicId
+        if (publicId) {
+            try {
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudinaryErr) {
+                console.error('Cloudinary delete error:', cloudinaryErr.message);
+            }
+        }
+
+        // 4. Return the merged list (consistent with getStudentById)
+        const globalDocs = await Document.find({ studentId: req.params.id });
+        const formattedGlobalDocs = globalDocs.map(d => ({
+            _id: d._id,
+            name: d.documentType,
+            url: d.fileUrl,
+            status: d.status,
+            uploadDate: new Date(d.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            size: d.size || 'N/A'
+        }));
+
+        const allDocuments = [...formattedGlobalDocs, ...student.documents];
+
+        res.status(200).json({ success: true, data: allDocuments });
     } catch (error) {
-        console.error(error);
+        console.error('Delete Document Error:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
@@ -220,7 +256,19 @@ const downloadDocument = async (req, res) => {
         const student = await Student.findById(req.params.id);
         if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
-        const doc = student.documents.find(d => d._id.toString() === req.params.docId);
+        const { docId } = req.params;
+        let doc = student.documents.find(d => d._id.toString() === docId);
+
+        if (!doc) {
+            const globalDoc = await Document.findById(docId);
+            if (globalDoc) {
+                doc = {
+                    name: globalDoc.documentType,
+                    url: globalDoc.fileUrl
+                };
+            }
+        }
+
         if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
 
         // Set headers to force download with PDF format
@@ -229,7 +277,7 @@ const downloadDocument = async (req, res) => {
         if (!cleanFileName.toLowerCase().endsWith('.pdf')) {
             cleanFileName = `${cleanFileName}.pdf`;
         }
-        
+
         res.setHeader('Content-Disposition', `attachment; filename="${cleanFileName}"`);
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -245,7 +293,7 @@ const downloadDocument = async (req, res) => {
                     res.end();
                 }
             });
-            
+
             fileStream.pipe(res);
         });
 

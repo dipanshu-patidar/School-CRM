@@ -30,7 +30,7 @@ router.post('/', protect, authorize('admin'), createStudent);
 
 router.route('/:id')
     .get(protect, getStudentById)
-    .put(protect, authorize('admin'), updateStudent)
+    .put(protect, authorize('admin', 'staff'), updateStudent)
     .delete(protect, authorize('admin'), deleteStudent);
 
 // Tab routes

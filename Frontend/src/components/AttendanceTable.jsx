@@ -137,7 +137,7 @@ const AttendanceTable = ({ student, records = [] }) => {
                                     <td className="px-6 py-4 text-right no-print">
                                         <button
                                             onClick={() => handleDeleteClick(record)}
-                                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                                            className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
                                         >
                                             <Trash2 size={16} />
                                         </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserCheck, BookOpen, Star, Calendar, Trash2, Pencil, Loader2 } from 'lucide-react';
+import { X, UserCheck, BookOpen, Star, Calendar, Trash2, Pencil, Loader2, Search } from 'lucide-react';
 import { getStudents } from '../api/studentApi';
 import { getWorkshops } from '../api/workshopApi';
 import { addStudentAttendance } from '../api/attendanceApi';
@@ -9,6 +9,8 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
     const [students, setStudents] = useState([]);
     const [workshops, setWorkshops] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const [form, setForm] = useState({
         studentMongoId: '',
@@ -19,9 +21,16 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
     useEffect(() => {
         if (isOpen) {
             setForm({ studentMongoId: '', workshop: '', date: selectedDate || '' });
+            setSearchTerm('');
+            setDropdownOpen(false);
             fetchData();
         }
     }, [isOpen, selectedDate]);
+
+    const filteredStudents = students.filter(s =>
+        s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.id?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const fetchData = async () => {
         try {
@@ -83,22 +92,61 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Student */}
-                    <div>
+                    {/* Student Select with Search */}
+                    <div className="relative">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                             Select Student <span className="text-red-400">*</span>
                         </label>
-                        <select
-                            name="studentMongoId"
-                            value={form.studentMongoId}
-                            onChange={handleChange}
-                            required
-                            disabled={isLoading}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50"
-                        >
-                            <option value="">{isLoading ? 'Loading students...' : 'Choose a student...'}</option>
-                            {students.map(s => <option key={s._id} value={s._id}>{s.name} ({s.studentId})</option>)}
-                        </select>
+
+                        {/* Search Input */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder={isLoading ? 'Loading students...' : 'Search by name or ID...'}
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setDropdownOpen(true);
+                                }}
+                                onFocus={() => setDropdownOpen(true)}
+                                disabled={isLoading}
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                <Search size={16} />
+                            </div>
+                        </div>
+
+                        {/* Dropdown Results */}
+                        {dropdownOpen && !isLoading && (
+                            <>
+                                <div className="fixed inset-0 z-[60]" onClick={() => setDropdownOpen(false)} />
+                                <div className="absolute z-[70] left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                                    {filteredStudents.length > 0 ? (
+                                        filteredStudents.map(s => (
+                                            <button
+                                                key={s._id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setForm(prev => ({ ...prev, studentMongoId: s._id }));
+                                                    setSearchTerm(`${s.name} (${s.id})`);
+                                                    setDropdownOpen(false);
+                                                }}
+                                                className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-0 flex flex-col gap-0.5 ${form.studentMongoId === s._id ? 'bg-primary/10' : ''}`}
+                                            >
+                                                <span className="text-sm font-bold text-gray-900">{s.name}</span>
+                                                <span className="text-xs text-gray-500">ID: {s.id}</span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-8 text-center text-gray-400">
+                                            <p className="text-sm font-medium">No students matched "{searchTerm}"</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                        <input type="hidden" name="studentMongoId" value={form.studentMongoId} required />
                     </div>
 
                     {/* Workshop */}

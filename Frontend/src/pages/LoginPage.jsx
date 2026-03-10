@@ -119,7 +119,7 @@ const LoginPage = ({ onLogin }) => {
                         <form onSubmit={handleSubmit} className="w-full space-y-5">
 
                             {/* Role Toggle */}
-                            <div className="flex bg-gray-50 p-1 rounded-xl mb-4 border border-gray-100">
+                            {/* <div className="flex bg-gray-50 p-1 rounded-xl mb-4 border border-gray-100">
                                 <button
                                     type="button"
                                     onClick={() => handleRoleChange('admin')}
@@ -134,7 +134,7 @@ const LoginPage = ({ onLogin }) => {
                                 >
                                     Staff
                                 </button>
-                            </div>
+                            </div> */}
 
                             {/* Email Input */}
                             <div className="space-y-1.5">

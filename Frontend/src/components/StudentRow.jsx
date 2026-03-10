@@ -2,7 +2,7 @@ import React from 'react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const StudentRow = ({ student, onDelete, onEdit }) => {
+const StudentRow = ({ student, onDelete, onEdit, role }) => {
     const navigate = useNavigate();
 
     const getStatusStyles = (status) => {
@@ -42,9 +42,11 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                         <button title="Edit Student" onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer">
                             <Pencil size={17} />
                         </button>
-                        <button title="Delete Student" onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer">
-                            <Trash2 size={17} />
-                        </button>
+                        {role === 'admin' && (
+                            <button title="Delete Student" onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer">
+                                <Trash2 size={17} />
+                            </button>
+                        )}
                     </div>
                 </td>
             </tr>
@@ -73,7 +75,9 @@ const StudentRow = ({ student, onDelete, onEdit }) => {
                     <div className="flex items-center gap-1">
                         <button onClick={() => navigate(`/dashboard/students/${student._id}`)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={17} /></button>
                         <button onClick={() => onEdit(student)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={17} /></button>
-                        <button onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={17} /></button>
+                        {role === 'admin' && (
+                            <button onClick={() => onDelete(student)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={17} /></button>
+                        )}
                     </div>
                 </div>
             </div>

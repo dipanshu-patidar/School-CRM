@@ -141,13 +141,23 @@ const updateStudent = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
 
+        // Authorization Check: Staff can only update their assigned students
+        if (req.user.role !== 'admin' && student.assignedStaff.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to update this student' });
+        }
+
         // Only update allowed fields
         const { name, phone, email, assignedStaff, points, status } = req.body;
 
         if (name) student.name = name;
         if (phone) student.phone = phone;
         if (email) student.email = email;
-        if (assignedStaff) student.assignedStaff = assignedStaff;
+
+        // Only admin can change assigned staff
+        if (assignedStaff && req.user.role === 'admin') {
+            student.assignedStaff = assignedStaff;
+        }
+
         if (points !== undefined) student.points = points;
         if (status) student.status = status; // Allow manual override (e.g., Dropped)
 

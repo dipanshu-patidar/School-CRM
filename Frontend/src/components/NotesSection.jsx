@@ -92,20 +92,20 @@ const NotesSection = ({ student, initialNotes = [] }) => {
                         <div key={note._id} className="bg-amber-50 border border-amber-100 rounded-xl p-4 group hover:shadow-sm transition-all">
                             <div className="flex items-start justify-between gap-4">
                                 <p className="text-sm text-gray-800 leading-relaxed flex-1">{note.text}</p>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all no-print">
+                                <div className="flex items-center gap-2 no-print">
                                     <button
                                         title="Print Note"
                                         onClick={() => window.print()}
-                                        className="p-1.5 rounded-lg text-gray-300 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+                                        className="p-2 rounded-xl text-gray-400 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
                                     >
-                                        <Printer size={14} />
+                                        <Printer size={16} />
                                     </button>
                                     <button
                                         title="Delete Note"
                                         onClick={() => handleDelete(note._id)}
-                                        className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                                        className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
                                     >
-                                        <Trash2 size={14} />
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>

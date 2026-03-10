@@ -2,7 +2,7 @@ import React from 'react';
 import StudentRow from './StudentRow';
 import { UserPlus } from 'lucide-react';
 
-const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent }) => {
+const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent, role }) => {
     if (!students || students.length === 0) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-20 flex flex-col items-center justify-center text-center px-4">
@@ -40,6 +40,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
                                 student={student}
                                 onDelete={onDeleteStudent}
                                 onEdit={onEditStudent}
+                                role={role}
                             />
                         ))}
                     </tbody>
@@ -54,6 +55,7 @@ const StudentsTable = ({ students, onAddStudent, onDeleteStudent, onEditStudent 
                         student={student}
                         onDelete={onDeleteStudent}
                         onEdit={onEditStudent}
+                        role={role}
                     />
                 ))}
             </div>

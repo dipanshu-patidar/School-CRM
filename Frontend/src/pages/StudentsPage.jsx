@@ -174,6 +174,7 @@ const StudentsPage = ({ role }) => {
                         onAddStudent={handleAddStudent}
                         onDeleteStudent={handleDeleteRequest}
                         onEditStudent={handleEditStudent}
+                        role={role}
                     />
                 )}
             </div>

@@ -72,9 +72,23 @@ const uploadDocument = async (req, res) => {
 // @access  Private
 const getDocuments = async (req, res) => {
     try {
-        // Can add logic here to filter by req.query.studentId
         const filter = {};
         if (req.query.studentId) filter.studentId = req.query.studentId;
+
+        // Staff filter
+        if (req.user.role === 'staff') {
+            const students = await Student.find({ assignedStaff: req.user._id }).select('_id');
+            const studentIds = students.map(s => s._id);
+
+            if (filter.studentId) {
+                // If a specific student is requested, ensure it's one of their assigned students
+                if (!studentIds.some(id => id.toString() === filter.studentId.toString())) {
+                    return res.status(403).json({ success: false, message: 'Not authorized to view this student\'s documents' });
+                }
+            } else {
+                filter.studentId = { $in: studentIds };
+            }
+        }
 
         const documents = await Document.find(filter)
             .populate('studentId', 'name studentId status points')
@@ -106,9 +120,99 @@ const deleteDocument = async (req, res) => {
     }
 };
 
+// @desc    Update existing document
+// @route   PUT /api/documents/:id
+// @access  Private/Admin
+const updateDocument = async (req, res) => {
+    try {
+        const document = await Document.findById(req.params.id);
+        if (!document) {
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
+
+        const { documentType, status } = req.body;
+
+        // Update document type if provided
+        if (documentType) {
+            document.documentType = documentType;
+        }
+
+        // Update status if provided
+        if (status) {
+            document.status = status;
+        }
+
+        // If new file is uploaded, update the file URL
+        if (req.file) {
+            document.fileUrl = req.file.path; // Cloudinary URL
+        }
+
+        await document.save();
+
+        // Trigger business logic to evaluate student completion
+        await evaluateStudentCompletion(document.studentId);
+
+        res.status(200).json({ success: true, data: document });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+const downloadDocument = async (req, res) => {
+    try {
+        const document = await Document.findById(req.params.id);
+        if (!document) return res.status(404).json({ success: false, message: 'Document not found' });
+
+        // Clean filename and set headers to force download with PDF format
+        let cleanFileName = (document.documentType || 'document').replace(/\"/g, '');
+        // Add .pdf extension if not present
+        if (!cleanFileName.toLowerCase().endsWith('.pdf')) {
+            cleanFileName = `${cleanFileName}.pdf`;
+        }
+        
+        res.setHeader('Content-Disposition', `attachment; filename="${cleanFileName}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+
+        // Proxy the file from Cloudinary to the client
+        const protocol = document.fileUrl.startsWith('https') ? https : http;
+        const request = protocol.get(document.fileUrl, (fileStream) => {
+            fileStream.on('error', (err) => {
+                console.error('Stream read error:', err);
+                if (!res.writableEnded) {
+                    res.end();
+                }
+            });
+            
+            fileStream.pipe(res);
+        });
+
+        request.on('error', (err) => {
+            console.error('Request error:', err);
+            if (!res.writableEnded) {
+                res.status(500).end();
+            }
+        });
+
+        res.on('error', (err) => {
+            console.error('Response error:', err);
+        });
+    } catch (error) {
+        console.error('Download error:', error);
+        if (!res.writableEnded) {
+            res.status(500).json({ success: false, message: 'Server Error' });
+        }
+    }
+};
+
 module.exports = {
     uploadDocument,
     getDocuments,
     evaluateStudentCompletion,
-    deleteDocument
+    deleteDocument,
+    downloadDocument,
+    updateDocument
 };

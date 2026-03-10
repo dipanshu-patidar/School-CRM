@@ -59,7 +59,9 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                         <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">
                             {sessionStorage.getItem('userAvatar') ? (
                                 <img
-                                    src={`http://localhost:5000${sessionStorage.getItem('userAvatar')}`}
+                                    src={sessionStorage.getItem('userAvatar').startsWith('http')
+                                        ? sessionStorage.getItem('userAvatar')
+                                        : `http://localhost:5000${sessionStorage.getItem('userAvatar')}`}
                                     alt="Avatar"
                                     className="w-full h-full object-cover"
                                 />

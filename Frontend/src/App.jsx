@@ -26,6 +26,7 @@ function App() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('userEmail');
     sessionStorage.removeItem('userName');
+    sessionStorage.removeItem('userAvatar');
     sessionStorage.removeItem('user');
   };
 
@@ -44,8 +45,8 @@ function App() {
               <Layout role={role} onLogout={handleLogout}>
                 <Routes>
                   <Route index element={role === 'admin' ? <AdminDashboard /> : <Dashboard role={role} />} />
-                  <Route path="students" element={<StudentsPage />} />
-                  <Route path="students/:id" element={<StudentProfilePage />} />
+                  <Route path="students" element={<StudentsPage role={role} />} />
+                  <Route path="students/:id" element={<StudentProfilePage role={role} />} />
                   <Route path="staff" element={<StaffPage />} />
                   <Route path="workshops" element={<WorkshopsPage />} />
                   <Route path="attendance" element={<AttendanceCalendarPage />} />

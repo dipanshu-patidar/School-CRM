@@ -1,5 +1,6 @@
 const Student = require('../models/Student');
 const Document = require('../models/Document');
+const Attendance = require('../models/Attendance');
 const { cloudinary } = require('../config/cloudinary');
 const https = require('https');
 const http = require('http');
@@ -68,6 +69,19 @@ const addAttendance = async (req, res) => {
         student.points += Number(pointsEarned); // Increment overall points
         await student.save();
 
+        // Sync with global Attendance
+        try {
+            await Attendance.create({
+                studentId: student._id,
+                workshopId: workshopName,
+                date: new Date(), // Approximate current date for backend
+                pointsAwarded: Number(pointsEarned),
+                createdBy: req.user._id
+            });
+        } catch (syncErr) {
+            console.log("Global sync attendance duplicate or error ignored:", syncErr.message);
+        }
+
         res.status(201).json({ success: true, data: student }); // Return whole student to update points on UI
     } catch (error) {
         console.error(error);
@@ -86,8 +100,20 @@ const deleteAttendance = async (req, res) => {
         const attIndex = student.attendance.findIndex(att => att._id.toString() === req.params.attId);
         if (attIndex === -1) return res.status(404).json({ success: false, message: 'Attendance record not found' });
 
+        const deletedRecord = student.attendance[attIndex];
+
         // Deduct points
-        student.points -= student.attendance[attIndex].pointsEarned;
+        student.points -= deletedRecord.pointsEarned;
+
+        // Sync delete with global Attendance
+        try {
+            await Attendance.findOneAndDelete({
+                studentId: student._id,
+                workshopId: deletedRecord.workshopName
+            });
+        } catch (syncErr) {
+            console.log("Global sync delete ignored:", syncErr.message);
+        }
 
         // Remove record
         student.attendance.splice(attIndex, 1);
@@ -170,6 +196,12 @@ const deleteDocument = async (req, res) => {
             await cloudinary.uploader.destroy(doc.publicId);
         }
 
+        // --- NEW LOGIC: Delete from global Document collection to sync Admin view ---
+        await Document.findOneAndDelete({
+            studentId: student._id,
+            fileUrl: doc.url
+        });
+
         student.documents = student.documents.filter(d => d._id.toString() !== req.params.docId);
         await student.save();
 
@@ -191,21 +223,47 @@ const downloadDocument = async (req, res) => {
         const doc = student.documents.find(d => d._id.toString() === req.params.docId);
         if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
 
-        // Set headers so browser downloads with the correct filename
-        res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+        // Set headers to force download with PDF format
+        let cleanFileName = doc.name.replace(/\"/g, '');
+        // Add .pdf extension if not present
+        if (!cleanFileName.toLowerCase().endsWith('.pdf')) {
+            cleanFileName = `${cleanFileName}.pdf`;
+        }
+        
+        res.setHeader('Content-Disposition', `attachment; filename="${cleanFileName}"`);
         res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
 
         // Pipe the file from Cloudinary through our server to the client
         const protocol = doc.url.startsWith('https') ? https : http;
-        protocol.get(doc.url, (fileStream) => {
+        const request = protocol.get(doc.url, (fileStream) => {
+            fileStream.on('error', (err) => {
+                console.error('Stream read error:', err);
+                if (!res.writableEnded) {
+                    res.end();
+                }
+            });
+            
             fileStream.pipe(res);
-        }).on('error', (err) => {
-            console.error('Proxy download error:', err);
-            res.status(500).json({ success: false, message: 'Failed to download file' });
+        });
+
+        request.on('error', (err) => {
+            console.error('Request error:', err);
+            if (!res.writableEnded) {
+                res.status(500).end();
+            }
+        });
+
+        res.on('error', (err) => {
+            console.error('Response error:', err);
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error('Download error:', error);
+        if (!res.writableEnded) {
+            res.status(500).json({ success: false, message: 'Server Error' });
+        }
     }
 };
 

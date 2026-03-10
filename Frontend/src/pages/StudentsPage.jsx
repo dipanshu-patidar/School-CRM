@@ -4,8 +4,9 @@ import StudentFilters from '../components/StudentFilters';
 import StudentsTable from '../components/StudentsTable';
 import StudentModal from '../components/StudentModal';
 import { getAllStudents, createStudent, updateStudent, deleteStudent } from '../api/studentApi';
+import * as XLSX from 'xlsx';
 
-const StudentsPage = () => {
+const StudentsPage = ({ role }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [students, setStudents] = useState([]);
@@ -88,6 +89,31 @@ const StudentsPage = () => {
         }
     };
 
+    const handleExport = () => {
+        if (!filteredStudents || filteredStudents.length === 0) {
+            alert('No students to export');
+            return;
+        }
+
+        const exportData = filteredStudents.map(student => ({
+            'Student ID': student.studentId,
+            'Name': student.name,
+            'Email': student.email,
+            'Phone': student.phone || 'N/A',
+            'Status': student.status,
+            'Points': `${student.points || 0} / ${student.totalPoints || 250}`,
+            'Assigned Staff': student.assignedStaff?.name || 'Unassigned',
+            'Enrolled Date': student.createdAt ? new Date(student.createdAt).toLocaleDateString() : 'N/A'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Students");
+
+        // Generate Excel file and trigger download
+        XLSX.writeFile(wb, "Student_List.xlsx");
+    };
+
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -97,17 +123,22 @@ const StudentsPage = () => {
                     <p className="text-gray-500 mt-1">Manage and track all students enrolled in the program.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-600 font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer">
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-600 font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
+                    >
                         <Download size={18} />
                         Export
                     </button>
-                    <button
-                        onClick={handleAddStudent}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
-                    >
-                        <UserPlus size={18} />
-                        Add Student
-                    </button>
+                    {role === 'admin' && (
+                        <button
+                            onClick={handleAddStudent}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-lg font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95"
+                        >
+                            <UserPlus size={18} />
+                            Add Student
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -153,6 +184,7 @@ const StudentsPage = () => {
                 onClose={() => { setIsModalOpen(false); setEditingStudent(null); }}
                 onSave={handleSaveStudent}
                 editStudent={editingStudent}
+                role={role}
             />
 
             {/* Delete Confirmation Modal */}

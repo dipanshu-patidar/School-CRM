@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { getSettings } from '../api/settingApi';
 
-const StudentForm = ({ form, onChange }) => {
+const StudentForm = ({ form, onChange, role }) => {
     const [staffOptions, setStaffOptions] = useState([]);
     const [threshold, setThreshold] = useState(250);
 
@@ -100,8 +100,9 @@ const StudentForm = ({ form, onChange }) => {
                         name="assignedStaff"
                         value={form.assignedStaff?.id || form.assignedStaff?._id || form.assignedStaff || ''}
                         onChange={onChange}
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer appearance-none"
+                        className={`w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none ${role !== 'admin' ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
                         required
+                        disabled={role !== 'admin'}
                     >
                         <option value="">Select staff member...</option>
                         {staffOptions.map(s => <option key={s._id} value={s._id}>{s.name} ({s.email})</option>)}

@@ -112,22 +112,62 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
 
     const handleDownload = async (docId, name) => {
         try {
-            // Call our backend proxy so the file is served with the correct filename
-            const response = await api.get(
-                `/api/students/${student._id}/documents/${docId}/download`,
-                { responseType: 'blob' }
-            );
-            const blob = new Blob([response.data], { type: 'application/octet-stream' });
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = name; // Correct filename from our backend
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(blobUrl);
+            const doc = documents.find(d => d._id === docId);
+            if (!doc || !doc.url) {
+                alert('Document URL not found.');
+                return;
+            }
+
+            let fileName = name || doc.name || 'document';
+            // Add .pdf extension if not present
+            if (!fileName.toLowerCase().endsWith('.pdf')) {
+                fileName = `${fileName}.pdf`;
+            }
+            let blob = null;
+
+            // Download via API endpoint with proper blob handling
+            try {
+                const response = await api.get(`/api/students/${student._id}/documents/${docId}/download`, {
+                    responseType: 'blob'
+                });
+                blob = response.data; // This is already a blob from axios
+            } catch (apiErr) {
+                console.log('API download failed, trying direct Cloudinary URL:', apiErr.message);
+            }
+
+            // Fallback: Direct Cloudinary download if API failed
+            if (!blob) {
+                let downloadUrl = doc.url;
+
+                if (downloadUrl.includes('res.cloudinary.com')) {
+                    const uploadIndex = downloadUrl.indexOf('/upload/');
+                    if (uploadIndex !== -1) {
+                        const before = downloadUrl.slice(0, uploadIndex + 8);
+                        const after = downloadUrl.slice(uploadIndex + 8);
+                        const cleanName = fileName.toLowerCase().endsWith('.pdf') ? fileName.slice(0, -4) : fileName;
+                        const safeName = encodeURIComponent(cleanName.replace(/\s+/g, '_'));
+                        downloadUrl = `${before}fl_attachment:${safeName}/${after}`;
+                    }
+                }
+
+                const blobResponse = await fetch(downloadUrl);
+                if (!blobResponse.ok) throw new Error('Fetch failed');
+                blob = await blobResponse.blob();
+            }
+
+            // Trigger download
+            if (blob) {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
         } catch (err) {
-            console.error('Download failed', err);
+            console.error('Download failed completely:', err);
             alert('Download failed. Please try again.');
         }
     };

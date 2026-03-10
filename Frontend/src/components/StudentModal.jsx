@@ -13,7 +13,7 @@ const EMPTY_FORM = {
     points: '',
 };
 
-const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
+const StudentModal = ({ isOpen, onClose, onSave, editStudent = null, role }) => {
     const isEditing = !!editStudent;
     const [form, setForm] = useState({ ...EMPTY_FORM });
     const [threshold, setThreshold] = useState(250);
@@ -92,7 +92,7 @@ const StudentModal = ({ isOpen, onClose, onSave, editStudent = null }) => {
                 {/* Form Body */}
                 <form onSubmit={handleSubmit}>
                     <div className="px-8 py-6">
-                        <StudentForm form={form} onChange={handleChange} />
+                        <StudentForm form={form} onChange={handleChange} role={role} />
                     </div>
 
                     {/* Footer */}

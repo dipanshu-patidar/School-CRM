@@ -62,6 +62,22 @@ const getReports = async (req, res) => {
         const filter = {};
         if (req.query.studentId) filter.studentId = req.query.studentId;
 
+        // Staff filter
+        if (req.user.role === 'staff') {
+            const Student = require('../models/Student');
+            const students = await Student.find({ assignedStaff: req.user._id }).select('_id');
+            const studentIds = students.map(s => s._id);
+
+            if (filter.studentId) {
+                // If a specific student is requested, ensure it's one of their assigned students
+                if (!studentIds.some(id => id.toString() === filter.studentId.toString())) {
+                    return res.status(403).json({ success: false, message: 'Not authorized to view this student\'s reports' });
+                }
+            } else {
+                filter.studentId = { $in: studentIds };
+            }
+        }
+
         const reports = await PCPReport.find(filter)
             .populate('studentId', 'name studentId status')
             .populate('createdBy', 'name role')

@@ -8,7 +8,7 @@ import PCPReportForm from '../components/PCPReportForm';
 import PCPReportsTable from '../components/PCPReportsTable';
 import PCPReportViewModal from '../components/PCPReportViewModal';
 import PrintHeader from '../components/PrintHeader';
-import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport, uploadDocument } from '../api/documentApi';
+import { getAllDocuments, getAllPcpReports, deleteDocument, deletePcpReport, addPcpReport, uploadDocument, downloadDocument, updateDocument } from '../api/documentApi';
 import { getAllStudents } from '../api/studentApi';
 
 const DocumentsPage = ({ role }) => {
@@ -79,8 +79,15 @@ const DocumentsPage = ({ role }) => {
 
     const handleUpload = async (studentId, formData) => {
         try {
-            await uploadDocument(studentId, formData);
-            fetchData();
+            if (editingDoc) {
+                // Update existing document
+                await updateDocument(editingDoc.id, formData);
+            } else {
+                // Create new document
+                await uploadDocument(studentId, formData);
+            }
+            // Refetch data and wait for it to complete
+            await fetchData();
             setIsUploadOpen(false);
             setEditingDoc(null);
         } catch (err) {
@@ -92,7 +99,7 @@ const DocumentsPage = ({ role }) => {
     const handleSavePCP = async (reportData, studentMongoId) => {
         try {
             await addPcpReport(studentMongoId, reportData);
-            fetchData();
+            await fetchData();
             setIsPCPModalOpen(false);
             setEditingPCP(null);
         } catch (err) {
@@ -120,11 +127,55 @@ const DocumentsPage = ({ role }) => {
         window.print();
     };
 
-    const handleDownload = (doc) => {
-        if (doc.url) {
-            window.open(doc.url, '_blank');
-        } else {
-            alert('This report can be viewed and printed via the "View" button.');
+    const handleDownload = async (doc) => {
+        if (!doc.url && !doc.id) {
+            alert('No file available for download.');
+            return;
+        }
+
+        try {
+            let blob;
+            let fileName = doc.docName || 'document';
+            // Add .pdf extension if not present
+            if (!fileName.toLowerCase().endsWith('.pdf')) {
+                fileName = `${fileName}.pdf`;
+            }
+
+            // Try API download for global documents
+            if (doc.id) {
+                try {
+                    blob = await downloadDocument(doc.id); // This returns the blob directly
+                } catch (apiErr) {
+                    console.log('API download failed, trying direct URL:', apiErr.message);
+                    // Fall through to direct download
+                    if (!doc.url) throw apiErr;
+                }
+            }
+
+            // Direct Cloudinary download if API failed or no ID
+            if (!blob && doc.url) {
+                const response = await fetch(doc.url);
+                if (!response.ok) throw new Error('Fetch failed');
+                blob = await response.blob();
+            }
+
+            // Create and trigger download
+            if (blob) {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                return;
+            }
+
+            throw new Error('No blob data available');
+        } catch (err) {
+            console.error('Download failed:', err);
+            alert('Download failed. Please try again.');
         }
     };
 

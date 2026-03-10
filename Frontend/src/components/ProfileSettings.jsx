@@ -31,7 +31,10 @@ const ProfileSettings = () => {
                 email: userData.email || ''
             });
             if (userData.avatar) {
-                setAvatarPreview(`http://localhost:5000${userData.avatar}`);
+                const avatarUrl = userData.avatar.startsWith('http')
+                    ? userData.avatar
+                    : `http://localhost:5000${userData.avatar}`;
+                setAvatarPreview(avatarUrl);
             }
         } catch (err) {
             console.error('Error fetching user data:', err);
@@ -80,7 +83,10 @@ const ProfileSettings = () => {
             setAvatarFile(null);
 
             if (updatedUser.avatar) {
-                setAvatarPreview(`http://localhost:5000${updatedUser.avatar}`);
+                const avatarUrl = updatedUser.avatar.startsWith('http')
+                    ? updatedUser.avatar
+                    : `http://localhost:5000${updatedUser.avatar}`;
+                setAvatarPreview(avatarUrl);
             }
         } catch (err) {
             console.error('Error updating profile:', err);

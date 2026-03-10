@@ -6,15 +6,12 @@ import StudentProfileCard from '../components/StudentProfileCard';
 import ProgressBar from '../components/ProgressBar';
 import StudentTabs from '../components/StudentTabs';
 import PrintHeader from '../components/PrintHeader';
-import { getAllStaff } from '../api/staffApi';
-import { uploadDocument } from '../api/documentApi';
-
 import { getSettings } from '../api/settingApi';
 
 /* ────────────────────────────────
    EDIT STUDENT MODAL
    ──────────────────────────────── */
-const EditStudentModal = ({ student, onClose, onSave }) => {
+const EditStudentModal = ({ student, onClose, onSave, role }) => {
     const [form, setForm] = useState({
         ...student,
         assignedStaff: student.assignedStaff?._id || student.assignedStaff || ''
@@ -28,10 +25,10 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
             try {
                 setIsLoadingStaff(true);
                 const [staffRes, settingsRes] = await Promise.all([
-                    getAllStaff(),
+                    api.get('/api/users/staff'),
                     getSettings()
                 ]);
-                setStaffOptions(staffRes.data || []);
+                setStaffOptions(staffRes.data.data || []);
                 if (settingsRes.success) {
                     setThreshold(settingsRes.data.completionPointsThreshold);
                 }
@@ -99,8 +96,8 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
                             name="assignedStaff"
                             value={form.assignedStaff}
                             onChange={handleChange}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm cursor-pointer"
-                            disabled={isLoadingStaff}
+                            className={`w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm appearance-none ${role !== 'admin' ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
+                            disabled={role !== 'admin' || isLoadingStaff}
                         >
                             <option value="">{isLoadingStaff ? 'Loading staff...' : 'Select staff member...'}</option>
                             {staffOptions.map(staff => (
@@ -144,7 +141,7 @@ const EditStudentModal = ({ student, onClose, onSave }) => {
 /* ────────────────────────────────
    MAIN PAGE
    ──────────────────────────────── */
-const StudentProfilePage = () => {
+const StudentProfilePage = ({ role }) => {
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -276,6 +273,7 @@ const StudentProfilePage = () => {
                     student={studentData}
                     onClose={() => setShowEditModal(false)}
                     onSave={handleSaveEdit}
+                    role={role}
                 />
             )}
         </div>

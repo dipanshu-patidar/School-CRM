@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, CalendarDays } from 'lucide-react';
 import api from '../api/axios';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const AttendanceTable = ({ student, records = [] }) => {
     const navigate = useNavigate();
@@ -9,6 +10,11 @@ const AttendanceTable = ({ student, records = [] }) => {
     const [showInput, setShowInput] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({ workshopName: '', pointsEarned: 1 });
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [attendanceToDelete, setAttendanceToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleAdd = async () => {
         if (!formData.workshopName.trim()) return;
@@ -29,13 +35,24 @@ const AttendanceTable = ({ student, records = [] }) => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Delete this attendance record? Points will be deducted.")) return;
+    const handleDeleteClick = (record) => {
+        setAttendanceToDelete(record);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!attendanceToDelete) return;
+        setIsDeleting(true);
         try {
-            const res = await api.delete(`/api/students/${student._id}/attendance/${id}`);
+            const res = await api.delete(`/api/students/${student._id}/attendance/${attendanceToDelete._id}`);
             setAttendance(res.data.data.attendance || []);
+            setIsDeleteModalOpen(false);
+            setAttendanceToDelete(null);
         } catch (error) {
             console.error('Error deleting attendance', error);
+            alert('Failed to delete attendance record.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -119,7 +136,7 @@ const AttendanceTable = ({ student, records = [] }) => {
                                     <td className="px-6 py-4 text-sm text-gray-500">{record.date}</td>
                                     <td className="px-6 py-4 text-right no-print">
                                         <button
-                                            onClick={() => handleDelete(record._id)}
+                                            onClick={() => handleDeleteClick(record)}
                                             className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer opacity-0 group-hover:opacity-100"
                                         >
                                             <Trash2 size={16} />
@@ -131,6 +148,19 @@ const AttendanceTable = ({ student, records = [] }) => {
                     </table>
                 )}
             </div>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setAttendanceToDelete(null);
+                }}
+                onConfirm={confirmDelete}
+                title="Delete Attendance Record"
+                message={`Are you sure you want to delete the attendance for "${attendanceToDelete?.workshopName}"? ${attendanceToDelete?.pointsEarned} points will be deducted from the student's total.`}
+                confirmText="Delete Record"
+                isLoading={isDeleting}
+            />
         </div>
     );
 };

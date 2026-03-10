@@ -41,8 +41,28 @@ export const uploadDocument = async (studentId, formData) => {
     return response.data.data;
 };
 
+export const updateDocument = async (docId, formData) => {
+    // Update existing document with new data
+    const response = await api.put(`/api/documents/${docId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data.data;
+};
+
 export const deleteDocument = async (studentId, docId) => {
     const response = await api.delete(`/api/documents/${docId}`);
     return response.data;
+};
+
+export const downloadDocument = async (docId) => {
+    try {
+        const response = await api.get(`/api/documents/${docId}/download`, {
+            responseType: 'blob'
+        });
+        return response.data; // This is the blob itself
+    } catch (error) {
+        console.error('Download error:', error);
+        throw error;
+    }
 };
 

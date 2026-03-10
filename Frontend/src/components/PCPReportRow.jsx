@@ -10,9 +10,9 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                            {(report?.studentName || 'U').charAt(0)}
+                            {report.studentName.charAt(0)}
                         </div>
-                        <span className="text-sm font-semibold text-gray-900">{report?.studentName || 'Unknown Student'}</span>
+                        <span className="text-sm font-semibold text-gray-900">{report.studentName}</span>
                     </div>
                 </td>
                 <td className="px-6 py-4">
@@ -49,7 +49,6 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
                         >
                             <Pencil size={16} />
                         </button>
-
                         <button
                             title="Print Report"
                             onClick={() => window.print()}
@@ -115,7 +114,6 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole }) => {
                     >
                         <Pencil size={14} />
                     </button>
-
                     <button
                         onClick={() => window.print()}
                         className="p-2.5 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"

@@ -47,12 +47,12 @@ const createAttendance = async (req, res) => {
         // 4. Assign +1 point and save student
         student.points += points;
 
-        // Ensure student schema logic adds it properly without duplicating arrays if they existed previously inside students list.
-        // We will push a generic object into student's deprecated attendance array to keep backwards compatibility if UI uses it.
-        student.attendance.push({
-            workshopName,
+        // Ensure student schema logic adds it properly
+        const dateStr = attendanceDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        student.attendance.unshift({
+            workshopName: workshopName,
             pointsEarned: points,
-            date: date
+            date: dateStr
         });
 
         await student.save();
@@ -72,7 +72,14 @@ const createAttendance = async (req, res) => {
 // @access  Private
 const getAllAttendance = async (req, res) => {
     try {
-        const records = await Attendance.find()
+        let filter = {};
+        if (req.user.role === 'staff') {
+            const students = await Student.find({ assignedStaff: req.user._id }).select('_id');
+            const studentIds = students.map(s => s._id);
+            filter.studentId = { $in: studentIds };
+        }
+
+        const records = await Attendance.find(filter)
             .populate('studentId', 'name studentId points status')
             .sort('-date'); // newest first
 
@@ -114,10 +121,9 @@ const deleteAttendance = async (req, res) => {
         if (student) {
             student.points = Math.max(0, student.points - attendance.pointsAwarded); // Prevent negative
 
-            // Remove from legacy array if matching approx
-            const dateStr = new Date(attendance.date).toISOString().split('T')[0];
+            // Remove from legacy array by matching workshopName
             student.attendance = student.attendance.filter(a =>
-                !(a.workshopName === attendance.workshopId && a.date.includes(dateStr))
+                a.workshopName !== attendance.workshopId
             );
 
             await student.save();

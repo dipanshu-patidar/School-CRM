@@ -35,10 +35,10 @@ router.route('/:id')
 
 // Tab routes
 router.post('/:id/notes', protect, addNote);
-router.delete('/:studentId/notes/:noteId', protect, deleteNote);
+router.delete('/:id/notes/:noteId', protect, deleteNote);
 
 router.post('/:id/attendance', protect, addAttendance);
-router.delete('/:studentId/attendance/:attendanceId', protect, deleteAttendance);
+router.delete('/:id/attendance/:attId', protect, deleteAttendance);
 
 // Documents routes
 router.route('/:id/documents')

@@ -56,7 +56,7 @@ const getWorkshopById = async (req, res) => {
 // @access  Private/Admin
 const createWorkshop = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, pointsReward } = req.body;
 
         if (!name) {
             return res.status(400).json({ success: false, message: 'Please add a workshop name' });
@@ -65,8 +65,8 @@ const createWorkshop = async (req, res) => {
         const workshop = await Workshop.create({
             name,
             description,
-            pointsReward: 1, // Rule: automatically set to 1
-            createdBy: req.user._id // Rule: Store admin user id
+            pointsReward: pointsReward || 1,
+            createdBy: req.user._id
         });
 
         res.status(201).json({
@@ -92,15 +92,16 @@ const createWorkshop = async (req, res) => {
 // @access  Private/Admin
 const updateWorkshop = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, pointsReward } = req.body;
 
         let workshop = await Workshop.findById(req.params.id);
         if (!workshop) return res.status(404).json({ success: false, message: 'Workshop not found' });
 
-        // Build object with only allowed fields (no pointsReward)
+        // Build object with only allowed fields
         const updateData = {};
         if (name) updateData.name = name;
         if (description !== undefined) updateData.description = description;
+        if (pointsReward !== undefined) updateData.pointsReward = pointsReward;
 
         workshop = await Workshop.findByIdAndUpdate(req.params.id, updateData, {
             new: true,

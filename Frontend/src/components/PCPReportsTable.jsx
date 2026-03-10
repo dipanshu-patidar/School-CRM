@@ -74,20 +74,21 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
             </div>
 
             <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden flex flex-col print:border-none print:shadow-none">
-                <div className="overflow-x-auto print:overflow-visible">
-                    <table className="w-full text-left">
+                {/* Desktop/Print Table */}
+                <div className="hidden md:block print:block overflow-x-auto print:overflow-visible">
+                    <table className="w-full text-left print:table">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Student Name</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Document Type</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Date of Service</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Staff</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Created Date</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest no-print text-right">Actions</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Student Name</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Document Type</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Date of Service</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Staff</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Created Date</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">Status</th>
+                                <th className="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none no-print text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-50">
                             {paginatedReports.map(report => (
                                 <PCPReportRow
                                     key={report.id}
@@ -102,19 +103,36 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
                     </table>
                 </div>
 
+                {/* Mobile Card View - Hidden in Print */}
+                <div className="md:hidden print:hidden p-4 space-y-4 bg-gray-50/30">
+                    {paginatedReports.map(report => (
+                        <PCPReportRow
+                            key={`mobile-${report.id}`}
+                            report={report}
+                            onView={onView}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            userRole={userRole}
+                            isMobile={true}
+                        />
+                    ))}
+                </div>
+
                 {filteredReports.length === 0 && (
-                    <div className="py-20 flex flex-col items-center justify-center text-gray-400">
-                        <Search size={40} className="mb-4 opacity-20" />
-                        <p className="font-bold text-lg">No results found</p>
+                    <div className="py-24 flex flex-col items-center justify-center text-gray-400">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <Search size={32} className="opacity-20" />
+                        </div>
+                        <p className="font-bold text-lg text-gray-900">No reports found</p>
                         <p className="text-sm">Try adjusting your search or filters.</p>
                     </div>
                 )}
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/20 flex items-center justify-between no-print">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            Showing <span className="text-primary">{Math.min(filteredReports.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredReports.length, currentPage * itemsPerPage)}</span> of {filteredReports.length} reports
+                    <div className="px-8 py-5 border-t border-gray-50 bg-white flex items-center justify-between no-print">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            Showing <span className="text-primary">{Math.min(filteredReports.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredReports.length, currentPage * itemsPerPage)}</span> of {filteredReports.length} results
                         </p>
                         <div className="flex items-center gap-1">
                             <button

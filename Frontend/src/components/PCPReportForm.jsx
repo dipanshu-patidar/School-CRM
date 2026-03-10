@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Save, User, Calendar, Info, Activity, Target, Zap, FileUp, Loader2 } from 'lucide-react';
+import { X, FileText, Save, User, Calendar, Info, Activity, Target, Zap, FileUp, Loader2, Search } from 'lucide-react';
 import DocumentUploadField from './DocumentUploadField';
 import { getStudents } from '../api/studentApi';
 
 const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
     const [students, setStudents] = useState([]);
     const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         studentMongoId: '',
@@ -25,10 +27,21 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
         if (isOpen) {
             fetchStudents();
             if (editData) {
+                const s = editData.studentId; // This might be populated or just ID
+                setSearchTerm(editData.studentName ? `${editData.studentName} (${editData.studentId || ''})` : '');
+                // Only take the fields that the form actually manages
                 setFormData({
-                    ...editData,
                     studentMongoId: editData.studentMongoId || '',
-                    dateOfService: editData.dateOfService || new Date().toISOString().split('T')[0]
+                    dateOfService: editData.dateOfService ? new Date(editData.dateOfService).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    serviceDescription: editData.serviceDescription || '',
+                    faceToFace: editData.faceToFace || editData.faceToFaceIndicator || 'Face-to-Face',
+                    purpose: editData.purpose || '',
+                    intervention: editData.intervention || '',
+                    effectiveness: editData.effectiveness || '',
+                    staffNotes: editData.staffNotes || '',
+                    staffSignature: editData.staffSignature || '',
+                    assessmentFile: editData.assessmentFile || null,
+                    status: editData.status || 'Completed'
                 });
             } else {
                 setFormData({
@@ -61,6 +74,11 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
     };
 
     if (!isOpen) return null;
+
+    const filteredStudents = students.filter(s =>
+        s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.id?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -114,18 +132,60 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                                     Student Full Name <span className="text-red-400">*</span>
                                 </label>
                                 <div className="relative">
-                                    <User size={16} className="absolute left-3 top-3 text-gray-400" />
-                                    <select
-                                        required
-                                        name="studentMongoId"
-                                        value={formData.studentMongoId}
-                                        onChange={handleChange}
+                                    <User size={16} className="absolute left-3 top-3 text-gray-400 z-10" />
+                                    <input
+                                        type="text"
+                                        placeholder={isLoadingStudents ? 'Loading students...' : 'Search by name or ID...'}
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setDropdownOpen(true);
+                                            if (!e.target.value) {
+                                                setFormData(prev => ({ ...prev, studentMongoId: '' }));
+                                            }
+                                        }}
+                                        onFocus={() => {
+                                            if (!editData) setDropdownOpen(true);
+                                        }}
                                         disabled={!!editData || isLoadingStudents}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer disabled:opacity-50"
-                                    >
-                                        <option value="">{isLoadingStudents ? 'Loading Students...' : 'Select Student...'}</option>
-                                        {students.map(s => <option key={s._id} value={s._id}>{s.name} ({s.studentId})</option>)}
-                                    </select>
+                                        required
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 disabled:opacity-50"
+                                    />
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                        <Search size={16} />
+                                    </div>
+
+                                    {/* Dropdown Results */}
+                                    {dropdownOpen && !isLoadingStudents && !editData && (
+                                        <>
+                                            <div className="fixed inset-0 z-[60]" onClick={() => setDropdownOpen(false)} />
+                                            <div className="absolute z-[70] left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                                                {filteredStudents.length > 0 ? (
+                                                    filteredStudents.map(s => (
+                                                        <button
+                                                            key={s._id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData(prev => ({ ...prev, studentMongoId: s._id }));
+                                                                setSearchTerm(`${s.name} (${s.id})`);
+                                                                setDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-0 flex flex-col gap-0.5 ${formData.studentMongoId === s._id ? 'bg-primary/10' : ''}`}
+                                                        >
+                                                            <span className="text-sm font-bold text-gray-900">{s.name}</span>
+                                                            <span className="text-xs text-gray-500">ID: {s.id}</span>
+                                                        </button>
+                                                    ))
+                                                ) : (
+                                                    <div className="px-4 py-8 text-center text-gray-400">
+                                                        <Search size={24} className="mx-auto mb-2 opacity-20" />
+                                                        <p className="text-sm font-medium">No students matched "{searchTerm}"</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                    <input type="hidden" name="studentMongoId" value={formData.studentMongoId} required />
                                 </div>
                             </div>
 

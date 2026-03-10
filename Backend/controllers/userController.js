@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const imagekit = require('../config/imagekit');
 
 // @desc    Get all staff
 // @route   GET /api/users/staff
@@ -42,7 +43,17 @@ const updateProfile = async (req, res) => {
             }
 
             if (req.file) {
-                user.avatar = `/uploads/avatars/${req.file.filename}`;
+                try {
+                    const uploadResponse = await imagekit.upload({
+                        file: req.file.buffer,
+                        fileName: req.file.originalname,
+                        folder: '/avatars'
+                    });
+                    user.avatar = uploadResponse.url;
+                } catch (err) {
+                    console.error('ImageKit Upload Error:', err);
+                    return res.status(500).json({ success: false, message: 'File upload failed' });
+                }
             }
 
             const updatedUser = await user.save();

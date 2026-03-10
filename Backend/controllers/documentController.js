@@ -1,6 +1,7 @@
 const Document = require('../models/Document');
 const Student = require('../models/Student');
 const Setting = require('../models/Setting');
+const imagekit = require('../config/imagekit');
 
 // Helper to evaluate completion rules based on CRM specs
 const evaluateStudentCompletion = async (studentId) => {
@@ -45,15 +46,26 @@ const uploadDocument = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Student ID and Document Type are required' });
         }
 
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Please upload a file' });
+        let fileUrl = '';
+        if (req.file) {
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: req.file.originalname,
+                    folder: '/documents'
+                });
+                fileUrl = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
         }
 
         const document = await Document.create({
             studentId,
             documentType,
             status: status || 'pending',
-            fileUrl: req.file.path, // Cloudinary provides secure URL in .path
+            fileUrl: fileUrl,
             uploadedBy: req.user._id
         });
 
@@ -110,6 +122,14 @@ const deleteDocument = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Document not found' });
         }
 
+        // Staff check: Can only delete if student is assigned to them
+        if (req.user.role === 'staff') {
+            const student = await Student.findById(document.studentId);
+            if (!student || student.assignedStaff?.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ success: false, message: 'Not authorized to delete this student\'s documents' });
+            }
+        }
+
         // Optional: Delete from Cloudinary if needed, but for now just from DB
         await document.deleteOne();
 
@@ -144,7 +164,17 @@ const updateDocument = async (req, res) => {
 
         // If new file is uploaded, update the file URL
         if (req.file) {
-            document.fileUrl = req.file.path; // Cloudinary URL
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: req.file.originalname,
+                    folder: '/documents'
+                });
+                document.fileUrl = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
         }
 
         await document.save();
@@ -170,7 +200,7 @@ const downloadDocument = async (req, res) => {
         if (!cleanFileName.toLowerCase().endsWith('.pdf')) {
             cleanFileName = `${cleanFileName}.pdf`;
         }
-        
+
         res.setHeader('Content-Disposition', `attachment; filename="${cleanFileName}"`);
         res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -186,7 +216,7 @@ const downloadDocument = async (req, res) => {
                     res.end();
                 }
             });
-            
+
             fileStream.pipe(res);
         });
 

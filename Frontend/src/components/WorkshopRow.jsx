@@ -21,7 +21,7 @@ const WorkshopRow = ({ workshop, onEdit, onDelete, onView }) => {
                 </td>
                 <td className="px-6 py-4">
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                        +1 Point
+                        +{workshop.pointsReward} {workshop.pointsReward === 1 ? 'Point' : 'Points'}
                     </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">{workshop.createdDate}</td>
@@ -56,7 +56,7 @@ const WorkshopRow = ({ workshop, onEdit, onDelete, onView }) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">+1</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">+{workshop.pointsReward}</span>
                         <button onClick={() => onView(workshop)} className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"><Eye size={15} /></button>
                         <button onClick={() => onEdit(workshop)} className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer"><Pencil size={15} /></button>
                         <button onClick={() => onDelete(workshop)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"><Trash2 size={15} /></button>

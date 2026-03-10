@@ -58,10 +58,14 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
 
         try {
             setIsLoading(true);
-            // Points are always 1 according to requirements
+
+            // Find selected workshop to get its points
+            const selectedWorkshop = workshops.find(w => w.name === form.workshop);
+            const pointsReward = selectedWorkshop?.pointsReward || 1;
+
             await addStudentAttendance(form.studentMongoId, {
                 workshopName: form.workshop,
-                pointsEarned: 1,
+                pointsEarned: pointsReward,
                 date: form.date
             });
             onSave(); // Refresh parent
@@ -73,6 +77,9 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
         }
     };
 
+    const selectedWorkshopObj = workshops.find(w => w.name === form.workshop);
+    const currentPoints = selectedWorkshopObj?.pointsReward || 1;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose} />
@@ -83,7 +90,7 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                         <div className="p-2 bg-primary/10 rounded-xl"><UserCheck size={20} className="text-primary" /></div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Mark Attendance</h3>
-                            <p className="text-xs text-gray-500">Record a workshop attendance (+1 point).</p>
+                            <p className="text-xs text-gray-500">Record a workshop attendance ({form.workshop ? `+${currentPoints} ${currentPoints === 1 ? 'point' : 'points'}` : 'earn points'}).</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 cursor-pointer">
@@ -185,7 +192,7 @@ export const MarkAttendanceModal = ({ isOpen, selectedDate, onClose, onSave }) =
                     {/* Points info */}
                     <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/10 rounded-lg">
                         <Star size={16} className="text-primary shrink-0" />
-                        <p className="text-xs text-gray-600 font-bold">Points Awarded: <span className="text-primary">+1 Point</span> (auto-assigned)</p>
+                        <p className="text-xs text-gray-600 font-bold">Points Awarded: <span className="text-primary">+{currentPoints} {currentPoints === 1 ? 'Point' : 'Points'}</span></p>
                     </div>
 
                     <div className="flex gap-3 pt-2">

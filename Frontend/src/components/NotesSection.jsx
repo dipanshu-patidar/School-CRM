@@ -96,14 +96,14 @@ const NotesSection = ({ student, initialNotes = [] }) => {
                                     <button
                                         title="Print Note"
                                         onClick={() => window.print()}
-                                        className="p-2 rounded-xl text-gray-400 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
+                                        className="p-2.5 rounded-xl text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all cursor-pointer shadow-sm active:scale-95"
                                     >
                                         <Printer size={16} />
                                     </button>
                                     <button
                                         title="Delete Note"
                                         onClick={() => handleDelete(note._id)}
-                                        className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
+                                        className="p-2.5 rounded-xl text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-100 transition-all cursor-pointer shadow-sm active:scale-95"
                                     >
                                         <Trash2 size={16} />
                                     </button>

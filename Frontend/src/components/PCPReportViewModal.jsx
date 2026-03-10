@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, Calendar, User, CheckCircle, Clock, MessageSquare, ClipboardCheck, Zap, Printer } from 'lucide-react';
+import { X, FileText, Calendar, User, CheckCircle, Clock, MessageSquare, ClipboardCheck, Zap, Download } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
 import PrintHeader from './PrintHeader';
 
@@ -116,9 +116,9 @@ const PCPReportViewModal = ({ report, onClose }) => {
                                     <h4 className="text-xl font-bold text-gray-900 tracking-tight flex-1 border-b border-gray-100 pb-1.5">Assessment Attachment</h4>
                                 </div>
                                 <div className="rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 min-h-[400px] relative">
-                                    {report.assessmentFile.toLowerCase().endsWith('.pdf') ? (
+                                    {(report.assessmentFile.toLowerCase().split('?')[0].endsWith('.pdf') || report.assessmentFile.toLowerCase().includes('/assessments/')) ? (
                                         <iframe
-                                            src={`${report.assessmentFile}#toolbar=0`}
+                                            src={`${report.assessmentFile}${report.assessmentFile.includes('?') ? '&' : '?'}toolbar=0`}
                                             className="w-full h-[500px] border-none"
                                             title="Assessment PDF Preview"
                                         />
@@ -176,13 +176,21 @@ const PCPReportViewModal = ({ report, onClose }) => {
                         >
                             Close
                         </button>
-                        <button
-                            onClick={() => window.print()}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm cursor-pointer no-print focus:ring-2 focus:ring-gray-100"
-                        >
-                            <Printer size={18} />
-                            Print Report
-                        </button>
+                        {report.assessmentFile && (
+                            <button
+                                onClick={() => {
+                                    if (window.onDownloadDocument) {
+                                        window.onDownloadDocument({ url: report.assessmentFile, docName: 'Assessment Attachment' });
+                                    } else {
+                                        window.open(report.assessmentFile + (report.assessmentFile.includes('?') ? '&' : '?') + 'ik-attachment=true', '_blank');
+                                    }
+                                }}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-hover text-black rounded-xl font-bold transition-all shadow-lg shadow-primary/20 cursor-pointer active:scale-95 no-print"
+                            >
+                                <Download size={18} />
+                                Download Attachment
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

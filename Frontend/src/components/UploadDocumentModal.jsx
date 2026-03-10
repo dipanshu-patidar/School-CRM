@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Upload, FileUp, Loader2 } from 'lucide-react';
+import { X, Upload, FileUp, Loader2, Search, User } from 'lucide-react';
 
 const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, students = [] }) => {
     const isEditing = !!editDoc;
@@ -9,6 +9,8 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, studen
     const [file, setFile] = useState(null);
     const [dragging, setDragging] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const inputRef = useRef();
 
     useEffect(() => {
@@ -18,8 +20,16 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, studen
                 setStatus(editDoc.status || 'pending');
                 setDocumentType(editDoc.docName || '');
                 setFile(null); // When editing, we usually don't show the previous file for re-upload unless requested
+
+                // Set initial search term for editing
+                const student = students.find(s => s._id === editDoc.studentMongoId);
+                if (student) {
+                    setSearchTerm(`${student.name} (${student.id})`);
+                }
             } else {
                 setStudentId('');
+                setSearchTerm('');
+                setDropdownOpen(false);
                 setStatus('pending');
                 setDocumentType('');
                 setFile(null);
@@ -28,6 +38,11 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, studen
     }, [isOpen, editDoc, isEditing]);
 
     if (!isOpen) return null;
+
+    const filteredStudents = students.filter(s =>
+        s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.id?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleFile = (f) => {
         if (f) setFile(f);
@@ -88,21 +103,66 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload, editDoc = null, studen
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
+                    <div className="relative">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                             Select Student <span className="text-red-400">*</span>
                         </label>
-                        <select
-                            required
-                            value={studentId}
-                            onChange={(e) => setStudentId(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all"
-                        >
-                            <option value="">Choose a student...</option>
-                            {students.map(s => (
-                                <option key={s._id} value={s._id}>{s.name} ({s.id})</option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <User size={16} className="absolute left-3 top-3 text-gray-400 z-10" />
+                            <input
+                                type="text"
+                                placeholder="Search by name or ID..."
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setDropdownOpen(true);
+                                    if (!e.target.value) {
+                                        setStudentId('');
+                                    }
+                                }}
+                                onFocus={() => {
+                                    if (!isEditing) setDropdownOpen(true);
+                                }}
+                                disabled={isEditing || isSubmitting}
+                                required
+                                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                <Search size={16} />
+                            </div>
+
+                            {/* Dropdown Results */}
+                            {dropdownOpen && !isEditing && (
+                                <>
+                                    <div className="fixed inset-0 z-[60]" onClick={() => setDropdownOpen(false)} />
+                                    <div className="absolute z-[70] left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {filteredStudents.length > 0 ? (
+                                            filteredStudents.map(s => (
+                                                <button
+                                                    key={s._id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setStudentId(s._id);
+                                                        setSearchTerm(`${s.name} (${s.id})`);
+                                                        setDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-0 flex flex-col gap-0.5 ${studentId === s._id ? 'bg-primary/10' : ''}`}
+                                                >
+                                                    <span className="text-sm font-bold text-gray-900">{s.name}</span>
+                                                    <span className="text-xs text-gray-500">ID: {s.id}</span>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-8 text-center text-gray-400">
+                                                <Search size={24} className="mx-auto mb-2 opacity-20" />
+                                                <p className="text-sm font-medium">No students matched "{searchTerm}"</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <input type="hidden" name="studentId" value={studentId} required />
                     </div>
 
                     <div>

@@ -1,4 +1,5 @@
 const PCPReport = require('../models/PCPReport');
+const imagekit = require('../config/imagekit');
 
 // @desc    Create a PCP/IGP Report
 // @route   POST /api/pcp-reports
@@ -6,25 +7,36 @@ const PCPReport = require('../models/PCPReport');
 const createReport = async (req, res) => {
     try {
         console.log('--- New PCP Report Submission ---');
-        const {
-            studentId,
-            dateOfService,
-            serviceDescription,
-            faceToFaceIndicator,
-            faceToFace,
-            purpose,
-            intervention,
-            effectiveness,
-            staffNotes,
-            staffSignature,
-            status
-        } = req.body;
+        
+        // Pick specific fields and handle potential array values from double-append
+        const getField = (name) => {
+            const val = req.body[name];
+            return Array.isArray(val) ? val[0] : val;
+        };
+
+        const studentId = getField('studentId');
+        const dateOfService = getField('dateOfService');
+        const staffSignature = getField('staffSignature');
+        const status = getField('status');
 
         if (!studentId || !dateOfService || !staffSignature) {
             return res.status(400).json({ success: false, message: 'Student, date of service, and staff signature are required.' });
         }
 
-        const assessmentFile = req.file ? req.file.path : undefined;
+        let assessmentFile = undefined;
+        if (req.file) {
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer, // required
+                    fileName: req.file.originalname, // required
+                    folder: '/assessments'
+                });
+                assessmentFile = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
+        }
 
         // Ensure status matches model enum ['draft', 'completed']
         let finalStatus = 'draft';
@@ -35,12 +47,12 @@ const createReport = async (req, res) => {
         const report = await PCPReport.create({
             studentId,
             dateOfService,
-            serviceDescription: serviceDescription || 'Standard Service',
-            faceToFaceIndicator: faceToFaceIndicator || faceToFace || 'Face-to-Face',
-            purpose: purpose || 'Standard Purpose',
-            intervention: intervention || 'Standard Intervention',
-            effectiveness: effectiveness || 'Standard Effectiveness',
-            staffNotes: staffNotes || '',
+            serviceDescription: getField('serviceDescription') || 'Standard Service',
+            faceToFaceIndicator: getField('faceToFaceIndicator') || getField('faceToFace') || 'Face-to-Face',
+            purpose: getField('purpose') || 'Standard Purpose',
+            intervention: getField('intervention') || 'Standard Intervention',
+            effectiveness: getField('effectiveness') || 'Standard Effectiveness',
+            staffNotes: getField('staffNotes') || '',
             staffSignature,
             assessmentFile,
             status: finalStatus,
@@ -118,10 +130,38 @@ const updateReport = async (req, res) => {
         let report = await PCPReport.findById(req.params.id);
         if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
 
-        const updateData = { ...req.body };
+        // Sanitizing input: only allow these fields to be updated via this route
+        const allowedFields = [
+            'dateOfService', 'serviceDescription', 'faceToFaceIndicator', 'faceToFace',
+            'purpose', 'intervention', 'effectiveness', 'staffNotes', 'staffSignature', 'status'
+        ];
+        
+        const updateData = {};
+        allowedFields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                // If it's an array (from double append), take the first value
+                updateData[field] = Array.isArray(req.body[field]) ? req.body[field][0] : req.body[field];
+            }
+        });
+
+        // Ensure status matches model enum ['draft', 'completed']
+        if (updateData.status) {
+            updateData.status = updateData.status.toLowerCase() === 'draft' ? 'draft' : 'completed';
+        }
+
         // If a new file is uploaded, update the assessmentFile URL
         if (req.file) {
-            updateData.assessmentFile = req.file.path;
+            try {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: req.file.originalname,
+                    folder: '/assessments'
+                });
+                updateData.assessmentFile = uploadResponse.url;
+            } catch (err) {
+                console.error('ImageKit Upload Error:', err);
+                return res.status(500).json({ success: false, message: 'File upload failed' });
+            }
         }
 
         report = await PCPReport.findByIdAndUpdate(req.params.id, updateData, {
@@ -131,8 +171,8 @@ const updateReport = async (req, res) => {
 
         res.status(200).json({ success: true, data: report });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error('PCP REPORT UPDATE ERROR:', error);
+        res.status(500).json({ success: false, message: error.message || 'Server Error' });
     }
 };
 

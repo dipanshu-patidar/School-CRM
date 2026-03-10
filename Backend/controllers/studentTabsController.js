@@ -190,6 +190,11 @@ const deleteDocument = async (req, res) => {
         const student = await Student.findById(req.params.id);
         if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
+        // Staff check: Can only delete if student is assigned to them
+        if (req.user.role === 'staff' && student.assignedStaff?.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this student\'s documents' });
+        }
+
         const { docId } = req.params;
         let docToDelete = null;
         let publicId = null;

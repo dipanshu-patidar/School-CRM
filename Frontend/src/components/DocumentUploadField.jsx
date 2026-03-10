@@ -13,14 +13,19 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
         }
 
         if (selectedFile instanceof File) {
-            const url = URL.createObjectURL(selectedFile);
-            setPreviewUrl(url);
-            return () => URL.revokeObjectURL(url);
+            if (selectedFile.type.startsWith('image/')) {
+                const url = URL.createObjectURL(selectedFile);
+                setPreviewUrl(url);
+                return () => URL.revokeObjectURL(url);
+            } else {
+                setPreviewUrl(null); // No preview for non-image local files
+            }
+            return;
         }
 
         if (typeof selectedFile === 'string') {
             let url = selectedFile;
-            // Cloudinary transformation for preview
+            // Support both Cloudinary and ImageKit transformations for preview
             if (url.includes('res.cloudinary.com')) {
                 const uploadIndex = url.indexOf('/upload/');
                 if (uploadIndex !== -1) {
@@ -31,6 +36,9 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
                         : 'w_400,h_400,c_fill,f_auto,q_auto';
                     url = url.slice(0, uploadIndex + 8) + transformation + url.slice(uploadIndex + 7);
                 }
+            } else if (url.includes('ik.imagekit.io')) {
+                // ImageKit transformation
+                url = `${url}?tr=w-400,h-400,cm-pad_resize,bg-F3F4F6`;
             }
             setPreviewUrl(url);
         }
@@ -111,15 +119,20 @@ const DocumentUploadField = ({ onFileSelect, selectedFile, label = "Assessment U
 
                 {selectedFile ? (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                        {isPreviewable(fileName) && previewUrl && (
-                            <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+                        {isPreviewable(fileName) && (
+                            <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
                                 {fileName.toLowerCase().endsWith('.pdf') ? (
-                                    <div className="w-full h-full flex flex-col items-center justify-center">
-                                        <img src={previewUrl} alt="PDF Preview" className="h-full object-contain" />
-                                        <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded uppercase">PDF Thumbnail</div>
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-red-50/30">
+                                        <FileText size={48} className="text-red-400 mb-2" />
+                                        <div className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">PDF Document</div>
                                     </div>
-                                ) : (
+                                ) : previewUrl ? (
                                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/30">
+                                        <ImageIcon size={48} className="text-blue-400 mb-2" />
+                                        <div className="bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Image</div>
+                                    </div>
                                 )}
                             </div>
                         )}

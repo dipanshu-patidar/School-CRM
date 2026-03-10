@@ -177,6 +177,17 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
         return ['jpg', 'jpeg', 'png', 'gif', 'pdf'].includes(ext);
     };
 
+    const getStatusBadge = (status) => {
+        const s = status?.toLowerCase();
+        if (s === 'approved') {
+            return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">Approved</span>;
+        }
+        if (s === 'rejected') {
+            return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-100 whitespace-nowrap">Rejected</span>;
+        }
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200 whitespace-nowrap uppercase">Pending</span>;
+    };
+
     return (
         <div className="space-y-4 p-6">
             <div className="flex justify-end">
@@ -222,7 +233,10 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px] md:max-w-md">{doc.name}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px] md:max-w-md">{doc.name}</p>
+                                        {getStatusBadge(doc.status)}
+                                    </div>
                                     <p className="text-xs text-gray-400">{doc.size} · {doc.uploadDate}</p>
                                 </div>
                             </div>
@@ -230,13 +244,14 @@ const DocumentsList = ({ student, initialDocuments = [], triggerUpload, onUpload
                                 <button
                                     title="Download"
                                     onClick={() => handleDownload(doc._id, doc.name)}
-                                    className="p-2 rounded-xl text-gray-400 hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
+                                    className="p-2.5 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 transition-all cursor-pointer shadow-sm active:scale-95"
                                 >
                                     <Download size={16} />
                                 </button>
                                 <button
+                                    title="Delete"
                                     onClick={() => handleDeleteRequest(doc)}
-                                    className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all cursor-pointer shadow-sm hover:shadow-md bg-white"
+                                    className="p-2.5 rounded-xl text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-100 transition-all cursor-pointer shadow-sm active:scale-95"
                                 >
                                     <Trash2 size={16} />
                                 </button>

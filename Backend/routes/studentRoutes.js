@@ -46,6 +46,6 @@ router.route('/:id/documents')
 router.route('/:id/documents/:docId/download')
     .get(protect, downloadDocument);
 router.route('/:id/documents/:docId')
-    .delete(protect, authorize('admin'), deleteDocument);
+    .delete(protect, authorize('admin', 'staff'), deleteDocument);
 
 module.exports = router;

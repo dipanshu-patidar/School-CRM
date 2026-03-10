@@ -13,6 +13,6 @@ router.route('/:id/download')
 
 router.route('/:id')
     .put(protect, authorize('admin', 'staff'), uploadMiddleware.single('file'), updateDocument)
-    .delete(protect, authorize('admin'), deleteDocument);
+    .delete(protect, authorize('admin', 'staff'), deleteDocument);
 
 module.exports = router;

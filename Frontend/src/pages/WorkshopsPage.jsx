@@ -9,12 +9,14 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
     const isEditing = !!editWorkshop;
     const [name, setName] = useState(editWorkshop?.name || '');
     const [description, setDescription] = useState(editWorkshop?.description || '');
+    const [points, setPoints] = useState(editWorkshop?.pointsReward || 1);
     const [isLoading, setIsLoading] = useState(false);
 
     React.useEffect(() => {
         if (isOpen) {
             setName(editWorkshop?.name || '');
             setDescription(editWorkshop?.description || '');
+            setPoints(editWorkshop?.pointsReward || 1);
         }
     }, [isOpen, editWorkshop]);
 
@@ -29,7 +31,7 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
             const workshopData = {
                 name: name.trim(),
                 description: description.trim(),
-                points: 1
+                pointsReward: Number(points)
             };
 
             if (isEditing) {
@@ -69,19 +71,34 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                            Workshop Name <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                            autoFocus
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="e.g. Financial Literacy"
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                            required
-                        />
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                                Workshop Name <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                autoFocus
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. Financial Literacy"
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                                Points <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                value={points}
+                                onChange={(e) => setPoints(e.target.value)}
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                required
+                            />
+                        </div>
                     </div>
 
                     {/* Description */}
@@ -101,11 +118,11 @@ const WorkshopModal = ({ isOpen, onClose, onSave, editWorkshop = null }) => {
                     {/* Points Info */}
                     <div className="flex items-center gap-4 p-4 bg-[#FDFCF6] border border-primary/20 rounded-xl shadow-sm">
                         <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-primary shadow-lg shadow-primary/20 shrink-0">
-                            <span className="text-sm font-black text-black leading-none">+1</span>
-                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">Point</span>
+                            <span className="text-sm font-black text-black leading-none">+{points}</span>
+                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">{Number(points) === 1 ? 'Point' : 'Points'}</span>
                         </div>
                         <p className="text-xs text-gray-600 font-semibold leading-relaxed">
-                            Each attendance at this workshop grants <strong className="text-gray-900">+1 point</strong> toward student completion.
+                            Each attendance at this workshop grants <strong className="text-gray-900">+{points} {Number(points) === 1 ? 'point' : 'points'}</strong> toward student completion.
                         </p>
                     </div>
 
@@ -163,13 +180,13 @@ const WorkshopViewModal = ({ workshop, onClose }) => {
                     {/* Points Badge */}
                     <div className="flex items-center gap-4 p-4 bg-[#FDFCF6] border border-primary/20 rounded-2xl shadow-sm">
                         <div className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-primary shadow-lg shadow-primary/30 shrink-0">
-                            <span className="text-sm font-black text-black leading-none">+1</span>
-                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">Point</span>
+                            <span className="text-sm font-black text-black leading-none">+{workshop.pointsReward}</span>
+                            <span className="text-[10px] font-black text-black/60 uppercase tracking-tighter leading-none mt-0.5">{workshop.pointsReward === 1 ? 'Point' : 'Points'}</span>
                         </div>
                         <div>
                             <p className="text-xs font-bold text-gray-900">Points Reward</p>
                             <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Each attendance grants <strong className="text-primary font-bold">+1 point</strong> toward program completion.
+                                Each attendance grants <strong className="text-primary font-bold">+{workshop.pointsReward} {workshop.pointsReward === 1 ? 'point' : 'points'}</strong> toward program completion.
                             </p>
                         </div>
                     </div>

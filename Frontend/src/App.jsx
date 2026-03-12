@@ -12,6 +12,7 @@ import DocumentsPage from './pages/DocumentsPage';
 import SettingsPage from './pages/SettingsPage';
 import Dashboard from './pages/Dashboard';
 import StaffPage from './pages/StaffPage';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   const [role, setRole] = useState(sessionStorage.getItem('userRole'));
@@ -38,6 +39,11 @@ function App() {
         <Routes>
           <Route
             path="/"
+            element={<LandingPage />}
+          />
+
+          <Route
+            path="/login"
             element={role ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />}
           />
 

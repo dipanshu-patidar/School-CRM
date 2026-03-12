@@ -11,16 +11,72 @@ exports.getStats = async (req, res) => {
     try {
         const totalOrganizations = await Organization.countDocuments();
         const totalAdminUsers = await User.countDocuments({ role: 'admin' });
-        const activeSubscriptions = await Subscription.countDocuments({ status: 'Active' });
-        const revenue = await Subscription.aggregate([
-            { $match: { status: 'Active' } },
-            { $group: { _id: null, total: { $sum: '$amount' } } }
-        ]);
+        
+        // Deriving active subscriptions and revenue directly from Organizations for better reliability
+        const activeOrgs = await Organization.find({ status: 'Active' }).populate('planId');
+        const activeSubscriptions = activeOrgs.length;
+        const monthlyRevenue = activeOrgs.reduce((sum, org) => sum + (org.planId?.price || 0), 0);
 
+        // Self-healing: Ensure active orgs have a subscription record for the current month
+        for (const org of activeOrgs) {
+            const hasSub = await Subscription.findOne({ organizationId: org._id });
+            if (!hasSub && org.planId) {
+                await Subscription.create({
+                    organizationId: org._id,
+                    planId: org.planId._id,
+                    amount: org.planId.price,
+                    status: 'Active',
+                    billingDate: org.startDate || org.createdAt || new Date()
+                });
+            }
+        }
+        
         const latestOrganizations = await Organization.find()
             .sort({ createdAt: -1 })
             .limit(3)
             .populate('planId', 'planName');
+
+        // Get revenue history for last 12 months
+        const twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+        twelveMonthsAgo.setDate(1);
+        twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+        const revenueHistoryRaw = await Subscription.aggregate([
+            {
+                $match: {
+                    billingDate: { $gte: twelveMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$billingDate" },
+                        month: { $month: "$billingDate" }
+                    },
+                    total: { $sum: "$amount" }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        // Format to ensure all 12 months are represented
+        const revenueHistory = [];
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        
+        let current = new Date(twelveMonthsAgo);
+        for (let i = 0; i < 12; i++) {
+            const m = current.getMonth() + 1;
+            const y = current.getFullYear();
+            
+            const match = revenueHistoryRaw.find(r => r._id.month === m && r._id.year === y);
+            revenueHistory.push({
+                month: monthNames[current.getMonth()],
+                revenue: match ? match.total : 0
+            });
+            
+            current.setMonth(current.getMonth() + 1);
+        }
 
         res.status(200).json({
             success: true,
@@ -28,8 +84,9 @@ exports.getStats = async (req, res) => {
                 totalOrganizations,
                 totalAdminUsers,
                 activeSubscriptions,
-                monthlyRevenue: revenue.length > 0 ? revenue[0].total : 0,
-                latestOrganizations
+                monthlyRevenue,
+                latestOrganizations,
+                revenueHistory
             }
         });
     } catch (error) {
@@ -88,6 +145,18 @@ exports.createOrganization = async (req, res) => {
         // Link User back to Organization
         organization.adminUserId = adminUser._id;
         await organization.save();
+
+        // Create initial Subscription record for revenue tracking
+        const plan = await SubscriptionPlan.findById(planId);
+        if (plan) {
+            await Subscription.create({
+                organizationId: organization._id,
+                planId: plan._id,
+                amount: plan.price,
+                status: 'Active',
+                billingDate: new Date()
+            });
+        }
 
         res.status(201).json({
             success: true,
@@ -290,6 +359,18 @@ exports.updateOrganizationStatus = async (req, res) => {
             organization.expireDate = expireDate;
             organization.planType = type;
             await organization.save();
+
+            // Create Subscription record on approval
+            const plan = await SubscriptionPlan.findById(organization.planId);
+            if (plan) {
+                await Subscription.create({
+                    organizationId: organization._id,
+                    planId: plan._id,
+                    amount: plan.price,
+                    status: 'Active',
+                    billingDate: new Date()
+                });
+            }
         } else {
             organization.status = status;
             await organization.save();

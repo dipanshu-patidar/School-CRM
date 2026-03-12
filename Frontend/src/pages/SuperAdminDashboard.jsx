@@ -18,7 +18,8 @@ const SuperAdminDashboard = () => {
         totalAdminUsers: 0,
         activeSubscriptions: 0,
         monthlyRevenue: 0,
-        latestOrganizations: []
+        latestOrganizations: [],
+        revenueHistory: []
     });
     const [loading, setLoading] = useState(true);
 
@@ -97,21 +98,31 @@ const SuperAdminDashboard = () => {
                         </div>
                         
                         <div className="h-80 flex items-end justify-between gap-4 px-2 relative z-10">
-                            {[45, 68, 52, 85, 72, 95, 88, 100, 78, 92, 110, 105].map((height, i) => (
-                                <div key={i} className="flex-1 space-y-4 group/bar cursor-pointer h-full flex flex-col justify-end">
-                                    <div className="relative w-full bg-gray-50/50 rounded-t-2xl overflow-hidden" style={{ height: '85%' }}>
-                                        <div 
-                                            className="absolute bottom-0 left-0 w-full bg-primary/10 group-hover/bar:bg-primary transition-all duration-700 rounded-t-2xl"
-                                            style={{ height: `${height}%` }}
-                                        >
-                                            <div className="absolute top-0 left-0 w-full h-[2px] bg-primary shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+                            {stats.revenueHistory?.length > 0 ? (
+                                stats.revenueHistory.map((item, i) => {
+                                    const maxRevenue = Math.max(...stats.revenueHistory.map(r => r.revenue), 1);
+                                    const height = (item.revenue / maxRevenue) * 100;
+                                    return (
+                                        <div key={i} className="flex-1 space-y-4 group/bar cursor-pointer h-full flex flex-col justify-end">
+                                            <div className="relative w-full bg-gray-50/50 rounded-t-2xl overflow-hidden" style={{ height: '85%' }}>
+                                                <div 
+                                                    className="absolute bottom-0 left-0 w-full bg-primary/10 group-hover/bar:bg-primary transition-all duration-700 rounded-t-2xl"
+                                                    style={{ height: `${height}%` }}
+                                                >
+                                                    <div className="absolute top-0 left-0 w-full h-[2px] bg-primary shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+                                                </div>
+                                            </div>
+                                            <div className="text-[9px] text-gray-400 group-hover/bar:text-primary transition-colors text-center font-black uppercase tracking-[0.1em]">
+                                                {item.month}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="text-[9px] text-gray-400 group-hover/bar:text-primary transition-colors text-center font-black uppercase tracking-[0.1em]">
-                                        {['APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR'][i]}
-                                    </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <p className="text-gray-400 font-bold italic uppercase tracking-widest text-[10px]">Analyzing Revenue Vectors...</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                         
                         {/* Horizontal guide lines */}

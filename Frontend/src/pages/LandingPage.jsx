@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { 
   Users, 
   BookOpen, 
@@ -28,6 +29,21 @@ import logoImg from '../assets/login/logo.png';
 
 const LandingPage = () => {
   const role = sessionStorage.getItem('userRole');
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/plans');
+        if (res.data.success) {
+          setPlans(res.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-primary-gold selection:text-black overflow-x-hidden">
@@ -186,63 +202,72 @@ const LandingPage = () => {
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="py-32 bg-[#070707] border-y border-white/5 relative">
+        <section id="pricing" className="py-32 bg-[#070707] border-y border-white/5 relative underline-offset-4">
           <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center mb-20">
              <h2 className="text-5xl md:text-7xl font-black mb-6 leading-none">Investment.</h2>
-             <p className="text-lg text-gray-500 font-medium">Professional infrastructure for high-impact organizations.</p>
+             <p className="text-lg text-gray-500 font-medium tracking-tight">Professional infrastructure for high-impact organizations.</p>
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-3 gap-10 items-end">
-             {/* Tier 1 */}
-             <div className="p-10 rounded-[2.5rem] bg-[#0c0c0c] border border-white/10 flex flex-col hover:border-[#D4AF37]/30 transition-all">
-                <span className="text-[9px] font-black tracking-[0.4em] text-gray-500 uppercase mb-6">Base Tier</span>
-                <div className="mb-8 flex items-baseline gap-2">
-                  <span className="text-4xl font-black">$29</span>
-                  <span className="text-gray-600 font-bold text-xs">USD/mo</span>
-                </div>
-                <ul className="space-y-4 mb-10 flex-grow">
-                  {[ "50 Active Students", "Attendance Engine", "Basic Vault Storage" ].map((t, i) => (
-                    <li key={i} className="flex gap-3 items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none">
-                       <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div> {t}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/login" className="w-full py-4 rounded-xl bg-white text-black font-black text-xs text-center hover:bg-[#D4AF37] transition-all">SIGN UP</Link>
-             </div>
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 overflow-x-auto overflow-y-visible pb-10 pt-14">
+            <div className="inline-flex gap-8 items-stretch min-w-full justify-center px-4 py-4">
+              {plans.length > 0 ? (
+                plans.map((plan) => (
+                  <div key={plan._id} className={`p-10 rounded-[2.5rem] bg-[#0c0c0c] border flex flex-col transition-all duration-500 hover:scale-[1.02] w-full max-w-[380px] min-w-[320px] ${
+                    plan.isPopular ? 'border-2 border-[#D4AF37] shadow-[0_20px_40px_rgba(212,175,55,0.1)] relative' : 'border-white/10 hover:border-[#D4AF37]/30'
+                  }`}>
+                    {plan.isPopular && (
+                      <div className="absolute top-0 left-10 transform -translate-y-1/2 bg-[#D4AF37] text-black px-4 py-1.5 rounded-full text-[8px] font-black tracking-[0.3em] uppercase z-10">
+                        Popular Choice
+                      </div>
+                    )}
+                    
+                    <span className={`text-[9px] font-black tracking-[0.4em] uppercase mb-6 ${plan.isPopular ? 'text-[#D4AF37]' : 'text-gray-500'}`}>
+                      {plan.billingPeriod} Plan
+                    </span>
 
-             {/* Tier 2 - Featured */}
-             <div className="p-10 md:p-14 rounded-[2.5rem] bg-[#0c0c0c] border-2 border-[#D4AF37] flex flex-col shadow-[0_20px_40px_rgba(212,175,55,0.1)] relative transform md:scale-105 z-10">
-                <div className="absolute top-0 left-10 transform -translate-y-1/2 bg-[#D4AF37] text-black px-4 py-1.5 rounded-full text-[8px] font-black tracking-[0.3em] uppercase">Professional Choice</div>
-                <span className="text-[9px] font-black tracking-[0.4em] text-[#D4AF37] uppercase mb-8">Standard Tier</span>
-                <div className="mb-8 flex items-baseline gap-2 text-white">
-                  <span className="text-6xl font-black">$79</span>
-                  <span className="text-gray-500 font-bold text-xs">USD/mo</span>
-                </div>
-                <ul className="space-y-5 mb-10 flex-grow">
-                  {[ "Unlimited Students", "P.I.E Service Reports", "Advanced Analytics", "Priority Support" ].map((t, i) => (
-                    <li key={i} className="flex gap-4 items-center text-gray-200 font-black text-[11px] uppercase tracking-tight">
-                       <Check size={16} className="text-[#D4AF37]" /> {t}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/login" className="w-full py-6 rounded-2xl bg-[#D4AF37] text-black font-black text-lg text-center hover:bg-[#C89B2D] transition-all">SELECT PLAN</Link>
-             </div>
+                    <div className="mb-8 items-start">
+                      <h3 className="text-2xl font-black text-white italic uppercase tracking-tight mb-2 truncate">{plan.planName}</h3>
+                      <div className="flex items-baseline gap-2">
+                        <span className={`font-black ${plan.isPopular ? 'text-6xl' : 'text-4xl'}`}>${plan.price}</span>
+                        <span className="text-gray-600 font-bold text-xs uppercase tracking-widest">USD/{plan.billingPeriod === 'Yearly' ? 'yr' : 'mo'}</span>
+                      </div>
+                    </div>
 
-             {/* Tier 3 */}
-             <div className="p-10 rounded-[2.5rem] bg-[#0c0c0c] border border-white/10 flex flex-col hover:border-[#D4AF37]/30 transition-all">
-                <span className="text-[9px] font-black tracking-[0.4em] text-gray-500 uppercase mb-6">Scale Tier</span>
-                <div className="mb-8">
-                  <span className="text-4xl font-black">Custom</span>
+                    <div className="space-y-4 mb-10 flex-grow">
+                      <div className="flex gap-3 items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none border-b border-white/5 pb-4">
+                         <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
+                         Up to {plan.maxStudents?.toLocaleString() || '1000'} Students
+                      </div>
+                      <div className="flex gap-3 items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none border-b border-white/5 pb-4">
+                         <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div>
+                         {plan.maxStaff} Maximum Staff
+                      </div>
+                      {plan.features?.map((feature, i) => (
+                        <li key={i} className="flex gap-3 items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none group/feat list-none">
+                           <Check size={14} className="text-[#D4AF37] group-hover/feat:scale-125 transition-transform" /> 
+                           {feature}
+                        </li>
+                      ))}
+                    </div>
+
+                    <Link 
+                      to={`/register?planId=${plan._id}`} 
+                      className={`w-full py-4 rounded-xl font-black text-xs text-center transition-all ${
+                        plan.isPopular 
+                        ? 'bg-[#D4AF37] text-black hover:bg-[#C89B2D]' 
+                        : 'bg-white text-black hover:bg-[#D4AF37]'
+                      }`}
+                    >
+                      {plan.price === 0 ? 'START FREE' : 'SELECT PLAN'}
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <div className="py-20 text-center">
+                  <p className="text-gray-500 font-black uppercase tracking-[0.2em] animate-pulse italic">Synchronizing Global Tiers...</p>
                 </div>
-                <ul className="space-y-4 mb-10 flex-grow">
-                  {[ "Multi-Site Admin", "Custom Integrations", "Service Level Agreement", "Dedicated Manager" ].map((t, i) => (
-                    <li key={i} className="flex gap-3 items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest leading-none">
-                       <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></div> {t}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/login" className="w-full py-4 rounded-xl border border-white/10 text-white font-black text-xs text-center hover:bg-white hover:text-black transition-all">ENGAGE SALES</Link>
-             </div>
+              )}
+            </div>
           </div>
         </section>
 

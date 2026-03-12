@@ -8,7 +8,11 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Settings
+    Settings,
+    Building2,
+    CreditCard,
+    DollarSign,
+    ShieldCheck
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import logoImg from '../assets/login/logo.png';
@@ -32,7 +36,15 @@ const Sidebar = ({ role, collapsed, setCollapsed, onLogout }) => {
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
-    const menuItems = role === 'admin' ? adminMenu : staffMenu;
+    const superAdminMenu = [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'admin', label: 'Admin', icon: Building2 },
+        { id: 'plans', label: 'Plan & Pricing', icon: CreditCard },
+        { id: 'revenue', label: 'Revenue', icon: DollarSign },
+        { id: 'settings', label: 'Settings', icon: ShieldCheck },
+    ];
+
+    const menuItems = role === 'super_admin' ? superAdminMenu : (role === 'admin' ? adminMenu : staffMenu);
 
     return (
         <aside

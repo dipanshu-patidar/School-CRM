@@ -1,34 +1,43 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Search, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
+import logoImg from '../assets/login/logo.png';
 
 const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     const location = useLocation();
 
-    const userName = sessionStorage.getItem('userName') || (role === 'admin' ? 'Admin' : 'Staff');
+    const userName = sessionStorage.getItem('userName') || (role === 'super_admin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Staff');
     const userRole = sessionStorage.getItem('userRole') || role;
 
     const getPageTitle = () => {
         const path = location.pathname;
-        if (path === '/dashboard') return 'Dashboard Overview';
+        if (path === '/dashboard') return role === 'super_admin' ? 'System Overview' : 'Dashboard Overview';
+        if (path.includes('/dashboard/admin')) return 'Organization Management';
+        if (path.includes('/dashboard/plans')) return 'Subscription Plans';
+        if (path.includes('/dashboard/revenue')) return 'Revenue Tracking';
         if (path.includes('/students')) return 'Student Management';
         if (path.includes('/workshops')) return 'Workshops & Programs';
         if (path.includes('/attendance')) return 'Attendance Records';
         if (path.includes('/documents')) return 'Document Central';
-        if (path.includes('/settings')) return 'System Settings';
+        if (path.includes('/settings')) return role === 'super_admin' ? 'Global Settings' : 'System Settings';
         if (path.includes('/profile')) return 'My Profile';
         return 'Overview';
     };
 
     return (
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={() => setCollapsed(!collapsed)}
-                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-primary transition-all cursor-pointer"
-                >
-                    <Menu size={22} />
-                </button>
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-primary transition-all cursor-pointer"
+                    >
+                        <Menu size={22} />
+                    </button>
+                    <div className="h-10 w-10 overflow-hidden rounded-lg bg-black p-1 shadow-sm border border-gray-100">
+                        <img src={logoImg} alt="Logo" className="w-full h-full object-contain" />
+                    </div>
+                </div>
                 <h2 className="text-xl font-semibold text-text">{getPageTitle()}</h2>
             </div>
 

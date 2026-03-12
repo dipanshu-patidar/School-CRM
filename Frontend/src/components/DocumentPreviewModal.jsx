@@ -37,11 +37,11 @@ const DocumentPreviewModal = ({ doc, onClose }) => {
                             (() => {
                                 const urlLower = doc.url.toLowerCase();
                                 const docNameLower = (doc.docName || '').toLowerCase();
-                                const isPdf = urlLower.split('?')[0].endsWith('.pdf') || 
-                                              docNameLower.split('?')[0].endsWith('.pdf') ||
-                                              urlLower.includes('/assessments/') || 
-                                              (urlLower.includes('/documents/') && !urlLower.match(/\.(jpg|jpeg|png|gif|webp)/));
-                                
+                                const isPdf = urlLower.split('?')[0].endsWith('.pdf') ||
+                                    docNameLower.split('?')[0].endsWith('.pdf') ||
+                                    urlLower.includes('/assessments/') ||
+                                    (urlLower.includes('/documents/') && !urlLower.match(/\.(jpg|jpeg|png|gif|webp)/));
+
                                 if (isPdf) {
                                     // Robust URL handling for standard PDFs in iframes
                                     const baseUrl = doc.url.split('?')[0];

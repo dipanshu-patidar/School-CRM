@@ -211,6 +211,26 @@
   text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
+/* Custom Golden Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4af37;
+  border-radius: 100px;
+  border: 2px solid #f8f8f8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c89b2d;
+}
+
 /* Custom Scrollbar for Landing Page */
 .selection\:bg-primary-gold ::selection {
   background-color: #D4AF37;

@@ -13,6 +13,12 @@ import SettingsPage from './pages/SettingsPage';
 import Dashboard from './pages/Dashboard';
 import StaffPage from './pages/StaffPage';
 import LandingPage from './pages/LandingPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import AdminManagement from './pages/AdminManagement';
+import PlanManagement from './pages/PlanManagement';
+import RevenueTracking from './pages/RevenueTracking';
+import SuperAdminSettings from './pages/SuperAdminSettings';
+import RegisterAdmin from './pages/RegisterAdmin';
 
 function App() {
   const [role, setRole] = useState(sessionStorage.getItem('userRole'));
@@ -48,12 +54,24 @@ function App() {
           />
 
           <Route
+            path="/register"
+            element={<RegisterAdmin />}
+          />
+
+          <Route
             path="/dashboard/*"
             element={
               role ? (
                 <Layout role={role} onLogout={handleLogout}>
                   <Routes>
-                    <Route index element={role === 'admin' ? <AdminDashboard /> : <Dashboard role={role} />} />
+                    <Route index element={
+                      role === 'super_admin' ? <SuperAdminDashboard /> : 
+                      role === 'admin' ? <AdminDashboard /> : <Dashboard role={role} />
+                    } />
+                    <Route path="admin" element={<AdminManagement />} />
+                    <Route path="plans" element={<PlanManagement />} />
+                    <Route path="revenue" element={<RevenueTracking />} />
+                    <Route path="settings" element={role === 'super_admin' ? <SuperAdminSettings /> : <SettingsPage role={role} />} />
                     <Route path="students" element={<StudentsPage role={role} />} />
                     <Route path="students/:id" element={<StudentProfilePage role={role} />} />
                     <Route path="staff" element={<StaffPage />} />

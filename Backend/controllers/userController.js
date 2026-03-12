@@ -6,7 +6,10 @@ const imagekit = require('../config/imagekit');
 // @access  Private
 const getStaff = async (req, res) => {
     try {
-        const staff = await User.find({ role: 'staff' }).select('-password');
+        const staff = await User.find({ 
+            role: 'staff',
+            organizationId: req.user.organizationId 
+        }).select('-password');
         res.status(200).json({ success: true, data: staff });
     } catch (error) {
         console.error(error);

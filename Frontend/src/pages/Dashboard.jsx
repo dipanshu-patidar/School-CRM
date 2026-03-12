@@ -7,7 +7,9 @@ import {
     Calendar,
     MoreVertical,
     CheckCircle2,
-    Loader2
+    Loader2,
+    AlertTriangle,
+    ShieldAlert
 } from 'lucide-react';
 import { getDashboardStats } from '../api/dashboardApi';
 
@@ -67,8 +69,36 @@ const Dashboard = ({ role }) => {
         },
     ];
 
+    const expiration = statsData?.expiration;
+    const daysRemaining = expiration?.expireDate 
+        ? Math.ceil((new Date(expiration.expireDate) - new Date()) / (1000 * 60 * 60 * 24))
+        : null;
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Expiration Alert */}
+            {role === 'admin' && daysRemaining !== null && daysRemaining <= 7 && (
+                <div className={`p-4 rounded-2xl border flex items-center gap-4 animate-bounce-subtle ${
+                    daysRemaining <= 0 
+                    ? 'bg-red-50 border-red-100 text-red-700' 
+                    : 'bg-orange-50 border-orange-100 text-orange-700'
+                }`}>
+                    <div className={`p-2 rounded-xl ${daysRemaining <= 0 ? 'bg-red-100' : 'bg-orange-100'}`}>
+                        {daysRemaining <= 0 ? <ShieldAlert size={20} /> : <AlertTriangle size={20} />}
+                    </div>
+                    <div>
+                        <p className="text-sm font-black uppercase tracking-widest">
+                            {daysRemaining <= 0 ? 'Subscription Expired' : 'Subscription Expiring Soon'}
+                        </p>
+                        <p className="text-xs font-medium opacity-80">
+                            {daysRemaining <= 0 
+                                ? 'Your access will be restricted soon. Please contact SuperAdmin immediately.' 
+                                : `Your plan expires in ${daysRemaining} days. Renew now to avoid service interruption.`}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Header Secion */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

@@ -25,7 +25,7 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     };
 
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-50 shadow-sm">
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
                     <button
@@ -34,9 +34,11 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                     >
                         <Menu size={22} />
                     </button>
+                    {/* Small Logo - Commented out temporarily
                     <div className="h-10 w-10 overflow-hidden rounded-lg bg-black p-1 shadow-sm border border-gray-100">
                         <img src={logoImg} alt="Logo" className="w-full h-full object-contain" />
                     </div>
+                    */}
                 </div>
                 <h2 className="text-xl font-semibold text-text">{getPageTitle()}</h2>
             </div>
@@ -63,7 +65,8 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                 {/* User Profile Dropdown Simulation */}
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold text-text">{userName}</p>
+                        <p className="text-sm font-semibold text
+                        -text">{userName}</p>
                         <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                     </div>
                     <div className="relative group">

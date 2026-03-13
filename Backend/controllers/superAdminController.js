@@ -108,7 +108,9 @@ exports.createOrganization = async (req, res) => {
         address,
         startDate,
         expireDate,
-        planType 
+        planType,
+        paymentStatus,
+        registrationAmount
     } = req.body;
 
     try {
@@ -130,6 +132,8 @@ exports.createOrganization = async (req, res) => {
             startDate: sDate,
             expireDate: eDate,
             planType,
+            paymentStatus: paymentStatus || 'Pending',
+            registrationAmount,
             status: 'Active'
         });
 
@@ -330,7 +334,7 @@ exports.deleteOrganization = async (req, res) => {
 // @access  Private/SuperAdmin
 exports.updateOrganizationStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, paymentStatus } = req.body;
 
         if (!['Active', 'Suspended', 'Pending', 'Rejected'].includes(status)) {
             return res.status(400).json({ success: false, message: 'Invalid status' });
@@ -339,6 +343,11 @@ exports.updateOrganizationStatus = async (req, res) => {
         const organization = await Organization.findById(req.params.id);
         if (!organization) {
             return res.status(404).json({ success: false, message: 'Organization not found' });
+        }
+
+        // Update payment status if provided
+        if (paymentStatus) {
+            organization.paymentStatus = paymentStatus;
         }
 
         // If approving a pending organization or fixing an organization missing dates
@@ -381,3 +390,150 @@ exports.updateOrganizationStatus = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Get detailed revenue statistics
+// @route   GET /api/superadmin/revenue/stats
+// @access  Private/SuperAdmin
+exports.getRevenueStats = async (req, res) => {
+    try {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        
+        // 1. YTD Revenue from Subscriptions
+        const subscriptionsYTD = await Subscription.aggregate([
+            { $match: { billingDate: { $gte: startOfYear } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+
+        // 2. Add Registration Amounts from Organizations
+        const orgsYTD = await Organization.aggregate([
+            { $match: { createdAt: { $gte: startOfYear }, registrationAmount: { $exists: true } } },
+            { $group: { _id: null, total: { $sum: "$registrationAmount" } } }
+        ]);
+
+        const ytdRevenue = (subscriptionsYTD[0]?.total || 0) + (orgsYTD[0]?.total || 0);
+
+        // 3. MRR (Current Month Revenue)
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const subscriptionsMRR = await Subscription.aggregate([
+            { $match: { billingDate: { $gte: startOfMonth } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ]);
+        const mrr = subscriptionsMRR[0]?.total || 0;
+
+        // 4. Pending Invoices (Pending Organizations)
+        const pendingInvoicesCount = await Organization.countDocuments({ paymentStatus: 'Pending' });
+
+        // 5. Monthly Trend (Last 12 Months)
+        const twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+        twelveMonthsAgo.setDate(1);
+        
+        const monthlyTrendRaw = await Subscription.aggregate([
+            { $match: { billingDate: { $gte: twelveMonthsAgo } } },
+            {
+                $group: {
+                    _id: { month: { $month: "$billingDate" }, year: { $year: "$billingDate" } },
+                    total: { $sum: "$amount" }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyData = [];
+        let tempDate = new Date(twelveMonthsAgo);
+        for (let i = 0; i < 12; i++) {
+            const m = tempDate.getMonth() + 1;
+            const y = tempDate.getFullYear();
+            const match = monthlyTrendRaw.find(r => r._id.month === m && r._id.year === y);
+            monthlyData.push({
+                name: monthNames[tempDate.getMonth()],
+                value: match ? match.total : 0
+            });
+            tempDate.setMonth(tempDate.getMonth() + 1);
+        }
+
+        // 6. Yearly Data (Last 5 Years)
+        const currentYear = now.getFullYear();
+        const yearlyData = [];
+        let lastYearRevenue = 0;
+        for (let y = currentYear - 4; y <= currentYear; y++) {
+            const startOfY = new Date(y, 0, 1);
+            const endOfY = new Date(y, 11, 31, 23, 59, 59);
+            const subYear = await Subscription.aggregate([
+                { $match: { billingDate: { $gte: startOfY, $lte: endOfY } } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ]);
+            const revenue = subYear[0]?.total || 0;
+            if (y === currentYear - 1) lastYearRevenue = revenue;
+            
+            yearlyData.push({
+                year: y.toString(),
+                value: revenue
+            });
+        }
+
+        const growthVelocity = lastYearRevenue > 0 
+            ? (((ytdRevenue - lastYearRevenue) / lastYearRevenue) * 100).toFixed(1)
+            : "0.0";
+
+        const orgsThisMonth = await Organization.countDocuments({
+            createdAt: { $gte: startOfMonth }
+        });
+
+        // 7. Transaction Log (Latest 10)
+        const transactions = await Subscription.find()
+            .sort({ billingDate: -1 })
+            .limit(10)
+            .populate('organizationId', 'name');
+
+        const formattedTransactions = transactions.map(t => ({
+            _id: t._id.toString(),
+            id: `TXN-${t._id.toString().slice(-4).toUpperCase()}`,
+            org: t.organizationId?.name || 'Unknown',
+            amount: t.amount,
+            date: t.billingDate.toISOString().split('T')[0],
+            status: 'Paid'
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: {
+                stats: {
+                    ytdRevenue,
+                    mrr,
+                    yearlyRevenue: ytdRevenue,
+                    pendingInvoices: pendingInvoicesCount,
+                    growthVelocity: `${growthVelocity > 0 ? '+' : ''}${growthVelocity}%`,
+                    mrrBadge: `${orgsThisMonth} new schools this month`
+                },
+                monthlyData,
+                yearlyData,
+                transactions: formattedTransactions
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Delete a specific transaction/subscription
+// @route   DELETE /api/superadmin/subscriptions/:id
+// @access  Private/SuperAdmin
+exports.deleteSubscription = async (req, res) => {
+    try {
+        const subscription = await Subscription.findById(req.params.id);
+
+        if (!subscription) {
+            return res.status(404).json({ success: false, message: 'Transaction not found' });
+        }
+
+        await subscription.deleteOne();
+
+        res.status(200).json({ success: true, message: 'Transaction removed' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+

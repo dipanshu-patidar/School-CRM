@@ -33,7 +33,9 @@ const RegisterAdmin = () => {
         adminEmail: '',
         phoneNumber: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        amount: 0,
+        paymentMethod: 'Cash'
     });
 
     useEffect(() => {
@@ -46,6 +48,12 @@ const RegisterAdmin = () => {
                 const res = await axios.get(`http://localhost:5000/api/plans`);
                 const selectedPlan = res.data.data.find(p => p._id === planId);
                 setPlan(selectedPlan);
+                if (selectedPlan) {
+                    setFormData(prev => ({
+                        ...prev,
+                        amount: selectedPlan.price
+                    }));
+                }
             } catch (error) {
                 console.error('Failed to fetch plan:', error);
             } finally {
@@ -69,7 +77,9 @@ const RegisterAdmin = () => {
                 adminEmail: formData.adminEmail,
                 adminPassword: formData.password,
                 phoneNumber: formData.phoneNumber,
-                planId: planId
+                planId: planId,
+                registrationAmount: formData.amount,
+                paymentMethod: formData.paymentMethod
             });
             
             setShowSuccessModal(true);
@@ -298,6 +308,43 @@ const RegisterAdmin = () => {
                                         value={formData.confirmPassword}
                                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                                     />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-2.5">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-2">Investment Amount</label>
+                                <div className="relative group">
+                                    <Zap className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#D4AF37] transition-all duration-300" size={18} />
+                                    <input
+                                        readOnly
+                                        type="text"
+                                        className="w-full pl-14 pr-6 py-5 bg-gray-100 border border-transparent rounded-[1.8rem] text-gray-500 font-bold cursor-not-allowed transition-all shadow-sm"
+                                        value={`$${formData.amount}`}
+                                    />
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 px-3 py-1 rounded-full border border-[#D4AF37]/20 shadow-sm">
+                                        Fixed Protocol
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2.5">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-2">Payment Method</label>
+                                <div className="relative group">
+                                    <Crown className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#D4AF37] transition-all duration-300" size={18} />
+                                    <select
+                                        required
+                                        className="w-full pl-14 pr-10 py-5 bg-gray-50 border border-transparent rounded-[1.8rem] text-gray-900 font-bold appearance-none focus:outline-none focus:ring-8 focus:ring-[#D4AF37]/5 focus:border-[#D4AF37]/30 focus:bg-white transition-all shadow-sm group-hover:shadow-md cursor-pointer"
+                                        value={formData.paymentMethod}
+                                        onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                                    >
+                                        <option value="Cash">Cash Transaction</option>
+                                        <option value="UPI">UPI / Digital Gateway</option>
+                                        <option value="Card">Credit / Debit Instrument</option>
+                                    </select>
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-300">
+                                        <Zap size={14} />
+                                    </div>
                                 </div>
                             </div>
                         </div>

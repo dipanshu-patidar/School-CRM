@@ -7,10 +7,18 @@ const SubscriptionPlan = require('../models/SubscriptionPlan');
 // @access  Private/Admin
 const getAllStaff = async (req, res) => {
     try {
-        const staff = await User.find({ 
-            role: { $in: ['staff', 'admin'] },
+        const fetchFilter = { 
             organizationId: req.user.organizationId 
-        }).select('-password');
+        };
+
+        // If requester is admin, only show staff
+        if (req.user.role === 'admin') {
+            fetchFilter.role = 'staff';
+        } else {
+            fetchFilter.role = { $in: ['staff', 'admin'] };
+        }
+
+        const staff = await User.find(fetchFilter).select('-password');
         res.status(200).json({
             success: true,
             count: staff.length,
@@ -26,7 +34,12 @@ const getAllStaff = async (req, res) => {
 // @route   POST /api/staff
 // @access  Private/Admin
 const createStaff = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+
+    // Security: Admin can only create 'staff'
+    if (req.user.role === 'admin') {
+        role = 'staff';
+    }
 
     try {
         let user = await User.findOne({ 
@@ -98,7 +111,15 @@ const updateStaff = async (req, res) => {
         // Update fields if they exist in request body
         if (req.body.name) user.name = req.body.name;
         if (req.body.email) user.email = req.body.email;
-        if (req.body.role) user.role = req.body.role;
+        
+        // Security: Only SuperAdmin can promote/demote admins
+        if (req.body.role && req.user.role !== 'admin') {
+            user.role = req.body.role;
+        } else if (req.body.role === 'admin' && req.user.role === 'admin') {
+            // Silently ignore or block role escalation to admin by an admin
+            // We keep the existing role
+        }
+
         if (req.body.status) user.status = req.body.status;
         if (req.body.password) user.password = req.body.password;
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Plus, Search, Edit2, ShieldAlert, Eye, Users, GraduationCap } from 'lucide-react';
+import { Building2, Plus, Search, Edit2, ShieldAlert, Eye, Users, GraduationCap, CheckCircle2, Zap, Mail, Phone } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -10,11 +10,16 @@ const AdminManagement = () => {
     const [viewModal, setViewModal] = useState(false);
     const [showSuspendModal, setShowSuspendModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showApproveModal, setShowApproveModal] = useState(false);
+    const [approvalPaymentStatus, setApprovalPaymentStatus] = useState('Pending');
     const [selectedOrg, setSelectedOrg] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
-    const [statusFilter, setStatusFilter] = useState('All'); // New: Status Filter State
+    const [statusFilter, setStatusFilter] = useState('All'); 
+    const [searchTerm, setSearchTerm] = useState(''); 
+    const [startDateFilter, setStartDateFilter] = useState(''); 
+    const [endDateFilter, setEndDateFilter] = useState(''); 
     const [newOrg, setNewOrg] = useState({
         organizationName: '',
         adminName: '',
@@ -26,7 +31,9 @@ const AdminManagement = () => {
         address: '',
         startDate: new Date().toISOString().split('T')[0],
         expireDate: '',
-        planType: 'Monthly'
+        planType: 'Monthly',
+        paymentStatus: 'Pending',
+        registrationAmount: 0
     });
 
     const fetchOrganizations = async () => {
@@ -53,7 +60,18 @@ const AdminManagement = () => {
         fetchOrganizations();
     }, []);
 
-    // New: Automate Expire Date calculation
+    useEffect(() => {
+        if (newOrg.planId) {
+            const selectedPlan = plans.find(p => p._id === newOrg.planId);
+            if (selectedPlan) {
+                setNewOrg(prev => ({
+                    ...prev,
+                    registrationAmount: selectedPlan.price
+                }));
+            }
+        }
+    }, [newOrg.planId, plans]);
+
     useEffect(() => {
         if (newOrg.startDate && newOrg.planType) {
             const start = new Date(newOrg.startDate);
@@ -114,7 +132,8 @@ const AdminManagement = () => {
             address: org.address || '',
             startDate: org.startDate ? new Date(org.startDate).toISOString().split('T')[0] : '',
             expireDate: org.expireDate ? new Date(org.expireDate).toISOString().split('T')[0] : '',
-            planType: org.planType || 'Monthly'
+            planType: org.planType || 'Monthly',
+            paymentStatus: org.paymentStatus || 'Pending'
         });
         setShowModal(true);
     };
@@ -138,20 +157,27 @@ const AdminManagement = () => {
         }
     };
 
-    const handleStatusUpdate = async (id, newStatus) => {
+    const handleStatusUpdate = async (id, newStatus, paymentStatus = null) => {
         try {
             const token = sessionStorage.getItem('token');
-            await axios.patch(`http://localhost:5000/api/superadmin/organizations/${id}/status`, { 
-                status: newStatus 
-            }, {
+            const data = { status: newStatus };
+            if (paymentStatus) {
+                data.paymentStatus = paymentStatus;
+            }
+            await axios.patch(`http://localhost:5000/api/superadmin/organizations/${id}/status`, data, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success(`Organization status updated to ${newStatus}`);
             setShowSuspendModal(false);
+            setShowApproveModal(false);
             fetchOrganizations();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update status');
         }
+    };
+
+    const confirmApproval = async () => {
+        await handleStatusUpdate(selectedOrg._id, 'Active', approvalPaymentStatus);
     };
 
     const handleSuspendToggle = () => {
@@ -173,7 +199,8 @@ const AdminManagement = () => {
             address: '',
             startDate: new Date().toISOString().split('T')[0],
             expireDate: '',
-            planType: 'Monthly'
+            planType: 'Monthly',
+            paymentStatus: 'Pending'
         });
     };
 
@@ -194,53 +221,110 @@ const AdminManagement = () => {
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xl shadow-gray-100/50">
-                <div className="p-6 border-b border-gray-50 flex items-center gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row items-center gap-6">
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                         <input 
                             type="text" 
-                            placeholder="Filter by organization name or admin email..." 
-                            className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-12 pr-4 py-3 text-gray-800 focus:outline-none focus:border-primary transition-all font-medium"
+                            placeholder="Search by organization or admin email..." 
+                            className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl pl-11 pr-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-primary focus:bg-white transition-all font-bold placeholder:text-gray-400 placeholder:font-medium"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-2">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">From</span>
+                            <input 
+                                type="date" 
+                                className="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 p-0"
+                                value={startDateFilter}
+                                onChange={(e) => setStartDateFilter(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2 bg-gray-50/50 border border-gray-100 rounded-2xl px-4 py-2">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">To</span>
+                            <input 
+                                type="date" 
+                                className="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 p-0"
+                                value={endDateFilter}
+                                onChange={(e) => setEndDateFilter(e.target.value)}
+                            />
+                        </div>
+                        {(searchTerm || startDateFilter || endDateFilter) && (
+                            <button 
+                                onClick={() => { setSearchTerm(''); setStartDateFilter(''); setEndDateFilter(''); }}
+                                className="p-2 text-primary hover:bg-primary/5 rounded-xl transition-all"
+                                title="Clear All Filters"
+                            >
+                                <Plus size={20} className="rotate-45" />
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                {/* Status Tabs */}
-                <div className="flex border-b border-gray-50 px-6 bg-gray-50/30">
-                    {['All', 'Pending', 'Active', 'Suspended', 'Rejected'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setStatusFilter(tab)}
-                            className={`px-6 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${
-                                statusFilter === tab ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-                            }`}
-                        >
-                            {tab}
-                            {statusFilter === tab && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full" />
-                            )}
-                        </button>
-                    ))}
+                {/* Status Tabs - Redesigned Segmented Control */}
+                <div className="px-10 py-8 bg-white border-b border-gray-100/30">
+                    <div className="inline-flex p-2 bg-gray-50 rounded-[2rem] border border-gray-100 relative group/tabs">
+                        {['All', 'Pending', 'Active', 'Suspended', 'Rejected'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setStatusFilter(tab)}
+                                className={`relative z-10 px-10 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 rounded-[1.25rem] flex items-center gap-3 overflow-hidden italic ${
+                                    statusFilter === tab 
+                                    ? 'text-gray-900' 
+                                    : 'text-gray-400 hover:text-gray-900 group-hover/tabs:opacity-70 hover:!opacity-100'
+                                }`}
+                            >
+                                {statusFilter === tab && (
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                    </span>
+                                )}
+                                {tab}
+                                {statusFilter === tab && (
+                                    <div className="absolute inset-0 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[1.25rem] z-[-1] animate-in fade-in zoom-in-95 duration-500 border border-gray-100" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Organization</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Contact Details</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Subscription</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Usage</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Validity</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Actions</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider min-w-[220px]">Organization</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider min-w-[200px]">Contact Intelligence</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider min-w-[180px]">Subscription Matrix</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Usage</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider">Validity</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider text-center">Payment</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider text-center">Status</th>
+                                <th className="px-6 py-5 text-gray-400 font-bold uppercase text-[10px] tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {organizations
                                 .filter(org => {
-                                    if (statusFilter === 'All') return true;
-                                    return org.status === statusFilter;
+                                    // Status Filter
+                                    const matchesStatus = statusFilter === 'All' || org.status === statusFilter;
+                                    
+                                    // Search Filter
+                                    const searchLower = searchTerm.toLowerCase();
+                                    const matchesSearch = !searchTerm || 
+                                        org.name.toLowerCase().includes(searchLower) || 
+                                        org.adminUserId?.email.toLowerCase().includes(searchLower);
+                                    
+                                    // Date Range Filter
+                                    const orgDate = new Date(org.startDate).getTime();
+                                    const start = startDateFilter ? new Date(startDateFilter).getTime() : -Infinity;
+                                    const end = endDateFilter ? new Date(endDateFilter).getTime() : Infinity;
+                                    const matchesDate = orgDate >= start && orgDate <= end;
+
+                                    return matchesStatus && matchesSearch && matchesDate;
                                 })
                                 .map((org) => (
                                 <tr key={org._id} className="hover:bg-gray-50/50 transition-colors group">
@@ -255,22 +339,29 @@ const AdminManagement = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="space-y-0.5">
-                                            <p className="text-gray-800 font-bold text-sm italic">{org.adminUserId?.name}</p>
-                                            <p className="text-xs text-gray-400 flex items-center gap-1">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                                                {org.adminUserId?.email}
-                                            </p>
-                                            <p className="text-[10px] text-gray-500 font-medium">{org.phoneNumber || 'No Phone'}</p>
+                                    <td className="px-6 py-6 border-b border-gray-50/50">
+                                        <div className="space-y-1.5">
+                                            <p className="text-gray-900 font-black text-xs uppercase italic tracking-tight">{org.adminUserId?.name || 'Authorized Personnel'}</p>
+                                            <div className="space-y-1">
+                                                <p className="text-[11px] text-gray-600 font-bold flex items-center gap-2 group/email">
+                                                    <Mail size={12} className="text-primary opacity-60 group-hover/email:opacity-100 transition-opacity" />
+                                                    <span className="truncate max-w-[160px] underline decoration-primary/20">{org.adminUserId?.email}</span>
+                                                </p>
+                                                <p className="text-[10px] text-gray-500 font-black flex items-center gap-2 uppercase tracking-tighter">
+                                                    <Phone size={11} className="text-primary opacity-60" />
+                                                    {org.phoneNumber || 'Secure Line N/A'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="space-y-1">
-                                            <span className="px-3 py-1 bg-primary/5 text-primary rounded-lg text-[10px] font-black border border-primary/10 uppercase italic tracking-widest">
-                                                {org.planId?.planName}
-                                            </span>
-                                            <p className="text-gray-400 text-[10px] font-bold uppercase ml-1 opacity-70">
+                                    <td className="px-6 py-6 border-b border-gray-50/50">
+                                        <div className="space-y-2">
+                                            <div className="inline-flex">
+                                                <span className="px-4 py-1.5 bg-gray-900 text-primary rounded-xl text-[10px] font-black border border-gray-800 uppercase italic tracking-[0.15em] whitespace-nowrap shadow-lg shadow-gray-200">
+                                                    {org.planId?.planName || 'NO ACTIVE PLAN'}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest ml-1 opacity-60 group-hover:opacity-100 transition-opacity italic">
                                                 {org.planType || 'Monthly'} Cycle
                                             </p>
                                         </div>
@@ -295,6 +386,15 @@ const AdminManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                                            org.paymentStatus === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                                            org.paymentStatus === 'Partly' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                                            'bg-red-50 text-red-600 border-red-100'
+                                        }`}>
+                                            {org.paymentStatus || 'Pending'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
                                             org.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                                             org.status === 'Pending' ? 'bg-orange-50 text-orange-600 border-orange-100 animate-pulse' :
                                             org.status === 'Suspended' ? 'bg-red-50 text-red-600 border-red-100' :
@@ -308,7 +408,11 @@ const AdminManagement = () => {
                                             {org.status === 'Pending' ? (
                                                 <>
                                                     <button 
-                                                        onClick={() => handleStatusUpdate(org._id, 'Active')}
+                                                        onClick={() => {
+                                                            setSelectedOrg(org);
+                                                            setApprovalPaymentStatus('Pending');
+                                                            setShowApproveModal(true);
+                                                        }}
                                                         className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-200"
                                                     >
                                                         Approve
@@ -478,6 +582,33 @@ const AdminManagement = () => {
                                 </select>
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-bold text-gray-600 mb-1.5 flex items-center gap-1">
+                                    Payment Status <span className="text-red-500">*</span>
+                                </label>
+                                <select 
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-primary cursor-pointer font-medium"
+                                    value={newOrg.paymentStatus}
+                                    onChange={(e) => setNewOrg({...newOrg, paymentStatus: e.target.value})}
+                                >
+                                    <option value="Paid">Paid</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Partly">Partly</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-600 mb-1.5">
+                                    Amount <span className="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    readOnly
+                                    type="text"
+                                    className="w-full bg-gray-100 border border-gray-100 rounded-xl px-4 py-3 text-gray-900 font-bold cursor-not-allowed shadow-sm"
+                                    value={`$${newOrg.registrationAmount || 0}`}
+                                />
+                            </div>
+
                             {!isEditing && (
                                 <>
                                     <div className="md:col-span-2">
@@ -540,109 +671,113 @@ const AdminManagement = () => {
                 </div>
             )}
 
-            {/* View Organization Details Modal */}
+            {/* View Organization Details Modal - Compact & Refined */}
             {viewModal && selectedOrg && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-                    <div className="bg-white w-full max-w-2xl rounded-[2.5rem] border border-gray-100 p-8 space-y-8 shadow-2xl animate-in zoom-in-95 duration-300 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -mr-32 -mt-32" />
+                    <div className="bg-white w-full max-w-xl rounded-[2rem] border border-gray-100 p-6 space-y-6 shadow-2xl animate-in zoom-in-95 duration-300 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[60px] -mr-24 -mt-24" />
                         
-                        <div className="flex justify-between items-center relative z-10 border-b border-gray-50 pb-6">
+                        <div className="flex justify-between items-center relative z-10 border-b border-gray-50 pb-4">
                             <div>
-                                <h2 className="text-2xl font-black text-gray-900 uppercase italic">Company <span className="text-primary not-italic">Profile</span></h2>
-                                <p className="text-[10px] text-gray-400 font-bold tracking-[0.2em] uppercase mt-1 italic">Data Integrity & Verification</p>
+                                <h2 className="text-xl font-black text-gray-900 uppercase italic">Organization <span className="text-primary not-italic">Profile</span></h2>
+                                <p className="text-[9px] text-gray-400 font-bold tracking-[0.2em] uppercase mt-0.5 italic">Operational Intelligence</p>
                             </div>
-                            <button onClick={() => setViewModal(false)} className="bg-gray-50 hover:bg-gray-100 p-3 rounded-2xl transition-all shadow-sm">
-                                <Plus size={24} className="rotate-45 text-gray-400" />
+                            <button onClick={() => setViewModal(false)} className="bg-gray-50 hover:bg-gray-100 p-2.5 rounded-xl transition-all shadow-sm">
+                                <Plus size={20} className="rotate-45 text-gray-400" />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                            {/* Company Info */}
-                            <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+                            {/* Entity Info */}
+                            <div className="space-y-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Company Name</label>
-                                    <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl font-black text-gray-900 italic uppercase tracking-wider">
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Entity Name</label>
+                                    <div className="p-3.5 bg-gray-50/50 border border-gray-50 rounded-xl font-black text-gray-900 italic uppercase tracking-wider text-sm">
                                         {selectedOrg.name || 'Not Specified'}
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Physical Address</label>
-                                    <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl font-bold text-gray-700 text-sm">
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Physical Address</label>
+                                    <div className="p-3.5 bg-gray-50/50 border border-gray-50 rounded-xl font-bold text-gray-700 text-xs leading-relaxed">
                                         {selectedOrg.address || 'Address not specified'}
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Phone Number</label>
-                                    <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl font-black text-primary italic text-sm">
-                                        {selectedOrg.phoneNumber || 'Not Provided'}
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Contact Line</label>
+                                    <div className="p-3.5 bg-gray-50/50 border border-gray-50 rounded-xl font-black text-primary italic text-xs">
+                                        {selectedOrg.phoneNumber || 'Secure Line N/A'}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Admin & Subscription */}
-                            <div className="space-y-6">
+                            {/* Personnel & Subscription */}
+                            <div className="space-y-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Administrative Lead</label>
-                                    <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl">
-                                        <p className="font-black text-gray-900 uppercase italic">{selectedOrg.adminUserId?.name || 'Admin Not Set'}</p>
-                                        <p className="text-xs text-primary font-bold mt-1 tracking-tighter">{selectedOrg.adminUserId?.email || 'No Email Available'}</p>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Administrative Lead</label>
+                                    <div className="p-3.5 bg-gray-50/50 border border-gray-50 rounded-xl">
+                                        <p className="font-black text-gray-900 uppercase italic text-xs">{selectedOrg.adminUserId?.name || 'Admin Not Set'}</p>
+                                        <p className="text-[10px] text-primary font-bold mt-0.5 tracking-tighter truncate">{selectedOrg.adminUserId?.email || 'No Email Registered'}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Resource Utilization</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white transition-colors">
-                                            <div>
-                                                <p className="font-black text-gray-900 text-lg italic">{selectedOrg.staffCount || 0}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase">Staff Members</p>
-                                            </div>
-                                            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <Users size={20} />
-                                            </div>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Resource Load</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="p-3 bg-gray-50/50 border border-gray-50 rounded-xl group hover:bg-white transition-colors">
+                                            <p className="font-black text-gray-900 text-base italic">{selectedOrg.staffCount || 0}</p>
+                                            <p className="text-[8px] text-gray-400 font-bold uppercase">Staff</p>
                                         </div>
-                                        <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl flex items-center justify-between group hover:bg-white transition-colors">
-                                            <div>
-                                                <p className="font-black text-primary text-lg italic">{selectedOrg.studentCount || 0}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase">Enrolled Students</p>
-                                            </div>
-                                            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <GraduationCap size={20} />
-                                            </div>
+                                        <div className="p-3 bg-gray-50/50 border border-gray-50 rounded-xl group hover:bg-white transition-colors">
+                                            <p className="font-black text-primary text-base italic">{selectedOrg.studentCount || 0}</p>
+                                            <p className="text-[8px] text-gray-400 font-bold uppercase">Students</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Subscription Status</label>
-                                    <div className="p-4 bg-gray-50/50 border border-gray-50 rounded-2xl flex items-center justify-between">
-                                        <div>
-                                            <p className="font-black text-gray-900 uppercase italic">{selectedOrg.planId?.planName || 'Plan N/A'}</p>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{selectedOrg.planType || 'Monthly'} Billing</p>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Subscription Matrix</label>
+                                    <div className="p-3.5 bg-gray-50/50 border border-gray-50 rounded-xl relative">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <p className="font-black text-gray-900 uppercase italic text-xs truncate max-w-[120px]">{selectedOrg.planId?.planName || 'Plan N/A'}</p>
+                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black border uppercase italic ${
+                                                selectedOrg.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'
+                                            }`}>{selectedOrg.status || 'Offline'}</span>
                                         </div>
-                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black border uppercase italic ${
-                                            selectedOrg.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'
-                                        }`}>{selectedOrg.status || 'Unknown'}</span>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Genesis</label>
-                                        <div className="p-3 bg-gray-50/50 border border-gray-50 rounded-xl text-xs font-black text-gray-600">
-                                            {selectedOrg.startDate ? new Date(selectedOrg.startDate).toLocaleDateString() : 'N/A'}
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <p className="text-[9px] text-gray-400 font-bold uppercase">{selectedOrg.planType || 'Standard'} Cycle</p>
+                                            <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
+                                            <p className={`text-[9px] font-black uppercase italic ${
+                                                selectedOrg.paymentStatus === 'Paid' ? 'text-emerald-500' : 'text-orange-500'
+                                            }`}>{selectedOrg.paymentStatus || 'Pending'}</p>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Expiration</label>
-                                        <div className="p-3 bg-red-50/30 border border-red-50/50 rounded-xl text-xs font-black text-red-500">
-                                            {selectedOrg.expireDate ? new Date(selectedOrg.expireDate).toLocaleDateString() : 'Infinite'}
+                                        <div className="pt-2 border-t border-gray-100/60 flex items-center justify-between">
+                                            <p className="text-[9px] text-gray-400 font-bold uppercase">Setup: <span className="text-gray-900 font-black">${selectedOrg.registrationAmount || 0}</span></p>
+                                            <div className="flex items-center gap-1">
+                                                <Zap size={10} className="text-primary" />
+                                                <span className="text-[9px] text-primary font-black uppercase italic">{selectedOrg.paymentMethod || 'System'}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="pt-4 relative z-10 flex gap-4">
-                            <button onClick={() => setViewModal(false)} className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase italic tracking-widest text-xs hover:bg-primary/90 transition-all shadow-xl shadow-primary/20">
-                                Close Terminal
+                        <div className="grid grid-cols-2 gap-4 pt-1 relative z-10">
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Activation</label>
+                                <div className="p-2.5 bg-gray-50/50 border border-gray-50 rounded-xl text-xs font-black text-gray-600 text-center">
+                                    {selectedOrg.startDate ? new Date(selectedOrg.startDate).toLocaleDateString() : 'N/A'}
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Termination</label>
+                                <div className="p-2.5 bg-red-50/30 border border-red-50/50 rounded-xl text-xs font-black text-red-500 text-center">
+                                    {selectedOrg.expireDate ? new Date(selectedOrg.expireDate).toLocaleDateString() : 'Never'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-2 relative z-10">
+                            <button onClick={() => setViewModal(false)} className="w-full bg-primary text-white py-3.5 rounded-xl font-black uppercase italic tracking-widest text-[10px] hover:bg-primary/90 transition-all shadow-xl shadow-primary/20">
+                                Close Interface
                             </button>
                         </div>
                     </div>
@@ -733,6 +868,58 @@ const AdminManagement = () => {
                                     Confirm Delete
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Approval Modal */}
+            {showApproveModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <CheckCircle2 size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900 uppercase italic">Approve Registration</h3>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Protocol Activation Sequence</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6 mb-8">
+                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 italic">
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    You are about to approve <span className="font-black text-gray-900">{selectedOrg?.name}</span>. Please verify the initial payment status before activation.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 opacity-70">Define Payment Status</label>
+                                <select 
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-primary transition-all font-bold italic"
+                                    value={approvalPaymentStatus}
+                                    onChange={(e) => setApprovalPaymentStatus(e.target.value)}
+                                >
+                                    <option value="Paid">Mark as Fully Paid</option>
+                                    <option value="Partly">Mark as Partly Paid</option>
+                                    <option value="Pending">Keep as Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setShowApproveModal(false)}
+                                className="flex-1 px-6 py-3 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmApproval}
+                                className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-100"
+                            >
+                                Approve & Set Status
+                            </button>
                         </div>
                     </div>
                 </div>

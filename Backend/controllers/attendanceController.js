@@ -29,13 +29,15 @@ const createAttendance = async (req, res) => {
             });
         }
 
-        // 2. Get student scoped by organization
-        const student = await Student.findOne({ 
-            _id: studentMongoId, 
-            organizationId: req.user.organizationId 
-        });
+        // 2. Get student scoped by organization and (if staff) assigned staff
+        const studentFilter = { _id: studentMongoId, organizationId: req.user.organizationId };
+        if (req.user.role === 'staff') {
+            studentFilter.assignedStaff = req.user._id;
+        }
+
+        const student = await Student.findOne(studentFilter);
         if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+            return res.status(403).json({ success: false, message: 'Not authorized to record attendance for this student' });
         }
 
         // 3. Create record

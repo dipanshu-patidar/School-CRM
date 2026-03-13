@@ -34,10 +34,27 @@ const organizationSchema = new mongoose.Schema(
             enum: ['Monthly', 'Yearly'],
             default: 'Monthly',
         },
+        paymentStatus: {
+            type: String,
+            enum: ['Paid', 'Pending', 'Partly'],
+            default: 'Pending',
+        },
+        paymentStatus: {
+            type: String,
+            enum: ['Paid', 'Pending', 'Partly'],
+            default: 'Pending',
+        },
         status: {
             type: String,
             enum: ['Active', 'Suspended', 'Pending', 'Rejected'],
             default: 'Pending',
+        },
+        registrationAmount: {
+            type: Number,
+        },
+        paymentMethod: {
+            type: String,
+            enum: ['Cash', 'UPI', 'Card'],
         },
     },
     {

@@ -11,7 +11,9 @@ const {
     createPlan,
     getPlans,
     updatePlan,
-    deletePlan
+    deletePlan,
+    getRevenueStats,
+    deleteSubscription
 } = require('../controllers/superAdminController');
 
 // All routes here are protected and restricted to super_admin
@@ -19,6 +21,8 @@ router.use(protect);
 router.use(authorize('super_admin'));
 
 router.get('/dashboard/stats', getStats);
+router.get('/revenue/stats', getRevenueStats);
+router.delete('/subscriptions/:id', deleteSubscription);
 
 router.route('/organizations')
     .get(getOrganizations)

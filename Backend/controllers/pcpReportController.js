@@ -23,9 +23,14 @@ const createReport = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Student, date of service, and staff signature are required.' });
         }
 
-        // Organization Check: Ensure student belongs to the same organization
+        // Organization and Role Check: Ensure student belongs to org and (if staff) is assigned
         const Student = require('../models/Student');
-        const student = await Student.findOne({ _id: studentId, organizationId: req.user.organizationId });
+        const studentFilter = { _id: studentId, organizationId: req.user.organizationId };
+        if (req.user.role === 'staff') {
+            studentFilter.assignedStaff = req.user._id;
+        }
+
+        const student = await Student.findOne(studentFilter);
         if (!student) {
             return res.status(403).json({ success: false, message: 'Not authorized to create report for this student' });
         }
@@ -161,9 +166,13 @@ const updateReport = async (req, res) => {
         let report = await PCPReport.findById(req.params.id).populate('studentId');
         if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
 
-        // Organization Check
+        // Organization and Ownership Check
         if (report.studentId?.organizationId?.toString() !== req.user.organizationId.toString()) {
             return res.status(403).json({ success: false, message: 'Not authorized to update this report' });
+        }
+
+        if (req.user.role === 'staff' && report.studentId?.assignedStaff?.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to update reports for this student' });
         }
 
         // Sanitizing input: only allow these fields to be updated via this route

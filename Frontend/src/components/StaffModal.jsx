@@ -103,7 +103,6 @@ const StaffModal = ({ isOpen, onClose, onSave, editStaff = null }) => {
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 cursor-pointer focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none"
                             >
-                                <option value="admin">Admin</option>
                                 <option value="staff">Staff</option>
                             </select>
                         </div>

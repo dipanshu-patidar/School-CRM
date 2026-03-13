@@ -38,7 +38,7 @@ const Sidebar = ({ role, collapsed, setCollapsed, onLogout }) => {
 
     const superAdminMenu = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'admin', label: 'Admin', icon: Building2 },
+        { id: 'admin', label: 'Admin Management', icon: Building2 },
         { id: 'plans', label: 'Plan & Pricing', icon: CreditCard },
         { id: 'revenue', label: 'Revenue', icon: DollarSign },
         { id: 'settings', label: 'Settings', icon: ShieldCheck },

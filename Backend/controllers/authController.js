@@ -101,29 +101,28 @@ const registerAdmin = async (req, res) => {
         adminEmail, 
         adminPassword, 
         planId,
-        phoneNumber
+        phoneNumber,
+        registrationAmount,
+        paymentMethod
     } = req.body;
 
     try {
-        // Check if user already exists
+        // ... existence checks ...
         const userExists = await User.findOne({ email: adminEmail });
         if (userExists) {
             return res.status(400).json({ success: false, message: 'User already exists with this email' });
         }
 
-        // Check if organization name exists
         const orgExists = await Organization.findOne({ name: organizationName });
         if (orgExists) {
             return res.status(400).json({ success: false, message: 'Organization name already taken' });
         }
 
-        // Fetch Plan to get billing period
         const plan = await SubscriptionPlan.findById(planId);
         if (!plan) {
             return res.status(404).json({ success: false, message: 'Subscription plan not found' });
         }
 
-        // Calculate Expiration Date
         const startDate = new Date();
         const expireDate = new Date();
         if (plan.billingPeriod === 'Yearly') {
@@ -132,11 +131,12 @@ const registerAdmin = async (req, res) => {
             expireDate.setMonth(startDate.getMonth() + 1);
         }
 
-        // Create Organization first
         const organization = await Organization.create({
             name: organizationName,
             planId,
             phoneNumber,
+            registrationAmount,
+            paymentMethod,
             status: 'Pending',
             planType: plan.billingPeriod,
             startDate,

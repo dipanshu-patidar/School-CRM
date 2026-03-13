@@ -10,7 +10,10 @@ import {
     Target,
     RefreshCw,
     Clock,
-    Download
+    Download,
+    Eye,
+    Trash2,
+    X
 } from 'lucide-react';
 import axios from 'axios';
 import { 
@@ -23,6 +26,8 @@ import {
     ResponsiveContainer,
     Cell
 } from 'recharts';
+import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 const RevenueTracking = () => {
     const [stats, setStats] = useState({
@@ -32,45 +37,95 @@ const RevenueTracking = () => {
         pendingInvoices: 0
     });
     const [transactions, setTransactions] = useState([]);
+    const [monthlyData, setMonthlyData] = useState([]);
+    const [yearlyData, setYearlyData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [viewModal, setViewModal] = useState(false);
+    const [deleteModal, setDeleteModal] = useState(false);
 
-    const monthlyData = [
-        { name: 'JAN', value: 400 },
-        { name: 'FEB', value: 300 },
-        { name: 'MAR', value: 500 },
-        { name: 'APR', value: 450 },
-        { name: 'MAY', value: 600 },
-        { name: 'JUN', value: 550 },
-        { name: 'JUL', value: 700 },
-        { name: 'AUG', value: 650 },
-        { name: 'SEP', value: 800 },
-        { name: 'OCT', value: 750 },
-        { name: 'NOV', value: 900 },
-        { name: 'DEC', value: 850 },
-    ];
+    const fetchRevenueData = async () => {
+        try {
+            const token = sessionStorage.getItem('token');
+            const response = await axios.get('http://localhost:5000/api/superadmin/revenue/stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                const { stats, monthlyData, yearlyData, transactions } = response.data.data;
+                setStats(stats);
+                setMonthlyData(monthlyData);
+                setYearlyData(yearlyData);
+                setTransactions(transactions);
+            }
+        } catch (error) {
+            console.error('Error fetching revenue stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const yearlyData = [
-        { year: '2024', value: 450 },
-        { year: '2025', value: 750 },
-        { year: '2026', value: 720 },
-    ];
+    const handleDeleteTransaction = async () => {
+        if (!selectedTransaction || !selectedTransaction._id) {
+            toast.error('Record ID missing. Please refresh the page.');
+            return;
+        }
+        
+        try {
+            const token = sessionStorage.getItem('token');
+            const response = await axios.delete(`http://localhost:5000/api/superadmin/subscriptions/${selectedTransaction._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.data.success) {
+                toast.success('Transaction purged successfully');
+                setDeleteModal(false);
+                fetchRevenueData(); // Refresh all stats
+            }
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            toast.error(error.response?.data?.message || 'Purge failed');
+        }
+    };
+
+    const handleExportExcel = () => {
+        if (!transactions || transactions.length === 0) {
+            toast.error('No transaction data to export');
+            return;
+        }
+
+        const toastId = toast.loading('Exporting to Excel...');
+        
+        try {
+            // Prepare data: Remove internal _id and format for Excel
+            const exportData = transactions.map(t => ({
+                'Transaction Code': t.id,
+                'Business Entity': t.org,
+                'Liquid Amount': t.amount,
+                'Verification Status': t.status,
+                'Timestamp': t.date
+            }));
+
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Revenue Ledger');
+            
+            // Generate filename
+            const filename = `Revenue_Ledger_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            // Save file
+            XLSX.writeFile(wb, filename);
+            toast.success('Ledger exported successfully', { id: toastId });
+        } catch (error) {
+            console.error('Excel Export Error:', error);
+            toast.error('Failed to export Excel', { id: toastId });
+        }
+    };
 
     useEffect(() => {
-        // Simulated data for Financial Overview
-        setStats({
-            ytdRevenue: 125000,
-            mrr: 15400,
-            yearlyRevenue: 185000,
-            pendingInvoices: 1200
-        });
-        setTransactions([
-            { id: 'TXN-9402', org: 'Hill Valley High', plan: 'Enterprise', amount: 1500, date: '2026-03-12', status: 'Paid' },
-            { id: 'TXN-9403', org: 'Shermer High School', plan: 'Pro', amount: 499, date: '2026-03-11', status: 'Paid' },
-            { id: 'TXN-9404', org: 'West Beverly High', plan: 'Basic', amount: 199, date: '2026-03-10', status: 'Pending' },
-            { id: 'TXN-9405', org: 'Bayside High', plan: 'Pro', amount: 499, date: '2026-03-09', status: 'Paid' },
-            { id: 'TXN-9406', org: 'North Shore High', plan: 'Enterprise', amount: 1500, date: '2026-03-08', status: 'Paid' },
-        ]);
-        setLoading(false);
+        fetchRevenueData();
     }, []);
 
 const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
@@ -105,8 +160,14 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                         TRACK MONTHLY RECURRING REVENUE & QUANTUM TRANSACTIONS
                     </p>
                 </div>
-                <button className="p-4 bg-white border border-gray-100 rounded-[1.5rem] text-gray-400 hover:text-primary hover:border-primary/30 transition-all shadow-xl shadow-gray-200/50 group active:rotate-180 duration-500">
-                    <RefreshCw size={24} className="group-hover:rotate-180 transition-all duration-700" />
+                <button 
+                    onClick={() => {
+                        setLoading(true);
+                        fetchRevenueData();
+                    }}
+                    className="p-4 bg-white border border-gray-100 rounded-[1.5rem] text-gray-400 hover:text-primary hover:border-primary/30 transition-all shadow-xl shadow-gray-200/50 group active:rotate-180 duration-500"
+                >
+                    <RefreshCw size={24} className={`${loading ? 'animate-spin' : ''} group-hover:rotate-180 transition-all duration-700`} />
                 </button>
             </div>
 
@@ -115,14 +176,14 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                 <RevenueCard 
                     title="Net Revenue (YTD)"
                     value={stats.ytdRevenue}
-                    badge="+12% vs last year"
+                    badge={`${stats.growthVelocity} vs last year`}
                     icon={TrendingUp}
                     isGold={true}
                 />
                 <RevenueCard 
                     title="Monthly Recurring Revenue"
                     value={stats.mrr}
-                    badge="Active Billing"
+                    badge={stats.mrrBadge}
                     icon={Activity}
                 />
                 <RevenueCard 
@@ -227,10 +288,10 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                     <div className="mt-8 pt-8 border-t border-gray-50 flex items-center justify-between relative z-10">
                         <div>
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Growth Velocity</p>
-                            <p className="text-xl font-black text-gray-900 italic">+28.4% <span className="text-primary text-xs not-italic">YOY</span></p>
+                            <p className="text-xl font-black text-gray-900 italic">{stats.growthVelocity} <span className="text-primary text-xs not-italic">YOY</span></p>
                         </div>
                         <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-primary border border-gray-100 italic font-black">
-                            Q1
+                            {new Date().getMonth() < 3 ? 'Q1' : new Date().getMonth() < 6 ? 'Q2' : new Date().getMonth() < 9 ? 'Q3' : 'Q4'}
                         </div>
                     </div>
                 </div>
@@ -246,13 +307,16 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                         </h2>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.4em] mt-2 italic">Immutable Financial Records</p>
                     </div>
-                    <button className="px-6 py-3 bg-gray-900 hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all italic flex items-center gap-3 shadow-xl shadow-gray-200">
+                    <button 
+                        onClick={handleExportExcel}
+                        className="px-6 py-3 bg-gray-900 hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all italic flex items-center gap-3 shadow-xl shadow-gray-200"
+                    >
                         <Download size={16} strokeWidth={3} />
                         Export Ledger
                     </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div id="transaction-table" className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50/50">
                             <tr>
@@ -261,7 +325,7 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                                 <th className="px-10 py-6 text-gray-400 font-black uppercase text-[10px] tracking-[0.3em]">Liquid Amount</th>
                                 <th className="px-10 py-6 text-gray-400 font-black uppercase text-[10px] tracking-[0.3em]">Verification</th>
                                 <th className="px-10 py-6 text-gray-400 font-black uppercase text-[10px] tracking-[0.3em]">Timestamp</th>
-                                <th className="px-10 py-6 text-gray-400 font-black uppercase text-[10px] tracking-[0.3em] text-right">Certificate</th>
+                                <th className="px-10 py-6 text-gray-400 font-black uppercase text-[10px] tracking-[0.3em] text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -290,9 +354,26 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                                     </td>
                                     <td className="px-10 py-8 text-gray-900 font-black text-[10px] uppercase italic tracking-[0.1em]">{t.date}</td>
                                     <td className="px-10 py-8 text-right">
-                                        <button className="p-3 bg-gray-50 text-gray-400 hover:text-primary hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all shadow-sm">
-                                            <FileDown size={18} strokeWidth={3} />
-                                        </button>
+                                        <div className="flex justify-end gap-2">
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedTransaction(t);
+                                                    setViewModal(true);
+                                                }}
+                                                className="p-3 bg-gray-50 text-gray-400 hover:text-primary hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all shadow-sm"
+                                            >
+                                                <Eye size={18} strokeWidth={3} />
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedTransaction(t);
+                                                    setDeleteModal(true);
+                                                }}
+                                                className="p-3 bg-red-50 text-red-400 hover:text-red-600 hover:bg-red-100 border border-red-100 rounded-2xl transition-all shadow-sm"
+                                            >
+                                                <Trash2 size={18} strokeWidth={3} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -306,6 +387,85 @@ const RevenueCard = ({ title, value, badge, icon: Icon, isGold }) => (
                     </button>
                 </div>
             </div>
+            {/* View Modal */}
+            {viewModal && selectedTransaction && (
+                <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
+                        <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900 uppercase italic tracking-wider">
+                                    Transaction <span className="text-primary not-italic">Deep Sheet</span>
+                                </h3>
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1 shrink-0 italic">{selectedTransaction.id}</p>
+                            </div>
+                            <button onClick={() => setViewModal(false)} className="p-3 hover:bg-white rounded-2xl text-gray-400 hover:text-gray-900 transition-all border border-transparent hover:border-gray-100">
+                                <X size={20} strokeWidth={3} />
+                            </button>
+                        </div>
+                        <div className="p-10 space-y-8">
+                            <div className="grid grid-cols-2 gap-10">
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Entity</p>
+                                    <p className="text-lg font-black text-gray-900 uppercase italic tracking-tight">{selectedTransaction.org}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Quantum Status</p>
+                                    <span className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black uppercase tracking-widest italic inline-block">
+                                        Paid
+                                    </span>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Liquid Amount</p>
+                                    <p className="text-2xl font-black text-primary italic tracking-tighter">${selectedTransaction.amount.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Timestamp</p>
+                                    <p className="text-sm font-black text-gray-900 uppercase italic tracking-widest">{selectedTransaction.date}</p>
+                                </div>
+                            </div>
+                            <div className="pt-8 border-t border-gray-50">
+                                <button 
+                                    onClick={() => setViewModal(false)}
+                                    className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all italic shadow-xl shadow-gray-200"
+                                >
+                                    Close Modal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {deleteModal && selectedTransaction && (
+                <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
+                        <div className="p-10 text-center">
+                            <div className="w-20 h-20 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-100">
+                                <Trash2 size={32} strokeWidth={2.5} />
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight mb-4">Purge Record?</h3>
+                            <p className="text-sm text-gray-500 font-bold mb-10 px-4 leading-relaxed">
+                                You are about to permanently delete record <span className="text-red-500">{selectedTransaction.id}</span>. This action is irreversible.
+                            </p>
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => setDeleteModal(false)}
+                                    className="flex-1 py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-900 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all italic"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleDeleteTransaction}
+                                    className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all italic shadow-lg shadow-red-200"
+                                >
+                                    Confirm Purge
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

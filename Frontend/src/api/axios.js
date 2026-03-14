@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+export const BASE_URL = 'https://shine-light-production.up.railway.app';
+
 // Set the base URL for the backend API
 const api = axios.create({
-    baseURL: 'http://localhost:5000', // Update this based on your environment
+    baseURL: BASE_URL, // Update this based on your environment
 });
 
 // Add a request interceptor to include the JWT token in headers

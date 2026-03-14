@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Plus, Search, Edit2, ShieldAlert, Eye, Users, GraduationCap, CheckCircle2, Zap, Mail, Phone } from 'lucide-react';
-import axios from 'axios';
+import api, { BASE_URL } from '../api/axios';
 import toast from 'react-hot-toast';
 
 const AdminManagement = () => {
@@ -40,12 +40,8 @@ const AdminManagement = () => {
         try {
             const token = sessionStorage.getItem('token');
             const [orgRes, planRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/superadmin/organizations', {
-                    headers: { Authorization: `Bearer ${token}` }
-                }),
-                axios.get('http://localhost:5000/api/superadmin/plans', {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+                api.get('/api/superadmin/organizations'),
+                api.get('/api/superadmin/plans')
             ]);
             setOrganizations(orgRes.data.data);
             setPlans(planRes.data.data);
@@ -100,14 +96,10 @@ const AdminManagement = () => {
         try {
             const token = sessionStorage.getItem('token');
             if (isEditing) {
-                await axios.put(`http://localhost:5000/api/superadmin/organizations/${editId}`, newOrg, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.put(`/api/superadmin/organizations/${editId}`, newOrg);
                 toast.success('Organization updated successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/superadmin/organizations', newOrg, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.post('/api/superadmin/organizations', newOrg);
                 toast.success('Organization created successfully!');
             }
             setShowModal(false);
@@ -145,10 +137,7 @@ const AdminManagement = () => {
 
     const confirmDelete = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/superadmin/organizations/${selectedOrg._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/superadmin/organizations/${selectedOrg._id}`);
             toast.success('Organization terminated successfully');
             setShowDeleteModal(false);
             fetchOrganizations();
@@ -164,9 +153,7 @@ const AdminManagement = () => {
             if (paymentStatus) {
                 data.paymentStatus = paymentStatus;
             }
-            await axios.patch(`http://localhost:5000/api/superadmin/organizations/${id}/status`, data, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.patch(`/api/superadmin/organizations/${id}/status`, data);
             toast.success(`Organization status updated to ${newStatus}`);
             setShowSuspendModal(false);
             setShowApproveModal(false);

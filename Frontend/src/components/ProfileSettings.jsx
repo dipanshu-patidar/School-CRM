@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { updateProfile, getMe } from '../api/userApi';
+import { BASE_URL } from '../api/axios';
 import toast from 'react-hot-toast';
 
 const ProfileSettings = () => {
@@ -33,7 +34,7 @@ const ProfileSettings = () => {
             if (userData.avatar) {
                 const avatarUrl = userData.avatar.startsWith('http')
                     ? userData.avatar
-                    : `http://localhost:5000${userData.avatar}`;
+                    : `${BASE_URL}${userData.avatar}`;
                 setAvatarPreview(avatarUrl);
             }
         } catch (err) {
@@ -88,7 +89,7 @@ const ProfileSettings = () => {
             if (updatedUser.avatar) {
                 const avatarUrl = updatedUser.avatar.startsWith('http')
                     ? updatedUser.avatar
-                    : `http://localhost:5000${updatedUser.avatar}`;
+                    : `${BASE_URL}${updatedUser.avatar}`;
                 setAvatarPreview(avatarUrl);
             }
         }).catch((err) => console.error('Error updating profile:', err))

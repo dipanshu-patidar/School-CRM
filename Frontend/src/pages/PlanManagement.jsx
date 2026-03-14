@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Plus, Check, Trash2, Edit2, Zap, Shield, Crown, LayoutGrid, List, Grid } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 
 const PlanManagement = () => {
@@ -25,10 +25,7 @@ const PlanManagement = () => {
 
     const fetchPlans = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/superadmin/plans', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/api/superadmin/plans');
             setPlans(res.data.data);
         } catch (error) {
             toast.error('Failed to sync protocol tiers');
@@ -46,14 +43,10 @@ const PlanManagement = () => {
         try {
             const token = sessionStorage.getItem('token');
             if (isEditing) {
-                await axios.put(`http://localhost:5000/api/superadmin/plans/${editId}`, newPlan, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.put(`/api/superadmin/plans/${editId}`, newPlan);
                 toast.success('Protocol Tier Optimized');
             } else {
-                await axios.post('http://localhost:5000/api/superadmin/plans', newPlan, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await api.post('/api/superadmin/plans', newPlan);
                 toast.success('Protocol Tier Initialized');
             }
             setShowModal(false);
@@ -86,10 +79,7 @@ const PlanManagement = () => {
 
     const confirmDelete = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/superadmin/plans/${selectedPlan._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/superadmin/plans/${selectedPlan._id}`);
             toast.success('Protocol Tier Terminated');
             setShowDeleteModal(false);
             fetchPlans();

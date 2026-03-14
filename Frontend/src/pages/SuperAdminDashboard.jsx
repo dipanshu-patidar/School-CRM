@@ -9,7 +9,7 @@ import {
     Activity,
     ShieldCheck
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 import StatCard from '../components/StatCard';
 
 const SuperAdminDashboard = () => {
@@ -26,10 +26,7 @@ const SuperAdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const token = sessionStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/superadmin/dashboard/stats', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get('/api/superadmin/dashboard/stats');
                 if (res.data.success) {
                     setStats(res.data.data);
                 }

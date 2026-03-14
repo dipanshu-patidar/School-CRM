@@ -15,7 +15,7 @@ import {
     Trash2,
     X
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/axios';
 import { 
     BarChart, 
     Bar, 
@@ -46,10 +46,7 @@ const RevenueTracking = () => {
 
     const fetchRevenueData = async () => {
         try {
-            const token = sessionStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/superadmin/revenue/stats', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/api/superadmin/revenue/stats');
             if (response.data.success) {
                 const { stats, monthlyData, yearlyData, transactions } = response.data.data;
                 setStats(stats);
@@ -71,10 +68,7 @@ const RevenueTracking = () => {
         }
         
         try {
-            const token = sessionStorage.getItem('token');
-            const response = await axios.delete(`http://localhost:5000/api/superadmin/subscriptions/${selectedTransaction._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.delete(`/api/superadmin/subscriptions/${selectedTransaction._id}`);
 
             if (response.data.success) {
                 toast.success('Transaction purged successfully');

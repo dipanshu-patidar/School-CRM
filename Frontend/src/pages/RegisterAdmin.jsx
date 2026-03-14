@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { 
     Building2, 
@@ -45,7 +45,7 @@ const RegisterAdmin = () => {
                 return;
             }
             try {
-                const res = await axios.get(`http://localhost:5000/api/plans`);
+                const res = await api.get(`/api/plans`);
                 const selectedPlan = res.data.data.find(p => p._id === planId);
                 setPlan(selectedPlan);
                 if (selectedPlan) {
@@ -71,7 +71,7 @@ const RegisterAdmin = () => {
         
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/auth/register-admin', {
+            await api.post('/api/auth/register-admin', {
                 organizationName: formData.organizationName,
                 adminName: formData.adminName,
                 adminEmail: formData.adminEmail,

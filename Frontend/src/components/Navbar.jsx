@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Search, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
+import { BASE_URL } from '../api/axios';
 import logoImg from '../assets/login/logo.png';
 
 const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
@@ -75,7 +76,7 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                                 <img
                                     src={sessionStorage.getItem('userAvatar').startsWith('http')
                                         ? sessionStorage.getItem('userAvatar')
-                                        : `http://localhost:5000${sessionStorage.getItem('userAvatar')}`}
+                                        : `${BASE_URL}${sessionStorage.getItem('userAvatar')}`}
                                     alt="Avatar"
                                     className="w-full h-full object-cover"
                                 />

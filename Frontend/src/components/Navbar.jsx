@@ -10,6 +10,16 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
     const userName = sessionStorage.getItem('userName') || (role === 'super_admin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Staff');
     const userRole = sessionStorage.getItem('userRole') || role;
 
+    const [avatar, setAvatar] = React.useState(sessionStorage.getItem('userAvatar'));
+
+    React.useEffect(() => {
+        const handleUpdate = () => {
+            setAvatar(sessionStorage.getItem('userAvatar'));
+        };
+        window.addEventListener('userAvatarUpdated', handleUpdate);
+        return () => window.removeEventListener('userAvatarUpdated', handleUpdate);
+    }, []);
+
     const getPageTitle = () => {
         const path = location.pathname;
         if (path === '/dashboard') return role === 'super_admin' ? 'System Overview' : 'Dashboard Overview';
@@ -72,11 +82,11 @@ const Navbar = ({ role, onLogout, collapsed, setCollapsed }) => {
                     </div>
                     <div className="relative group">
                         <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all">
-                            {sessionStorage.getItem('userAvatar') ? (
+                            {avatar ? (
                                 <img
-                                    src={sessionStorage.getItem('userAvatar').startsWith('http')
-                                        ? sessionStorage.getItem('userAvatar')
-                                        : `${BASE_URL}${sessionStorage.getItem('userAvatar')}`}
+                                    src={avatar.startsWith('http')
+                                        ? avatar
+                                        : `${BASE_URL}${avatar}`}
                                     alt="Avatar"
                                     className="w-full h-full object-cover"
                                 />

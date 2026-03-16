@@ -80,6 +80,11 @@ const ProfileSettings = () => {
             sessionStorage.setItem('userName', updatedUser.name);
             if (updatedUser.avatar) {
                 sessionStorage.setItem('userAvatar', updatedUser.avatar);
+                window.dispatchEvent(new Event('userAvatarUpdated'));
+            }
+            if (updatedUser.organizationLogo) {
+                sessionStorage.setItem('organizationLogo', updatedUser.organizationLogo);
+                window.dispatchEvent(new Event('organizationLogoUpdated'));
             }
             setUser(updatedUser);
 

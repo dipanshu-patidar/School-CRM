@@ -73,6 +73,13 @@ const login = async (req, res) => {
         // Create token
         const token = generateToken(user._id, user.role);
 
+        // Populate organization logo
+        let organizationLogo = '';
+        if (user.organizationId) {
+            const org = await Organization.findById(user.organizationId);
+            organizationLogo = org ? org.logo : '';
+        }
+
         res.status(200).json({
             success: true,
             token,
@@ -82,7 +89,8 @@ const login = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 avatar: user.avatar,
-                organizationId: user.organizationId
+                organizationId: user.organizationId,
+                organizationLogo: organizationLogo
             },
         });
     } catch (error) {

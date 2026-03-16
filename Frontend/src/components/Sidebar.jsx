@@ -46,6 +46,16 @@ const Sidebar = ({ role, collapsed, setCollapsed, onLogout }) => {
 
     const menuItems = role === 'super_admin' ? superAdminMenu : (role === 'admin' ? adminMenu : staffMenu);
 
+    const [logo, setLogo] = React.useState(sessionStorage.getItem('organizationLogo'));
+
+    React.useEffect(() => {
+        const handleUpdate = () => {
+            setLogo(sessionStorage.getItem('organizationLogo'));
+        };
+        window.addEventListener('organizationLogoUpdated', handleUpdate);
+        return () => window.removeEventListener('organizationLogoUpdated', handleUpdate);
+    }, []);
+
     return (
         <aside
             className={`bg-sidebar border-r border-[#1F1F1F] h-screen flex flex-col sticky top-0 transition-all duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? 'w-20' : 'w-[300px]'
@@ -55,7 +65,15 @@ const Sidebar = ({ role, collapsed, setCollapsed, onLogout }) => {
             <div className={`relative flex flex-col items-center justify-center border-b border-[#1F1F1F] transition-all duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? 'h-24 px-2' : 'h-64 px-6'}`}>
                 {/* Maximized Logo Container */}
                 <div className={`rounded-3xl p-2 shadow-black/50 overflow-hidden flex items-center justify-center transition-all duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? 'w-16 h-16' : 'w-56 h-56'}`}>
-                    <img src={logoImg} alt="Logo" className="w-full h-full object-contain" />
+                    <img 
+                        src={logo 
+                            ? (logo.startsWith('http') 
+                                ? logo 
+                                : `http://localhost:5000${logo}`) 
+                            : logoImg} 
+                        alt="Logo" 
+                        className="w-full h-full object-contain" 
+                    />
                 </div>
             </div>
 

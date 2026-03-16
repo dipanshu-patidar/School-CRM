@@ -56,6 +56,10 @@ const organizationSchema = new mongoose.Schema(
             type: String,
             enum: ['Cash', 'UPI', 'Card'],
         },
+        logo: {
+            type: String,
+            default: '',
+        },
     },
     {
         timestamps: true,

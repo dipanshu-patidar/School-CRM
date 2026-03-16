@@ -68,6 +68,7 @@ const LoginPage = ({ onLogin }) => {
             sessionStorage.setItem('userName', user.name);
             sessionStorage.setItem('userRole', user.role);
             sessionStorage.setItem('userAvatar', user.avatar || '');
+            sessionStorage.setItem('organizationLogo', user.organizationLogo || '');
             sessionStorage.setItem('user', JSON.stringify(user));
 
             // Pass the verified role to handleLogin in App.jsx

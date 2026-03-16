@@ -1,6 +1,6 @@
 import axios from 'axios';
-
-export const BASE_URL = 'https://shine-light-production.up.railway.app';
+ 
+export const BASE_URL = 'http://localhost:5000';
 
 // Set the base URL for the backend API
 const api = axios.create({

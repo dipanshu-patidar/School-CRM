@@ -1,12 +1,20 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const RecentActivityTable = ({ activities = [] }) => {
+    const navigate = useNavigate();
+
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
                 {activities.length > 0 && (
-                    <button className="text-primary text-sm font-bold hover:underline cursor-pointer">View All</button>
+                    <button 
+                        onClick={() => navigate('/dashboard/attendance')}
+                        className="text-primary text-sm font-bold hover:underline cursor-pointer"
+                    >
+                        View All
+                    </button>
                 )}
             </div>
             <div className="overflow-x-auto">

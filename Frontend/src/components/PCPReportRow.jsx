@@ -2,7 +2,7 @@ import React from 'react';
 import { Eye, Pencil, Trash2, FileText, Calendar, User, Printer } from 'lucide-react';
 import ReportStatusBadge from './ReportStatusBadge';
 
-const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole, isMobile = false }) => {
+const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole, isMobile = false, onPrint }) => {
     if (isMobile) {
         return (
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:border-primary/30 transition-all relative space-y-4">
@@ -58,7 +58,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole, isMobile = f
                         <Pencil size={14} />
                     </button>
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => onPrint(report)}
                         className="p-3 rounded-xl bg-gray-50 text-gray-400 hover:text-gray-900 transition-all active:scale-95 cursor-pointer"
                     >
                         <Printer size={14} />
@@ -131,7 +131,7 @@ const PCPReportRow = ({ report, onView, onEdit, onDelete, userRole, isMobile = f
                     </button>
                     <button
                         title="Print Report"
-                        onClick={() => window.print()}
+                        onClick={() => onPrint(report)}
                         className="p-2 rounded-xl text-gray-600 bg-gray-50 hover:bg-gray-100 transition-all cursor-pointer shadow-sm border border-gray-200 active:scale-95"
                     >
                         <Printer size={16} />

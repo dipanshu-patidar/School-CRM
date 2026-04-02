@@ -43,6 +43,9 @@
 
 /* Print Styles - Outside of tailwind layers for absolute priority */
 @media print {
+  @page {
+    margin: 0; /* Disables browser-generated dates, URLs, and page numbers */
+  }
 
   /* Hide EVERYTHING by default in print */
   html,

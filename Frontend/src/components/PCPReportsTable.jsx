@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronLeft, ChevronRight, FileText, Plus } from 'lucide-react';
 import PCPReportRow from './PCPReportRow';
 
-const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userRole }) => {
+const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userRole, onPrint }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +26,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <FileText size={36} className="text-primary/40" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No PCP / IGP reports created yet</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No Progress / Clinical notes created yet</h3>
                 <p className="text-gray-500 max-w-xs mb-8 font-medium">Start by creating your first service documentation report using the P.I.E format.</p>
                 <button
                     onClick={onCreateNew}
@@ -43,7 +43,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
         <div className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">PCP / IGP Reports</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Progress / Clinical Notes</h2>
                     <p className="text-sm text-gray-500 font-medium">List of all service documentation reports created using the P.I.E format.</p>
                 </div>
 
@@ -97,6 +97,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
                                     onEdit={onEdit}
                                     onDelete={onDelete}
                                     userRole={userRole}
+                                    onPrint={onPrint}
                                 />
                             ))}
                         </tbody>
@@ -114,6 +115,7 @@ const PCPReportsTable = ({ reports, onView, onEdit, onDelete, onCreateNew, userR
                             onDelete={onDelete}
                             userRole={userRole}
                             isMobile={true}
+                            onPrint={onPrint}
                         />
                     ))}
                 </div>

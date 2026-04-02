@@ -11,9 +11,11 @@ import {
     AlertTriangle,
     ShieldAlert
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getDashboardStats } from '../api/dashboardApi';
 
 const Dashboard = ({ role }) => {
+    const navigate = useNavigate();
     const [statsData, setStatsData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userName, setUserName] = useState(sessionStorage.getItem('userName') || 'User');
@@ -144,7 +146,12 @@ const Dashboard = ({ role }) => {
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Recent Student Submissions</h3>
-                        {/* <button className="text-primary text-sm font-bold hover:underline cursor-pointer">View All</button> */}
+                        <button 
+                            onClick={() => navigate('/dashboard/students')}
+                            className="text-primary text-sm font-bold hover:underline cursor-pointer"
+                        >
+                            View All
+                        </button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
@@ -194,8 +201,14 @@ const Dashboard = ({ role }) => {
 
                 {/* Recent Activities Area */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm min-h-[400px]">
-                    <div className="p-6 border-b border-gray-100">
+                    <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <h3 className="font-bold text-gray-900 text-lg">Recent Activities</h3>
+                        <button 
+                            onClick={() => navigate('/dashboard/attendance')}
+                            className="text-primary text-sm font-bold hover:underline cursor-pointer"
+                        >
+                            View All
+                        </button>
                     </div>
                     <div className="p-6 space-y-6">
                         {statsData?.recentActivities?.length > 0 ? (

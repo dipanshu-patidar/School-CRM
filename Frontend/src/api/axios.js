@@ -1,7 +1,8 @@
 import axios from 'axios';
  
-export const BASE_URL = 'http://localhost:5000';
+export const BASE_URL = 'https://shining-light-crm-backend-production.up.railway.app';
 
+// export const BASE_URL = 'http://localhost:5000';
 // Set the base URL for the backend API
 const api = axios.create({
     baseURL: BASE_URL, // Update this based on your environment

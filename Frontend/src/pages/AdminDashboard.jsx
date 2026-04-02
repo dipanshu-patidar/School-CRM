@@ -44,7 +44,7 @@ const AdminDashboard = () => {
                 <div className="relative">
                     <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-full blur-[2px]" />
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase italic flex items-center gap-3">
-                        Program <span className="text-primary not-italic">Quantum</span>
+                        RIDSS <span className="text-primary not-italic">Program</span>
                     </h1>
                     <p className="text-gray-400 font-bold tracking-widest text-xs mt-2 ml-1">REAL-TIME OPERATIONAL METRICS</p>
                 </div>
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <StatCard
                     icon={Users}
-                    label="Total Registered Nodes"
+                    label="Total Registered Students"
                     value={statsData?.totalStudents || '0'}
                     trend="+12%"
                     trendType="up"
@@ -66,7 +66,7 @@ const AdminDashboard = () => {
                 />
                 <StatCard
                     icon={UserCheck}
-                    label="Active Sub-Nodes"
+                    label="Active Students"
                     value={statsData?.activeStudents || '0'}
                     trend="+5%"
                     trendType="up"
@@ -74,7 +74,7 @@ const AdminDashboard = () => {
                 />
                 <StatCard
                     icon={Award}
-                    label="Protocol Completions"
+                    label="Program Completions"
                     value={statsData?.completedStudents || '0'}
                     trend="-2%"
                     trendType="down"

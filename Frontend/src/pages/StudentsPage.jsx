@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 const StudentsPage = ({ role }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,10 +27,6 @@ const StudentsPage = ({ role }) => {
         try {
             setLoading(true);
             const data = await getAllStudents();
-            // getAllStudents returns the response data directly.
-            // If the controller returns a list, data IS the list.
-            // If the controller returns { success, data }, then data.data is the list.
-            // Our merged controller returns the array directly for getStudents.
             setStudents(Array.isArray(data) ? data : (data.data || []));
             setError(null);
         } catch (err) {
@@ -47,8 +45,31 @@ const StudentsPage = ({ role }) => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student._id?.toString().includes(searchTerm);
+        
         const matchesStatus = statusFilter === 'All' || student.status === statusFilter;
-        return matchesSearch && matchesStatus;
+
+        // Date Filter Logic
+        let matchesDate = true;
+        if (dateFrom || dateTo) {
+            const studentDate = student.startDate ? new Date(student.startDate) : (student.createdAt ? new Date(student.createdAt) : null);
+            if (!studentDate) {
+                matchesDate = false;
+            } else {
+                const start = dateFrom ? new Date(dateFrom) : null;
+                const end = dateTo ? new Date(dateTo) : null;
+                
+                if (start) {
+                    start.setHours(0, 0, 0, 0);
+                    if (studentDate < start) matchesDate = false;
+                }
+                if (end) {
+                    end.setHours(23, 59, 59, 999);
+                    if (studentDate > end) matchesDate = false;
+                }
+            }
+        }
+
+        return matchesSearch && matchesStatus && matchesDate;
     });
 
     const handleAddStudent = () => {
@@ -105,7 +126,9 @@ const StudentsPage = ({ role }) => {
             'Status': student.status,
             'Points': `${student.points || 0} / ${student.totalPoints || 250}`,
             'Assigned Staff': student.assignedStaff?.name || 'Unassigned',
-            'Enrolled Date': student.createdAt ? new Date(student.createdAt).toLocaleDateString() : 'N/A'
+            'Enrolled Date': student.startDate 
+                ? new Date(student.startDate).toLocaleDateString('en-GB') 
+                : (student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-GB') : 'N/A')
         }));
 
         const ws = XLSX.utils.json_to_sheet(exportData);
@@ -152,7 +175,11 @@ const StudentsPage = ({ role }) => {
                     setSearchTerm={setSearchTerm}
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
-                    totalStudents={students.length}
+                    dateFrom={dateFrom}
+                    setDateFrom={setDateFrom}
+                    dateTo={dateTo}
+                    setDateTo={setDateTo}
+                    totalStudents={filteredStudents.length}
                 />
 
                 {loading ? (

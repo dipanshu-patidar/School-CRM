@@ -74,7 +74,7 @@ const EditStudentModal = ({ student, onClose, onSave, role }) => {
                             />
                         </div>
                     ))}
-                    <div>
+                    {/* <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">Total Points</label>
                         <div className="relative">
                             <input
@@ -84,13 +84,14 @@ const EditStudentModal = ({ student, onClose, onSave, role }) => {
                                 onChange={handleChange}
                                 min={0}
                                 max={threshold}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 focus:outline-none cursor-not-allowed text-sm"
+                                disabled
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-primary text-xs">
                                 / {threshold}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Assigned Staff</label>
                         <select
@@ -119,6 +120,16 @@ const EditStudentModal = ({ student, onClose, onSave, role }) => {
                             <option value="Secondary Completion">Secondary Completion</option>
                             <option value="Dropped">Dropped</option>
                         </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                        <input
+                            type="date"
+                            name="startDate"
+                            value={form.startDate ? form.startDate.split('T')[0] : ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm cursor-pointer"
+                        />
                     </div>
                 </div>
 
@@ -165,7 +176,9 @@ const StudentProfilePage = ({ role }) => {
             setStudentData({
                 ...data,
                 totalPoints: threshold,
-                enrolledDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                enrolledDate: data.startDate 
+                    ? new Date(data.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                    : (data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A')
             });
         } catch (error) {
             console.error('Error fetching student', error);

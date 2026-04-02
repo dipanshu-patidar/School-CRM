@@ -110,25 +110,20 @@ const StudentForm = ({ form, onChange, role }) => {
                 </div>
             </div>
 
-            {/* Row 3: Current Points + Status */}
+            {/* Row 3: Start Date + Status */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                        Current Points
+                        Start Date <span className="text-red-400">*</span>
                     </label>
                     <input
-                        type="number"
-                        name="points"
-                        value={form.points || 0}
+                        type="date"
+                        name="startDate"
+                        value={form.startDate ? form.startDate.split('T')[0] : ''}
                         onChange={onChange}
-                        min={0}
-                        max={threshold}
-                        placeholder="0"
-                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        required
                     />
-                    <p className="text-xs text-gray-400 mt-1.5">
-                        Students need <span className="font-bold text-primary">{threshold} points</span> for program completion.
-                    </p>
                 </div>
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -142,10 +137,19 @@ const StudentForm = ({ form, onChange, role }) => {
                     >
                         <option value="Active">Active</option>
                         <option value="Completed">Completed</option>
+                        <option value="Secondary Completion">Secondary Completion</option>
                         <option value="Dropped">Dropped</option>
                     </select>
-                    <p className="text-xs text-gray-400 mt-1.5">
-                        Auto-set to <span className="font-bold text-primary">Completed</span> when points ≥ {threshold}.
+                </div>
+            </div>
+
+            {/* Row 4: Current Points Info (Points input is commented out) */}
+            <div className="grid grid-cols-1 gap-4">
+                <div>
+                    {/* Manual point entry is disabled by company policy */}
+                    {/* <input type="number" ... /> */}
+                    <p className="text-xs text-end text-gray-400">
+                        Status auto-sets to <span className="font-bold text-primary">Completed</span> when points ≥ {threshold}.
                     </p>
                 </div>
             </div>

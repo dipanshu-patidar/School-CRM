@@ -28,6 +28,7 @@ const DocumentsPage = ({ role }) => {
 
     const [previewDoc, setPreviewDoc] = useState(null);
     const [isPreviewFull, setIsPreviewFull] = useState(false);
+    const [isAutoPrint, setIsAutoPrint] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
     const fetchData = async () => {
@@ -49,7 +50,7 @@ const DocumentsPage = ({ role }) => {
                 date: new Date(d.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                 status: d.status,
                 size: d.size || 'N/A',
-                type: 'Standard document'
+                type: 'PCP / IGP Report'
             }));
 
             // Format data for PCP table
@@ -58,7 +59,7 @@ const DocumentsPage = ({ role }) => {
                 id: r._id,
                 studentMongoId: r.studentId?._id || r.studentId,
                 studentName: r.studentId?.name || 'Unknown Student',
-                type: 'PCP / IGP Report',
+                type: 'Progress / Clinical Note',
                 date: new Date(r.dateOfService).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                 status: r.status,
                 staff: r.staffSignature,
@@ -114,7 +115,7 @@ const DocumentsPage = ({ role }) => {
     };
 
     const handleDelete = async () => {
-        const deletePromise = deleteTarget.type === 'PCP / IGP Report'
+        const deletePromise = deleteTarget.type === 'Progress / Clinical Note'
             ? deletePcpReport(deleteTarget.studentMongoId, deleteTarget.id)
             : deleteDocument(deleteTarget.studentMongoId, deleteTarget.id);
 
@@ -201,6 +202,21 @@ const DocumentsPage = ({ role }) => {
     const handleViewDoc = (item, isFull = false) => {
         setPreviewDoc(item);
         setIsPreviewFull(isFull);
+        setIsAutoPrint(false);
+    };
+
+    const handlePrintDoc = (item) => {
+        if (item.type === 'PCP / IGP Report') { 
+            if (item.url) {
+                window.open(item.url, '_blank');
+            } else {
+                toast.error('No file available to print.');
+            }
+        } else {
+            setPreviewDoc(item);
+            setIsPreviewFull(false);
+            setIsAutoPrint(true);
+        }
     };
 
     return (
@@ -228,7 +244,7 @@ const DocumentsPage = ({ role }) => {
                                 className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-xl active:scale-95 cursor-pointer"
                             >
                                 <Plus size={20} />
-                                New PCP / IGP Report
+                                New Progress / Clinical Note
                             </button>
                         ) : (
                             <button
@@ -257,7 +273,7 @@ const DocumentsPage = ({ role }) => {
                             }`}
                     >
                         <ClipboardList size={18} className={activeTab === 'pcp' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
-                        <span className="relative z-10 text-sm">PCP / IGP Reports</span>
+                        <span className="relative z-10 text-sm">Progress / Clinical Notes</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('standard')}
@@ -267,7 +283,7 @@ const DocumentsPage = ({ role }) => {
                             }`}
                     >
                         <FileText size={18} className={activeTab === 'standard' ? 'text-black' : 'text-gray-400 group-hover:text-primary transition-colors'} />
-                        <span className="relative z-10 text-sm">Standard Documents</span>
+                        <span className="relative z-10 text-sm">PCP / IGP Reports</span>
                     </button>
                 </div>
 
@@ -288,11 +304,12 @@ const DocumentsPage = ({ role }) => {
                                 onDelete={setDeleteTarget}
                                 onCreateNew={() => { setEditingPCP(null); setIsPCPModalOpen(true); }}
                                 userRole={userRole}
+                                onPrint={handlePrintDoc}
                             />
                         ) : (
                             <div className="space-y-6">
                                 <div className="mb-2">
-                                    <h2 className="text-2xl font-bold text-gray-900">Standard Documents</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900">PCP / IGP Reports</h2>
                                     <p className="text-sm text-gray-500 font-medium">Manage program documentation and student IDs.</p>
                                 </div>
                                 <DocumentsTable
@@ -302,6 +319,7 @@ const DocumentsPage = ({ role }) => {
                                     onDelete={setDeleteTarget}
                                     onUpload={() => { setEditingDoc(null); setIsUploadOpen(true); }}
                                     onEdit={(d) => { setEditingDoc(d); setIsUploadOpen(true); }}
+                                    onPrint={handlePrintDoc}
                                 />
                             </div>
                         )
@@ -326,7 +344,7 @@ const DocumentsPage = ({ role }) => {
             />
 
             {previewDoc && (
-                previewDoc.type === 'PCP / IGP Report' ? (
+                previewDoc.type === 'Progress / Clinical Note' ? (
                     isPreviewFull ? (
                         <DocumentPreviewModal
                             doc={{ ...previewDoc, url: previewDoc.assessmentFile, docName: 'Assessment Attachment' }}
@@ -337,6 +355,7 @@ const DocumentsPage = ({ role }) => {
                             report={previewDoc}
                             onClose={() => setPreviewDoc(null)}
                             onDownload={handleDownload}
+                            autoPrint={isAutoPrint}
                         />
                     )
                 ) : (

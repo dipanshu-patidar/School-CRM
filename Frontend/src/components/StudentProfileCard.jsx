@@ -3,9 +3,13 @@ import { User, Phone, Mail, UserCog } from 'lucide-react';
 
 const StudentProfileCard = ({ student }) => {
     const getStatusStyles = (status) => {
-        return status === 'Active'
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-            : 'bg-primary/10 text-primary border-primary/20';
+        switch (status) {
+            case 'Active': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'Completed': return 'bg-primary/10 text-primary border-primary/20';
+            case 'Secondary Completion': return 'bg-blue-50 text-blue-700 border-blue-100';
+            case 'Dropped': return 'bg-red-50 text-red-700 border-red-100';
+            default: return 'bg-gray-50 text-gray-600 border-gray-100';
+        }
     };
 
     return (

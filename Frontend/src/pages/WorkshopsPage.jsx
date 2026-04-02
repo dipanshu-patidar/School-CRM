@@ -272,7 +272,7 @@ const WorkshopsPage = () => {
         toast.promise(deletePromise, {
             loading: 'Deleting workshop...',
             success: 'Workshop deleted successfully!',
-            error: 'Failed to delete workshop.'
+            error: (err) => err.response?.data?.message || 'Failed to delete workshop.'
         }).then(() => {
             fetchWorkshops();
             setDeleteTarget(null);

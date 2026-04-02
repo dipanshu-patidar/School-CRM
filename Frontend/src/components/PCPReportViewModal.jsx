@@ -3,7 +3,15 @@ import { X, FileText, Calendar, User, CheckCircle, Clock, MessageSquare, Clipboa
 import ReportStatusBadge from './ReportStatusBadge';
 import PrintHeader from './PrintHeader';
 
-const PCPReportViewModal = ({ report, onClose }) => {
+const PCPReportViewModal = ({ report, onClose, autoPrint }) => {
+    React.useEffect(() => {
+        if (autoPrint) {
+            setTimeout(() => {
+                window.print();
+            }, 600);
+        }
+    }, [autoPrint]);
+
     if (!report) return null;
 
     return (
@@ -21,7 +29,7 @@ const PCPReportViewModal = ({ report, onClose }) => {
                             <FileText size={28} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">PCP / IGP Service Documentation</h3>
+                            <h3 className="text-xl font-bold text-gray-900">Progress / Clinical Note</h3>
                             <div className="flex items-center gap-3 mt-1">
                                 <span className="text-sm text-gray-500 flex items-center gap-1.5 font-medium">
                                     <User size={14} className="text-gray-400" />

@@ -11,6 +11,7 @@ const EMPTY_FORM = {
     assignedStaff: '',
     status: 'Active',
     points: '',
+    startDate: new Date().toISOString().split('T')[0],
 };
 
 const StudentModal = ({ isOpen, onClose, onSave, editStudent = null, role }) => {

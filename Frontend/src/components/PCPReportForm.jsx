@@ -108,7 +108,7 @@ const PCPReportForm = ({ isOpen, onClose, onSave, editData = null }) => {
                             <FileText size={24} className="text-primary" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">{editData ? 'Edit Report' : 'New PCP / IGP Report'}</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{editData ? 'Edit Note' : 'New Progress / Clinical Note'}</h3>
                             <p className="text-sm text-gray-500 font-medium">Create a structured service documentation using P.I.E format.</p>
                         </div>
                     </div>
